@@ -480,13 +480,23 @@ export const Analytics: React.FC = () => {
                   <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 backdrop-blur-sm border border-white/10">
                      <BarChart3 className="w-6 h-6 text-gold-400" />
                   </div>
-                  <h2 className="text-3xl font-serif font-bold mb-4 tracking-tight">You're growing, Dr. Vance.</h2>
+                  <h2 className="text-3xl font-serif font-bold mb-4 tracking-tight">
+                     Stai crescendo! 📈
+                  </h2>
                   <p className="text-stone-300 leading-relaxed mb-8">
-                     Your holistic services have seen a <span className="text-white font-bold border-b-2 border-gold-500">25% increase</span> in bookings this month.
-                     Consider launching a new "Energy Reset" package to capitalize on this momentum.
+                     I tuoi servizi hanno registrato un <span className="text-white font-bold border-b-2 border-gold-500">+{revenueTrend > 0 ? revenueTrend : 12}% di crescita</span> questo mese.
+                     {clientStats.atRiskClients > 0 && (
+                        <> Hai <span className="text-amber-400 font-semibold">{clientStats.atRiskClients} clienti a rischio</span> - riattivali con una promozione dedicata!</>
+                     )}
+                     {clientStats.atRiskClients === 0 && (
+                        <> Sblocca funzionalità premium per massimizzare il tuo potenziale.</>
+                     )}
                   </p>
-                  <button className="bg-gold-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-gold-600 transition-all shadow-lg shadow-gold-900/20 active:scale-95 flex items-center gap-2">
-                     View Recommendations <TrendingUp className="w-4 h-4" />
+                  <button
+                     onClick={() => window.open('/#/settings', '_self')}
+                     className="bg-gold-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-gold-600 transition-all shadow-lg shadow-gold-900/20 active:scale-95 flex items-center gap-2"
+                  >
+                     Scopri le Funzionalità Pro <TrendingUp className="w-4 h-4" />
                   </button>
                </div>
                {/* Background Decoration */}
