@@ -15,6 +15,7 @@ import { Login } from './components/Login';
 import { SplashIntro } from './components/SplashIntro';
 import { FounderLanding } from './components/FounderLanding';
 import PaymentSuccess from './components/PaymentSuccess';
+import { ResetPassword } from './components/ResetPassword';
 import { UserProvider, useUser } from './contexts/UserContext';
 import { ProgramProvider } from './contexts/ProgramContext';
 import { ResourceProvider } from './contexts/ResourceContext';
@@ -62,6 +63,7 @@ const App: React.FC = () => {
                     <Route path="/login" element={<Login />} />
                     <Route path="/founder" element={<FounderLanding />} />
                     <Route path="/success" element={<PaymentSuccess />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
 
                     {/* Protected Routes */}
                     <Route path="/*" element={
