@@ -1,0 +1,18 @@
+{
+  "starter": {
+    "monthly": "price_1SjeGDBXiYadZ8OVyUByLQwi",
+    "annual": "price_1SjeGDBXiYadZ8OV2CGIdzst"
+  },
+  "pro": {
+    "monthly": "price_1SjeGEBXiYadZ8OVCgjpP0rX",
+    "annual": "price_1SjeGEBXiYadZ8OV2vnRulxN"
+  },
+  "signature": {
+    "monthly": "price_1SjeGFBXiYadZ8OVMjDZu5Lz",
+    "annual": "price_1SjeGFBXiYadZ8OVBzdPKgkx"
+  },
+  "empire": {
+    "monthly": "price_1SjeGGBXiYadZ8OVCtaRBGwP",
+    "annual": "price_1SjeGGBXiYadZ8OVjSzijbd2"
+  }
+}

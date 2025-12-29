@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminel | Gestionale Premium</title>
+  <!-- Custom SVG Favicon (The Spark) -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ce9341'><path d='M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z' /></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            // === LUMINEL RADIANTE: Gold-White Champagne (Luminoso!) ===
+            gold: {
+              50: 'hsl(48, 60%, 98%)',   /* Bianco champagne purissimo */
+              100: 'hsl(47, 65%, 94%)',   /* Perla dorata */
+              200: 'hsl(46, 60%, 88%)',   /* Champagne chiaro */
+              300: 'hsl(45, 58%, 82%)',   /* Champagne medio */
+              400: 'hsl(44, 70%, 72%)',   /* ORO LUMINOSO (no marrone!) */
+              500: 'hsl(43, 68%, 65%)',   /* Oro ricco */
+              600: 'hsl(42, 65%, 58%)',   /* Oro profondo hover */
+              700: 'hsl(41, 62%, 52%)',   /* Oro scuro accento */
+              800: 'hsl(40, 55%, 45%)',   /* Oro brunito */
+              900: 'hsl(38, 50%, 35%)',   /* Oro molto scuro */
+            },
+            // Champagne & Pearl (Base backgrounds)
+            pearl: {
+              white: 'hsl(50, 40%, 99%)',   /* Bianco perlato caldo */
+              gray: 'hsl(48, 25%, 85%)',   /* Grigio perla */
+            },
+            champagne: {
+              50: 'hsl(48, 35%, 97%)',   /* Bianco champagne */
+              100: 'hsl(46, 30%, 95%)',   /* Crema bianchissima */
+              200: 'hsl(44, 28%, 92%)',   /* Crema chiara */
+              300: 'hsl(42, 25%, 88%)',   /* Champagne soft */
+            },
+            // Rose Gold Accenti
+            rose: {
+              gold: 'hsl(18, 70%, 75%)',   /* Rosa-oro medio */
+              goldLight: 'hsl(20, 75%, 85%)',   /* Rosa-oro pallido */
+            },
+            ivory: 'hsl(48, 35%, 97%)',
+            cream: 'hsl(46, 30%, 95%)',
+            creamLight: 'hsl(44, 28%, 92%)',
+            // Supporto
+            sage: 'hsl(165, 40%, 75%)',
+            mint: 'hsl(165, 35%, 85%)',
+            stone: {
+              850: '#1c1917',
+            }
+          },
+          spacing: {
+            // Golden Ratio (Fibonacci) Spacing System
+            'fib-1': '1px',
+            'fib-2': '2px',
+            'fib-3': '3px',
+            'fib-5': '5px',
+            'fib-8': '8px',
+            'fib-13': '13px',
+            'fib-21': '21px',
+            'fib-34': '34px',
+            'fib-55': '55px',
+            'fib-89': '89px',
+            'fib-144': '144px',
+          },
+          animation: {
+            'pulse-subtle': 'pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'skeleton': 'skeleton 1.5s ease-in-out infinite',
+            'float': 'float 3s ease-in-out infinite',
+            'shimmer': 'shimmer 3s ease-in-out infinite',
+            'shine': 'shine 4s ease-in-out infinite',
+          },
+          keyframes: {
+            'pulse-subtle': {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.7' },
+            },
+            'skeleton': {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            },
+            'float': {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            'shimmer': {
+              '0%, 100%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+            },
+            'shine': {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(100%)' },
+            },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* === LUMINEL RADIANTE: Gold-White Champagne === */
+    :root {
+      /* Champagne Gold (LUMINOSO, no marrone!) */
+      --champagne-white: hsl(48, 60%, 98%);
+      --gold-pearl: hsl(47, 65%, 94%);
+      --champagne-light: hsl(46, 60%, 88%);
+      --champagne: hsl(45, 58%, 82%);
+      --gold-bright: hsl(44, 70%, 72%);
+      --gold-rich: hsl(43, 68%, 65%);
+      --gold-deep: hsl(42, 65%, 58%);
+      --gold-accent: hsl(41, 62%, 52%);
+
+      /* Bianco Perlato (Base backgrounds) */
+      --pearl-white: hsl(50, 40%, 99%);
+      --ivory: hsl(48, 35%, 97%);
+      --cream-white: hsl(46, 30%, 95%);
+      --cream-light: hsl(44, 28%, 92%);
+
+      /* Rose Gold Accenti */
+      --rose-gold-light: hsl(20, 75%, 85%);
+      --rose-gold: hsl(18, 70%, 75%);
+
+      /* Testi WCAG AAA */
+      --text-primary: hsl(42, 30%, 25%);
+      --text-secondary: hsl(44, 20%, 45%);
+      --text-tertiary: hsl(46, 15%, 60%);
+
+      /* Ombre Dorate */
+      --shadow-gold-soft: hsla(44, 60%, 60%, 0.10);
+      --shadow-gold-med: hsla(43, 65%, 55%, 0.15);
+      --shadow-gold-deep: hsla(42, 70%, 50%, 0.20);
+    }
+
+    /* Body: Pearl gradient base */
+    body {
+      background: linear-gradient(135deg, var(--pearl-white) 0%, var(--cream-white) 100%);
+    }
+
+    /* Hide scrollbar for clean look */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Custom Luxury Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--champagne-light), var(--champagne));
+      border-radius: 20px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, var(--gold-bright), var(--gold-rich));
+    }
+
+    /* Glassmorphism Elite Card - Gold-White Champagne */
+    .glass-card {
+      background: linear-gradient(135deg,
+          hsla(50, 60%, 99%, 0.95) 0%,
+          hsla(48, 55%, 97%, 0.9) 100%) !important;
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--champagne-light) !important;
+      box-shadow:
+        0 8px 32px var(--shadow-gold-soft),
+        0 4px 12px var(--shadow-gold-med),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 0 var(--champagne-light) !important;
+      border-radius: 20px !important;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: var(--champagne) !important;
+      box-shadow:
+        0 20px 60px var(--shadow-gold-med),
+        0 12px 32px var(--shadow-gold-deep),
+        inset 0 2px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -2px 0 var(--champagne) !important;
+    }
+
+    /* Shine effect animato */
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.2) 50%,
+          transparent 70%);
+      transform: rotate(45deg);
+      animation: shine 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Premium Icon with Radial Gradient 3D */
+    .premium-icon {
+      background: radial-gradient(circle at 30% 30%,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(0, 0, 0, 0.1) 100%);
+      box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.05),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
+      position: relative;
+    }
+
+    .premium-icon-glow::after {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 30%;
+      height: 30%;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      filter: blur(4px);
+    }
+
+    /* Typography Hierarchy - Elite */
+    .text-display {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .text-headline {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+
+    .text-body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      letter-spacing: 0;
+      line-height: 1.5;
+    }
+
+    .text-label {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+    /* Tabular Numbers for Metrics */
+    .tabular-nums {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    /* Loading Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg,
+          #e7e5e4 0%,
+          #f5f5f4 50%,
+          #e7e5e4 100%);
+      background-size: 200% 100%;
+      animation: skeleton 1.5s ease-in-out infinite;
+      border-radius: 8px;
+    }
+
+    .skeleton-text {
+      height: 1em;
+      width: 100%;
+    }
+
+    .skeleton-circle {
+      border-radius: 50%;
+    }
+
+    .skeleton-card {
+      height: 120px;
+      border-radius: 24px;
+    }
+
+    /* Empty State Polish */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(251, 248, 241, 0.9));
+      border: 2px dashed #e7e5e4;
+      border-radius: 24px;
+    }
+
+    .empty-state-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      color: #d6d3d1;
+    }
+
+    .empty-state-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #57534e;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state-description {
+      font-size: 0.875rem;
+      color: #a8a29e;
+      max-width: 280px;
+    }
+
+    /* Button Click Ripple Effect */
+    .btn-ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s;
+    }
+
+    .btn-ripple:active::after {
+      width: 200%;
+      height: 200%;
+    }
+
+    /* === LUMINEL RADIANTE: Button Gold Premium === */
+    .btn-gold-radiante {
+      background: linear-gradient(135deg,
+          var(--gold-bright) 0%,
+          var(--gold-rich) 50%,
+          var(--rose-gold-light) 100%);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      box-shadow:
+        0 4px 16px var(--shadow-gold-med),
+        0 2px 6px var(--shadow-gold-soft),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -2px 0 var(--gold-accent);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-gold-radiante:hover {
+      background: linear-gradient(135deg,
+          var(--gold-rich) 0%,
+          var(--gold-deep) 50%,
+          var(--rose-gold) 100%);
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 24px var(--shadow-gold-deep),
+        0 4px 12px var(--shadow-gold-med),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-gold-radiante:active {
+      transform: translateY(0);
+      box-shadow:
+        0 2px 8px var(--shadow-gold-med),
+        inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    /* === Metric Icon Radiante (Gemma oro con alone) === */
+    .metric-icon-radiante {
+      background: radial-gradient(circle at 30% 30%,
+          var(--gold-bright) 0%,
+          var(--gold-rich) 50%,
+          var(--gold-deep) 100%);
+      box-shadow:
+        0 0 24px var(--shadow-gold-med),
+        0 4px 16px var(--shadow-gold-deep),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: visible;
+    }
+
+    /* Glow interno animato */
+    .metric-icon-radiante::before {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(circle,
+          rgba(255, 255, 255, 0.7) 0%,
+          transparent 70%);
+      border-radius: 50%;
+      filter: blur(6px);
+      animation: pulse-glow 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.9;
+        transform: scale(1.1);
+      }
+    }
+
+    /* === Sidebar Champagne Luminosa === */
+    .sidebar-champagne {
+      background: linear-gradient(180deg,
+          var(--champagne-white) 0%,
+          var(--gold-pearl) 50%,
+          var(--champagne-light) 100%);
+      border-right: 1px solid var(--champagne);
+      backdrop-filter: blur(20px) saturate(150%);
+      box-shadow:
+        4px 0 40px var(--shadow-gold-soft),
+        inset -1px 0 0 var(--pearl-white),
+        inset 1px 0 0 var(--champagne-light);
+    }
+
+    /* === Sidebar Nav Item Active Gold === */
+    .nav-item-gold-active {
+      background: linear-gradient(90deg,
+          var(--gold-bright) 0%,
+          var(--gold-rich) 100%);
+      color: white;
+      border-radius: 12px;
+      box-shadow:
+        0 4px 16px var(--shadow-gold-med),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 var(--gold-accent);
+      font-weight: 600;
+    }
+
+    /* Nav item hover */
+    .sidebar-champagne .nav-item:hover:not(.nav-item-gold-active) {
+      background: var(--cream-light);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    /* === Badge Warning Warm === */
+    .badge-warning-warm {
+      background: linear-gradient(135deg, hsl(30, 85%, 85%) 0%, hsl(35, 80%, 75%) 100%);
+      color: hsl(30, 60%, 35%);
+      border: 1px solid hsl(30, 70%, 70%);
+      box-shadow: 0 2px 8px hsla(30, 70%, 50%, 0.2);
+    }
+
+    /* === Badge Success Sage === */
+    .badge-success-sage {
+      background: linear-gradient(135deg, hsl(165, 25%, 85%) 0%, hsl(150, 20%, 65%) 100%);
+      color: hsl(150, 40%, 25%);
+      border: 1px solid hsl(150, 20%, 65%);
+    }
+
+    /* === Metric Number Gold Shimmer === */
+    .metric-number-shimmer {
+      font-size: 2.5rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.1;
+      background: linear-gradient(120deg,
+          var(--gold-deep) 0%,
+          var(--gold-bright) 30%,
+          var(--rose-gold-light) 50%,
+          var(--gold-bright) 70%,
+          var(--gold-rich) 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer-gold 5s ease-in-out infinite;
+    }
+
+    @keyframes shimmer-gold {
+      0% {
+        background-position: 200% 0;
+      }
+
+      50% {
+        background-position: 0% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* === Chart Gold Gradient === */
+    .chart-gold-gradient {
+      --chart-fill-start: var(--gold-bright);
+      --chart-fill-mid: var(--champagne-light);
+      --chart-fill-end: var(--champagne-white);
+      --chart-stroke: var(--gold-rich);
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>

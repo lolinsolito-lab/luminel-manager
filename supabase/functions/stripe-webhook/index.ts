@@ -1,0 +1,309 @@
+// Supabase Edge Function: Stripe Webhook Handler
+// Deploy with: supabase functions deploy stripe-webhook
+// 
+// This function handles Stripe webhook events, specifically:
+// - checkout.session.completed: Updates user subscription in database
+
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
+import Stripe from "https://esm.sh/stripe@14.10.0";
+
+// Environment variables (set in Supabase Dashboard → Edge Functions → Secrets)
+const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY") || "";
+const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET") || "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+
+// Initialize Stripe
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
+    apiVersion: "2023-10-16",
+    httpClient: Stripe.createFetchHttpClient(),
+});
+
+// Initialize Supabase with Service Role (bypasses RLS)
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+// Price ID to Tier mapping (update these with your actual price IDs)
+const PRICE_TO_TIER: Record<string, { tier: string; cycle: string }> = {
+    // Monthly
+    "price_1SjeK2BXiYadZ8OVxr2EsCIG": { tier: "starter", cycle: "monthly" },
+    "price_1SjeK3BXiYadZ8OVkb3wyHT3": { tier: "pro", cycle: "monthly" },
+    "price_1SjeK5BXiYadZ8OVbuXkgj7R": { tier: "signature", cycle: "monthly" },
+    "price_1SjeK7BXiYadZ8OVPB3qAX67": { tier: "empire", cycle: "monthly" },
+    // Annual
+    "price_1SjeK2BXiYadZ8OVCHWIP4tW": { tier: "starter", cycle: "annual" },
+    "price_1SjeK4BXiYadZ8OVZ22TgrdS": { tier: "pro", cycle: "annual" },
+    "price_1SjeK6BXiYadZ8OV9PrB9xYB": { tier: "signature", cycle: "annual" },
+    "price_1SjeK8BXiYadZ8OV96K5vcKN": { tier: "empire", cycle: "annual" },
+};
+
+serve(async (req: Request) => {
+    // Only allow POST requests
+    if (req.method !== "POST") {
+        return new Response("Method not allowed", { status: 405 });
+    }
+
+    try {
+        // Get the raw body and signature
+        const body = await req.text();
+        const signature = req.headers.get("stripe-signature");
+
+        if (!signature) {
+            console.error("No Stripe signature found");
+            return new Response("No signature", { status: 400 });
+        }
+
+        // Verify the webhook signature (use async version for Deno runtime)
+        let event: Stripe.Event;
+        try {
+            event = await stripe.webhooks.constructEventAsync(body, signature, STRIPE_WEBHOOK_SECRET);
+        } catch (err) {
+            console.error("Webhook signature verification failed:", err);
+            return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+        }
+
+        console.log(`📩 Received Stripe event: ${event.type}`);
+
+        // Handle the event
+        switch (event.type) {
+            case "checkout.session.completed": {
+                const session = event.data.object as Stripe.Checkout.Session;
+                await handleCheckoutComplete(session);
+                break;
+            }
+
+            case "customer.subscription.updated": {
+                const subscription = event.data.object as Stripe.Subscription;
+                await handleSubscriptionUpdate(subscription);
+                break;
+            }
+
+            case "customer.subscription.deleted": {
+                const subscription = event.data.object as Stripe.Subscription;
+                await handleSubscriptionCanceled(subscription);
+                break;
+            }
+
+            default:
+                console.log(`Unhandled event type: ${event.type}`);
+        }
+
+        return new Response(JSON.stringify({ received: true }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+        });
+    } catch (error) {
+        console.error("Webhook error:", error);
+        return new Response(`Webhook Error: ${error.message}`, { status: 500 });
+    }
+});
+
+/**
+ * Handle checkout.session.completed event
+ * This is triggered when a customer completes a payment
+ */
+async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+    console.log("🎉 Processing checkout.session.completed");
+    console.log("Session ID:", session.id);
+
+    // Get customer email from multiple possible locations
+    const customerEmail = session.customer_email
+        || session.customer_details?.email
+        || null;
+
+    console.log("Customer Email:", customerEmail);
+    console.log("Customer ID:", session.customer);
+
+    if (!customerEmail) {
+        console.error("No customer email found in session!");
+        return;
+    }
+
+    // Get the subscription details
+    const subscriptionId = session.subscription as string;
+    if (!subscriptionId) {
+        console.log("No subscription ID found (one-time payment?)");
+        return;
+    }
+
+    // Fetch subscription to get the price ID
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const priceId = subscription.items.data[0]?.price.id;
+
+    if (!priceId) {
+        console.error("No price ID found in subscription");
+        return;
+    }
+
+    // Map price ID to tier
+    const tierInfo = PRICE_TO_TIER[priceId];
+    if (!tierInfo) {
+        console.error(`Unknown price ID: ${priceId}`);
+        return;
+    }
+
+    console.log(`📦 Plan: ${tierInfo.tier} (${tierInfo.cycle})`);
+
+    // Get the next founding member number
+    const { count: founderCount } = await supabase
+        .from("users")
+        .select("*", { count: "exact", head: true })
+        .eq("is_founding_member", true);
+
+    const { count: pendingCount } = await supabase
+        .from("pending_subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending");
+
+    const founderNumber = (founderCount || 0) + (pendingCount || 0) + 1;
+
+    // Check if user exists in database
+    const { data: existingUser, error: userError } = await supabase
+        .from("users")
+        .select("id, email, full_name")
+        .eq("email", customerEmail)
+        .single();
+
+    if (existingUser && !userError) {
+        // USER EXISTS - Update their subscription
+        console.log(`✅ User found: ${customerEmail}`);
+
+        const { error } = await supabase
+            .from("users")
+            .update({
+                subscription_tier: tierInfo.tier,
+                subscription_status: "active",
+                billing_cycle: tierInfo.cycle,
+                stripe_customer_id: session.customer as string,
+                stripe_subscription_id: subscriptionId,
+                is_founding_member: true,
+                founding_member_since: new Date().toISOString(),
+                founding_member_number: founderNumber,
+                updated_at: new Date().toISOString(),
+            })
+            .eq("email", customerEmail);
+
+        if (error) {
+            console.error("Error updating user:", error);
+            return;
+        }
+
+        console.log(`   Tier: ${tierInfo.tier}, Founder #${founderNumber}`);
+
+        // Send welcome email
+        await sendEmail(customerEmail, "founder_welcome", {
+            name: existingUser.full_name || customerEmail.split("@")[0] || "Founder",
+            tier: tierInfo.tier,
+            founderNumber: founderNumber,
+        });
+
+    } else {
+        // USER DOES NOT EXIST - Store in pending_subscriptions for marketing flow
+        console.log(`⏳ User not found, saving to pending_subscriptions: ${customerEmail}`);
+
+        const { error: pendingError } = await supabase
+            .from("pending_subscriptions")
+            .upsert({
+                email: customerEmail,
+                stripe_customer_id: session.customer as string,
+                stripe_subscription_id: subscriptionId,
+                subscription_tier: tierInfo.tier,
+                billing_cycle: tierInfo.cycle,
+                is_founding_member: true,
+                founding_member_number: founderNumber,
+                checkout_session_id: session.id,
+                status: "pending",
+            }, { onConflict: "email" });
+
+        if (pendingError) {
+            console.error("Error saving pending subscription:", pendingError);
+            return;
+        }
+
+        console.log(`   Saved pending: ${tierInfo.tier}, Founder #${founderNumber}`);
+
+        // Send invite registration email
+        const registrationUrl = `https://app.luminelcoach.com/#/register?email=${encodeURIComponent(customerEmail)}`;
+
+        await sendEmail(customerEmail, "invite_registration", {
+            tier: tierInfo.tier,
+            founderNumber: founderNumber,
+            registrationUrl: registrationUrl,
+        });
+    }
+}
+
+/**
+ * Helper function to send emails
+ */
+async function sendEmail(to: string, type: string, data: Record<string, unknown>) {
+    try {
+        const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            },
+            body: JSON.stringify({ to, type, data }),
+        });
+
+        if (emailResponse.ok) {
+            console.log(`📧 ${type} email sent to ${to}`);
+        } else {
+            console.error("Email send failed:", await emailResponse.text());
+        }
+    } catch (emailError) {
+        console.error("Error sending email:", emailError);
+    }
+}
+
+/**
+ * Handle subscription updates (plan changes, renewal, etc.)
+ */
+async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
+    console.log("🔄 Processing subscription update");
+
+    const priceId = subscription.items.data[0]?.price.id;
+    const tierInfo = PRICE_TO_TIER[priceId];
+
+    if (!tierInfo) {
+        console.error(`Unknown price ID: ${priceId}`);
+        return;
+    }
+
+    const status = subscription.status === "active" ? "active" : "past_due";
+
+    const { error } = await supabase
+        .from("users")
+        .update({
+            subscription_tier: tierInfo.tier,
+            subscription_status: status,
+            billing_cycle: tierInfo.cycle,
+            updated_at: new Date().toISOString(),
+        })
+        .eq("stripe_subscription_id", subscription.id);
+
+    if (error) {
+        console.error("Error updating subscription:", error);
+    }
+}
+
+/**
+ * Handle subscription cancellation
+ */
+async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
+    console.log("❌ Processing subscription cancellation");
+
+    const { error } = await supabase
+        .from("users")
+        .update({
+            subscription_tier: "free",
+            subscription_status: "canceled",
+            updated_at: new Date().toISOString(),
+        })
+        .eq("stripe_subscription_id", subscription.id);
+
+    if (error) {
+        console.error("Error canceling subscription:", error);
+    }
+}
