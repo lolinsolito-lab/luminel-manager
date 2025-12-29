@@ -11,7 +11,10 @@ import {
    PieChart as PieIcon,
    Download,
    Euro,
-   Loader2
+   Loader2,
+   Crown,
+   Sparkles,
+   Rocket
 } from 'lucide-react';
 import {
    AreaChart,
@@ -32,6 +35,7 @@ import { isSupabaseConfigured } from '../services/supabaseClient';
 import * as transactionService from '../services/transactionService';
 import * as sessionService from '../services/sessionService';
 import * as clientService from '../services/clientService';
+import { useSubscription } from '../contexts/SubscriptionContext';
 
 // Types for real data
 interface RevenueDataPoint {
@@ -120,6 +124,7 @@ const KpiCard = ({ title, value, subtext, trend, trendLabel, icon: Icon, colorCl
 export const Analytics: React.FC = () => {
    const [timeRange, setTimeRange] = useState('Year to Date');
    const [isLoading, setIsLoading] = useState(true);
+   const { subscription } = useSubscription();
 
    // Real data states
    const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>([]);
@@ -474,33 +479,108 @@ export const Analytics: React.FC = () => {
                </div>
             </div>
 
-            {/* Text Insights - Styled to look Premium/Elegant */}
+            {/* Text Insights - Tier-Aware Intelligent Card */}
             <div className="bg-gradient-to-br from-stone-900 to-stone-800 rounded-2xl p-8 text-white relative overflow-hidden flex flex-col justify-center shadow-xl">
                <div className="relative z-10 max-w-lg">
+                  {/* Dynamic Icon based on tier */}
                   <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 backdrop-blur-sm border border-white/10">
-                     <BarChart3 className="w-6 h-6 text-gold-400" />
-                  </div>
-                  <h2 className="text-3xl font-serif font-bold mb-4 tracking-tight">
-                     Stai crescendo! 📈
-                  </h2>
-                  <p className="text-stone-300 leading-relaxed mb-8">
-                     I tuoi servizi hanno registrato un <span className="text-white font-bold border-b-2 border-gold-500">+{revenueTrend > 0 ? revenueTrend : 12}% di crescita</span> questo mese.
-                     {clientStats.atRiskClients > 0 && (
-                        <> Hai <span className="text-amber-400 font-semibold">{clientStats.atRiskClients} clienti a rischio</span> - riattivali con una promozione dedicata!</>
+                     {subscription.tier === 'empire' ? (
+                        <Crown className="w-6 h-6 text-amber-400" />
+                     ) : subscription.tier === 'signature' ? (
+                        <Sparkles className="w-6 h-6 text-purple-400" />
+                     ) : subscription.tier === 'pro' ? (
+                        <Rocket className="w-6 h-6 text-blue-400" />
+                     ) : (
+                        <TrendingUp className="w-6 h-6 text-green-400" />
                      )}
-                     {clientStats.atRiskClients === 0 && (
-                        <> Sblocca funzionalità premium per massimizzare il tuo potenziale.</>
+                  </div>
+
+                  {/* Dynamic Title based on tier and data */}
+                  <h2 className="text-3xl font-serif font-bold mb-4 tracking-tight">
+                     {subscription.tier === 'empire' ? (
+                        <>Eccellenza Imperiale 👑</>
+                     ) : subscription.tier === 'signature' || subscription.tier === 'pro' ? (
+                        <>Performance Elevata ✨</>
+                     ) : (
+                        <>Inizia la Crescita! 🚀</>
+                     )}
+                  </h2>
+
+                  {/* Dynamic Content based on tier and stats */}
+                  <p className="text-stone-300 leading-relaxed mb-8">
+                     {subscription.tier === 'empire' ? (
+                        <>
+                           Stai sfruttando il massimo potenziale di Luminel Empire.
+                           {clientStats.vipClients > 0 && (
+                              <> Hai <span className="text-amber-400 font-semibold">{clientStats.vipClients} clienti VIP</span> attivi.</>
+                           )}
+                           {clientStats.atRiskClients > 0 && (
+                              <> Attenzione: <span className="text-orange-400 font-semibold">{clientStats.atRiskClients} clienti</span> necessitano follow-up.</>
+                           )}
+                           {financeStats.totalRevenue > 0 && clientStats.atRiskClients === 0 && (
+                              <> Fatturato totale: <span className="text-green-400 font-semibold">€{financeStats.totalRevenue.toLocaleString()}</span>.</>
+                           )}
+                        </>
+                     ) : subscription.tier === 'signature' ? (
+                        <>
+                           {clientStats.totalClients > 0
+                              ? `Gestisci ${clientStats.totalClients} clienti con il piano Signature.`
+                              : 'Piano Signature attivo.'}
+                           <span className="block mt-2 text-purple-300">
+                              Passa a Empire per White Label, API complete e Success Manager dedicato.
+                           </span>
+                        </>
+                     ) : subscription.tier === 'pro' ? (
+                        <>
+                           {clientStats.totalClients > 0
+                              ? `Stai gestendo ${clientStats.totalClients} clienti.`
+                              : 'Piano Pro attivo.'}
+                           <span className="block mt-2 text-blue-300">
+                              Sblocca inventario, loyalty e team analytics con Signature.
+                           </span>
+                        </>
+                     ) : subscription.tier === 'starter' ? (
+                        <>
+                           Hai iniziato bene! Il piano Starter ti dà le basi.
+                           <span className="block mt-2 text-green-300">
+                              Passa a Pro per WhatsApp, fatturazione automatica e gestione team.
+                           </span>
+                        </>
+                     ) : (
+                        <>
+                           Stai usando la versione gratuita con funzionalità limitate.
+                           <span className="block mt-2 text-amber-300">
+                              Attiva un piano per sbloccare CRM avanzato, AI Coach e molto altro!
+                           </span>
+                        </>
                      )}
                   </p>
-                  <button
-                     onClick={() => window.open('/#/settings', '_self')}
-                     className="bg-gold-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-gold-600 transition-all shadow-lg shadow-gold-900/20 active:scale-95 flex items-center gap-2"
-                  >
-                     Scopri le Funzionalità Pro <TrendingUp className="w-4 h-4" />
-                  </button>
+
+                  {/* Dynamic CTA based on tier */}
+                  {subscription.tier !== 'empire' ? (
+                     <button
+                        onClick={() => window.open('/#/settings', '_self')}
+                        className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg shadow-amber-900/30 active:scale-95 flex items-center gap-2"
+                     >
+                        {subscription.tier === 'signature' ? 'Scopri Empire' :
+                           subscription.tier === 'pro' ? 'Upgrade a Signature' :
+                              subscription.tier === 'starter' ? 'Passa a Pro' :
+                                 'Attiva Piano Premium'}
+                        <TrendingUp className="w-4 h-4" />
+                     </button>
+                  ) : (
+                     <div className="flex items-center gap-2 text-amber-400 font-semibold">
+                        <Crown className="w-5 h-5" />
+                        <span>Hai il piano massimo</span>
+                     </div>
+                  )}
                </div>
                {/* Background Decoration */}
-               <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-gold-500/10 rounded-full blur-3xl animate-pulse"></div>
+               <div className={`absolute -right-20 -bottom-20 w-80 h-80 rounded-full blur-3xl animate-pulse ${subscription.tier === 'empire' ? 'bg-amber-500/15' :
+                     subscription.tier === 'signature' ? 'bg-purple-500/15' :
+                        subscription.tier === 'pro' ? 'bg-blue-500/15' :
+                           'bg-green-500/15'
+                  }`}></div>
             </div>
          </div>
 
