@@ -16,6 +16,7 @@ import { SplashIntro } from './components/SplashIntro';
 import { FounderLanding } from './components/FounderLanding';
 import PaymentSuccess from './components/PaymentSuccess';
 import { ResetPassword } from './components/ResetPassword';
+import { AdminDashboard } from './components/AdminDashboard';
 import { UserProvider, useUser } from './contexts/UserContext';
 import { ProgramProvider } from './contexts/ProgramContext';
 import { ResourceProvider } from './contexts/ResourceContext';
@@ -79,6 +80,7 @@ const App: React.FC = () => {
                             <Route path="/resources" element={<Library />} />
                             <Route path="/analytics" element={<Analytics />} />
                             <Route path="/settings" element={<Settings />} />
+                            <Route path="/admin" element={<AdminDashboard />} />
                             <Route path="*" element={<Navigate to="/" replace />} />
                           </Routes>
                           <AIAssistant />
