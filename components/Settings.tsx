@@ -17,12 +17,14 @@ import {
 } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useUser } from '../contexts/UserContext';
 import * as settingsService from '../services/settingsService';
 import * as storageService from '../services/storageService';
 import { isSupabaseConfigured } from '../services/supabaseClient';
 
 export const Settings: React.FC = () => {
    const { t } = useLanguage();
+   const { refreshBusinessSettings } = useUser();
    const [activeTab, setActiveTab] = useState<'General' | 'Schedule' | 'Integrations'>('General');
    const [isSaved, setIsSaved] = useState(false);
    const [isLoading, setIsLoading] = useState(true);
@@ -110,6 +112,7 @@ export const Settings: React.FC = () => {
       try {
          await settingsService.saveSettings({
             businessName: general.businessName,
+            logoUrl: logoUrl,
             taxId: general.taxId,
             address: general.address,
             currency: general.currency,
@@ -124,6 +127,10 @@ export const Settings: React.FC = () => {
             maxConcurrentAppointments: capacity.maxConcurrentAppointments,
             cabinNames: capacity.cabinNames
          });
+
+         // Refresh global branding context
+         await refreshBusinessSettings();
+
          setIsSaved(true);
          setTimeout(() => setIsSaved(false), 3000);
          console.log('[Settings] ☁️ Settings saved to Supabase');
@@ -161,6 +168,10 @@ export const Settings: React.FC = () => {
             maxConcurrentAppointments: capacity.maxConcurrentAppointments,
             cabinNames: capacity.cabinNames
          });
+
+         // Refresh global branding context immediately
+         await refreshBusinessSettings();
+
          console.log('[Settings] ☁️ Logo uploaded and saved');
       } catch (error: any) {
          console.error('[Settings] ❌ Logo upload failed:', error);

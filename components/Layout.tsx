@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -29,6 +29,7 @@ import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Logo } from './Logo';
 import { APP_CONFIG } from '../config';
+import * as settingsService from '../services/settingsService';
 import { NotificationDrawer } from './NotificationDrawer';
 import { useUI } from '../contexts/UIContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
@@ -57,7 +58,7 @@ const SidebarItem = ({ to, icon: Icon, label, onClick }: { to: string; icon: any
 };
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { user, updateProfile, logout } = useUser();
+  const { user, updateProfile, logout, businessSettings } = useUser();
   const { t, language, setLanguage } = useLanguage();
   const { isNotificationsOpen, closeNotifications, toggleNotifications, unreadCount } = useUI();
   const { isFoundingMember, subscription } = useSubscription();
@@ -128,7 +129,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="flex flex-col h-full">
           {/* Logo Area */}
           <div className="p-8 pb-4 pl-6 flex justify-between items-center">
-            <Logo />
+            <Logo logoUrl={businessSettings.logoUrl} />
             {/* Close button for mobile inside the drawer */}
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -154,9 +155,9 @@ export const Layout = ({ children }: LayoutProps) => {
           </nav>
 
           {/* Language Switcher & User Profile */}
-          <div className="p-4 border-t border-stone-100 space-y-3">
+          <div className="p-4 border-t border-stone-100 mt-auto">
             {/* Language Switcher */}
-            <div className="flex justify-center bg-stone-100 p-1 rounded-lg">
+            <div className="flex justify-center bg-stone-100 p-1 rounded-lg mb-3">
               <button
                 onClick={() => setLanguage('it')}
                 className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${language === 'it' ? 'bg-white shadow-sm text-stone-800' : 'text-stone-400 hover:text-stone-600'}`}
@@ -174,7 +175,7 @@ export const Layout = ({ children }: LayoutProps) => {
             {/* Profile Snippet */}
             <div
               onClick={() => { handleOpenProfile(); closeSidebar(); }}
-              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gold-50 hover:shadow-sm cursor-pointer transition-all group border border-transparent hover:border-gold-100 relative"
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gold-50 hover:shadow-sm cursor-pointer transition-all group border border-transparent hover:border-gold-100 relative mb-4"
             >
               <img
                 src={user.avatar}
@@ -186,6 +187,21 @@ export const Layout = ({ children }: LayoutProps) => {
                 <p className="text-xs text-stone-500 truncate">{user.role}</p>
               </div>
               <Settings className="w-4 h-4 text-stone-400 group-hover:text-gold-600" />
+            </div>
+
+            <button
+              onClick={logout}
+              className="flex items-center gap-3 w-full px-4 py-3 text-stone-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium tracking-wide">{t('nav.logout')}</span>
+            </button>
+
+            {/* Powered By Credit */}
+            <div className="mt-4 px-4 pt-4 border-t border-stone-50 text-center">
+              <p className="text-[10px] text-stone-400 font-medium tracking-wider uppercase opacity-60">
+                Powered by <span className="text-gold-600 font-bold">Luminel Elite</span>
+              </p>
             </div>
           </div>
         </div>

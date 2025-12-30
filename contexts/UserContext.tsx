@@ -30,10 +30,15 @@ interface UserContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isSupabaseMode: boolean;
+  businessSettings: {
+    name: string;
+    logoUrl: string;
+  };
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => void;
+  refreshBusinessSettings: () => Promise<void>;
 }
 
 const defaultUser: UserProfile = {
@@ -57,8 +62,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [businessSettings, setBusinessSettings] = useState({ name: 'Luminel Elite', logoUrl: '' });
 
   const isSupabaseMode = isSupabaseConfigured();
+
+  // Load Business Settings (Logo/Name)
+  const refreshBusinessSettings = async () => {
+    try {
+      const { getSettings } = await import('../services/settingsService');
+      const settings = await getSettings();
+      setBusinessSettings({
+        name: settings.businessName || 'Luminel Elite',
+        logoUrl: settings.logoUrl || ''
+      });
+    } catch (error) {
+      console.error('[UserContext] ❌ Error refreshing business settings:', error);
+    }
+  };
 
   // ==============================================
   // Initialize Auth State
@@ -83,6 +103,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               email: currentSession.user.email || '',
               avatar: metadata?.avatar_url || `https://ui-avatars.com/api/?name=${metadata?.full_name || 'U'}&background=ce9341&color=fff`
             });
+
+            // Also load business settings
+            refreshBusinessSettings();
           }
         } catch (error) {
           console.error('Error loading session:', error);
@@ -105,6 +128,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 email: newSession.user.email || '',
                 avatar: metadata?.avatar_url || `https://ui-avatars.com/api/?name=${metadata?.full_name || 'U'}&background=ce9341&color=fff`
               });
+
+              // Refresh business settings on login/state change
+              refreshBusinessSettings();
             } else {
               setUser(defaultUser);
             }
@@ -254,12 +280,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isAuthenticated,
       isLoading,
       isSupabaseMode,
+      businessSettings,
       login,
       register,
       logout,
-      updateProfile
-    }}>
-      {children}
+      updateProfile,
+      refreshBusinessSettings
+    }}
+    >  {children}
     </UserContext.Provider>
   );
 };
