@@ -115,19 +115,19 @@ const TESTIMONIALS = [
         quote: "Finalmente un gestionale che parla la mia lingua. Elegante e intuitivo.",
         name: "Marco T.",
         role: "Salon Milano",
-        badge: "Founding Member #12"
+        badge: "Founding Member #1"
     },
     {
         quote: "Dashboard così bella che la mostro ai clienti. È parte del mio branding ora.",
         name: "Sara L.",
         role: "Coach Bergamo",
-        badge: "Founding Member #27"
+        badge: "Founding Member #2"
     },
     {
         quote: "Ho provato 5 gestionali prima di Luminel. Non torno più indietro.",
         name: "Giulia M.",
         role: "Tattoo Artist Roma",
-        badge: "Founding Member #8"
+        badge: "Founding Member #3"
     }
 ];
 
