@@ -94,6 +94,7 @@ export const Settings: React.FC = () => {
                maxConcurrentAppointments: settings.maxConcurrentAppointments,
                cabinNames: settings.cabinNames
             });
+            setLogoUrl(settings.logoUrl || '');
             setIsCloudConnected(isSupabaseConfigured());
             console.log('[Settings] ✅ Settings loaded');
          } catch (error) {

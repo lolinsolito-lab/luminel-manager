@@ -12,6 +12,7 @@ export interface UserSettings {
 
     // Business Profile
     businessName: string;
+    logoUrl: string;
     taxId: string;
     address: string;
     currency: string;
@@ -43,6 +44,7 @@ export interface ScheduleDay {
 // Default settings
 const DEFAULT_SETTINGS: UserSettings = {
     businessName: 'Luminel Center',
+    logoUrl: '',
     taxId: '',
     address: '',
     currency: 'EUR',
@@ -71,6 +73,7 @@ const fromSupabase = (row: any): UserSettings => ({
     id: row.id,
     userId: row.user_id,
     businessName: row.business_name || DEFAULT_SETTINGS.businessName,
+    logoUrl: row.logo_url || '',
     taxId: row.tax_id || '',
     address: row.address || '',
     currency: row.currency || DEFAULT_SETTINGS.currency,
@@ -89,6 +92,7 @@ const fromSupabase = (row: any): UserSettings => ({
 // Convert to Supabase row format
 const toSupabase = (settings: Partial<UserSettings>) => ({
     business_name: settings.businessName,
+    logo_url: settings.logoUrl,
     tax_id: settings.taxId,
     address: settings.address,
     currency: settings.currency,
