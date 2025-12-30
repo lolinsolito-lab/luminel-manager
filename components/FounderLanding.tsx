@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Crown, Sparkles, Check, Zap, Users, Building2,
     Star, Shield, Clock, Gift, ChevronRight, ArrowRight,
-    Rocket, Heart, Lock, Timer, ChevronDown, Quote, MessageCircle, AlertCircle
+    Rocket, Heart, Lock, Timer, ChevronDown, Quote, MessageCircle, AlertCircle, X, Calendar
 } from 'lucide-react';
 import { joinFounderWaitlist, getFounderSpotsRemaining } from '../services/waitlistService';
 import stripeService from '../services/stripeService';
@@ -149,11 +149,132 @@ const FAQ_ITEMS = [
         question: "Posso provare prima di acquistare?",
         answer: "Tutti i piani includono 14 giorni di prova gratuita. Nessuna carta di credito richiesta per iniziare."
     },
-    {
-        question: "Come funziona la fatturazione?",
-        answer: "Fatturazione mensile o annuale (2 mesi gratis). Fatture italiane conformi, perfette per la tua contabilità."
-    }
 ];
+
+// COMPONENTE: Exit Intent Popup
+const ExitIntentPopup: React.FC<{ onClose: () => void, spots: number }> = ({ onClose, spots }) => (
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+        <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
+        >
+            <div className="absolute top-0 right-0 p-4">
+                <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
+                    <X className="w-6 h-6" />
+                </button>
+            </div>
+
+            <div className="text-center">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-8 h-8 text-amber-600 animate-pulse" />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-stone-900 mb-2">
+                    ⚠️ ASPETTA! Solo {spots} posti rimasti
+                </h3>
+                <p className="text-stone-600 mb-6">
+                    Non perdere l'opportunità di bloccare il prezzo Founder al 44% di sconto per sempre. Inserisci la tua email per ricevere:
+                </p>
+
+                <ul className="text-left space-y-3 mb-8">
+                    <li className="flex items-center gap-3 text-stone-700">
+                        <Check className="w-5 h-5 text-emerald-500" />
+                        <span>Reminder countdown (48h prima)</span>
+                    </li>
+                    <li className="flex items-center gap-3 text-stone-700">
+                        <Check className="w-5 h-5 text-emerald-500" />
+                        <span>Case study esclusivo Founder</span>
+                    </li>
+                    <li className="flex items-center gap-3 text-stone-700">
+                        <Check className="w-5 h-5 text-emerald-500" />
+                        <span>Extra 10% Early Bird (solo via email)</span>
+                    </li>
+                </ul>
+
+                <form className="space-y-4">
+                    <input
+                        type="email"
+                        placeholder="Inserisci la tua email"
+                        className="w-full px-6 py-4 rounded-xl border border-stone-200 focus:border-amber-500 outline-none transition-all text-lg"
+                    />
+                    <button className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold text-lg shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-2">
+                        RISERVAMI IL POSTO <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <p className="text-xs text-stone-400">
+                        ✓ Join 847+ professionsiti già in lista
+                    </p>
+                </form>
+            </div>
+        </motion.div>
+    </motion.div>
+);
+
+// COMPONENTE: Floating Contact
+const FloatingContact: React.FC = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="fixed bottom-8 right-8 z-[90]">
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        className="absolute bottom-20 right-0 w-72 bg-white rounded-2xl shadow-2xl border border-stone-100 p-4 mb-2"
+                    >
+                        <h4 className="font-bold text-stone-900 mb-4 flex items-center gap-2">
+                            <MessageCircle className="w-5 h-5 text-amber-500" />
+                            Domande? Chatta con Michael
+                        </h4>
+                        <div className="space-y-3">
+                            <a
+                                href="https://wa.me/39XXXXXXXXXX"
+                                target="_blank"
+                                className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <MessageCircle className="w-5 h-5" />
+                                    <span className="text-sm font-semibold">WhatsApp Business</span>
+                                </div>
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </a>
+                            <a
+                                href="https://calendly.com/luminel/founder-demo"
+                                target="_blank"
+                                className="flex items-center justify-between p-3 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="w-5 h-5" />
+                                    <span className="text-sm font-semibold">Demo Founder 1:1</span>
+                                </div>
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </a>
+                        </div>
+                        <p className="text-[10px] text-stone-400 mt-4 text-center">
+                            Risposta media: <span className="font-bold">&lt; 2 ore</span>
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-2xl flex items-center justify-center group"
+            >
+                {isOpen ? <X className="w-8 h-8" /> : <MessageCircle className="w-8 h-8" />}
+                <span className="absolute right-full mr-4 bg-stone-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    Chatta col Founder
+                </span>
+            </motion.button>
+        </div>
+    );
+};
 
 export const FounderLanding: React.FC = () => {
     const [founderSpots, setFounderSpots] = useState(25);
@@ -165,6 +286,32 @@ export const FounderLanding: React.FC = () => {
     const [submitted, setSubmitted] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [openFaq, setOpenFaq] = useState<number | null>(null);
+    const [showExitIntent, setShowExitIntent] = useState(false);
+    const [liveViewers, setLiveViewers] = useState(2);
+    const [lastPurchase, setLastPurchase] = useState({ city: 'Roma', time: 3 });
+
+    // Exit Intent Logic
+    useEffect(() => {
+        const handleMouseLeave = (e: MouseEvent) => {
+            if (e.clientY < 0 && !sessionStorage.getItem('exit-intent-shown')) {
+                setShowExitIntent(true);
+                sessionStorage.setItem('exit-intent-shown', 'true');
+            }
+        };
+        document.addEventListener('mouseleave', handleMouseLeave);
+        return () => document.removeEventListener('mouseleave', handleMouseLeave);
+    }, []);
+
+    // Simulated Life Stats
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLiveViewers(prev => {
+                const change = Math.floor(Math.random() * 3) - 1;
+                return Math.max(2, prev + change);
+            });
+        }, 15000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Countdown timer - Launch date: 21 Gennaio 2025
     const [timeLeft, setTimeLeft] = useState({
@@ -250,6 +397,21 @@ export const FounderLanding: React.FC = () => {
                         <Sparkles className="w-4 h-4" />
                     </motion.div>
 
+                    {/* LIVE STATS */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex flex-wrap justify-center gap-6 mb-8 text-sm font-medium"
+                    >
+                        <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-2 rounded-full border border-red-100">
+                            <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+                            🔴 LIVE: {liveViewers} persone stanno guardando questa pagina
+                        </div>
+                        <div className="flex items-center gap-2 text-amber-700 bg-amber-50 px-4 py-2 rounded-full border border-amber-100">
+                            ⚡ Ultimo acquisto: {lastPurchase.time} ore fa - {lastPurchase.city}
+                        </div>
+                    </motion.div>
+
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -261,6 +423,29 @@ export const FounderLanding: React.FC = () => {
                             Founding Member
                         </span>
                     </motion.h1>
+
+                    {/* SOCIAL PROOF HERO */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="mb-10"
+                    >
+                        <p className="text-stone-500 text-sm mb-4 font-medium uppercase tracking-wider">Trusted by 47 wellness professionals across Milano, Bergamo, Roma</p>
+                        <div className="flex justify-center -space-x-3 overflow-hidden">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                                <img
+                                    key={i}
+                                    className="inline-block h-10 w-10 rounded-full ring-2 ring-white grayscale hover:grayscale-0 transition-all cursor-pointer bg-stone-100"
+                                    src={`https://i.pravatar.cc/150?img=${i + 20}`}
+                                    alt="User"
+                                />
+                            ))}
+                            <div className="flex items-center justify-center h-10 h-10 w-10 rounded-full bg-amber-500 ring-2 ring-white text-[10px] font-black text-white">
+                                +37
+                            </div>
+                        </div>
+                    </motion.div>
 
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -295,6 +480,32 @@ export const FounderLanding: React.FC = () => {
                                         {String(item.value).padStart(2, '0')}
                                     </div>
                                     <div className="text-xs text-stone-400 mt-1">{item.label}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+
+                    {/* ACTIVITY FEED */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="max-w-md mx-auto mb-12 bg-stone-900/5 backdrop-blur-sm rounded-2xl p-4 border border-stone-200"
+                    >
+                        <h4 className="text-[10px] font-black uppercase text-stone-400 tracking-[0.2em] mb-4 text-center">🔥 ULTIMI FOUNDER ISCRITTI</h4>
+                        <div className="space-y-3">
+                            {[
+                                { name: 'Marco T.', loc: 'Salon Milano', time: '2 ore fa', char: 'M' },
+                                { name: 'Sara L.', loc: 'Coach Bergamo', time: '5 ore fa', char: 'S' },
+                                { name: 'Giulia M.', loc: 'Tattoo Roma', time: '1 giorno fa', char: 'G' }
+                            ].map((sub, i) => (
+                                <div key={i} className="flex items-center justify-between text-left">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-stone-800 text-white flex items-center justify-center font-bold text-xs">{sub.char}</div>
+                                        <div>
+                                            <p className="text-xs font-bold text-stone-800">{sub.name} — <span className="font-medium text-stone-500">{sub.loc}</span></p>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] font-medium text-stone-400">{sub.time}</span>
                                 </div>
                             ))}
                         </div>
@@ -428,6 +639,51 @@ export const FounderLanding: React.FC = () => {
             {/* Pricing Cards */}
             <section className="py-12 px-4">
                 <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4">Scegli il tuo piano Founder</h2>
+                        <p className="text-stone-500">Diventa un membro fondatore dell'Impero Luminel. Prezzo bloccato per sempre.</p>
+
+                        {/* FOUNDER VIDEO */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            className="max-w-4xl mx-auto mt-12 bg-stone-900 rounded-[2rem] aspect-video flex items-center justify-center relative overflow-hidden shadow-2xl group border-[6px] border-white ring-1 ring-stone-200"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                            <div className="text-white text-center z-20 p-8">
+                                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform cursor-pointer border border-white/30">
+                                    <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1" />
+                                </div>
+                                <h3 className="text-2xl font-serif font-bold mb-2">"Ciao, sono Michael, founder di Luminel"</h3>
+                                <p className="text-stone-300 text-sm max-w-md mx-auto">
+                                    Guarda come Luminel trasformerà il tuo business nel benessere.
+                                    Solo 22 posti Founder rimasti.
+                                </p>
+                            </div>
+                            <img
+                                src="https://images.unsplash.com/photo-1594465919760-441fe5908ab0?auto=format&fit=crop&q=80&w=1600"
+                                className="absolute inset-0 w-full h-full object-cover opacity-60"
+                                alt="Founder Video Thumbnail"
+                            />
+                        </motion.div>
+                    </div>
+
+                    <div className="flex justify-center items-center gap-4 mb-12">
+                        <span className={`text-sm ${billingCycle === 'monthly' ? 'text-stone-900 font-bold' : 'text-stone-400'}`}>Mensile</span>
+                        <button
+                            onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+                            className="w-14 h-7 bg-stone-200 rounded-full relative p-1 transition-colors hover:bg-stone-300"
+                        >
+                            <motion.div
+                                animate={{ x: billingCycle === 'annual' ? 28 : 0 }}
+                                className="w-5 h-5 bg-white rounded-full shadow-sm"
+                            />
+                        </button>
+                        <span className={`text-sm ${billingCycle === 'annual' ? 'text-stone-900 font-bold' : 'text-stone-400'}`}>Annuale</span>
+                        <div className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            2 MESI GRATIS
+                        </div>
+                    </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {PRICING_PLANS.map((plan, index) => (
                             <motion.div
@@ -787,6 +1043,14 @@ export const FounderLanding: React.FC = () => {
                     </p>
                 </div>
             </footer>
+
+            {/* EXIT INTENT POPUP */}
+            <AnimatePresence>
+                {showExitIntent && <ExitIntentPopup onClose={() => setShowExitIntent(false)} spots={founderSpots} />}
+            </AnimatePresence>
+
+            {/* FLOATING CONTACT */}
+            <FloatingContact />
         </div>
     );
 };
