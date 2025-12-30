@@ -16,21 +16,76 @@ export const ResetPassword: React.FC = () => {
     const [isValidSession, setIsValidSession] = useState<boolean | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
+        let retryCount = 0;
+        const maxRetries = 5;
+
+        // Check if URL contains recovery tokens (direct detection)
+        const checkForRecoveryTokens = () => {
+            const fullUrl = window.location.href;
+            const hash = window.location.hash;
+            // Supabase puts tokens like: #access_token=xxx&type=recovery
+            return fullUrl.includes('type=recovery') ||
+                hash.includes('type=recovery') ||
+                fullUrl.includes('access_token');
+        };
+
         // Check if user has a valid recovery session
         const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setIsValidSession(!!session);
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (session && isMounted) {
+                    setIsValidSession(true);
+                    return true;
+                }
+
+                // If no session but we have tokens in URL, Supabase might still be processing
+                if (checkForRecoveryTokens() && retryCount < maxRetries) {
+                    retryCount++;
+                    // Wait and retry - Supabase needs time to parse tokens
+                    setTimeout(() => {
+                        if (isMounted) checkSession();
+                    }, 500);
+                    return false;
+                }
+
+                if (isMounted) {
+                    setIsValidSession(!!session);
+                }
+                return !!session;
+            } catch (err) {
+                console.error('Session check error:', err);
+                if (isMounted) setIsValidSession(false);
+                return false;
+            }
         };
-        checkSession();
+
+        // If URL has recovery tokens, assume valid initially while Supabase processes
+        if (checkForRecoveryTokens()) {
+            // Give Supabase a moment to parse tokens before checking session
+            setTimeout(() => {
+                if (isMounted) checkSession();
+            }, 300);
+        } else {
+            checkSession();
+        }
 
         // Listen for auth state changes (recovery link clicked)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-            if (event === 'PASSWORD_RECOVERY') {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY' && isMounted) {
+                setIsValidSession(true);
+            }
+            // Also accept SIGNED_IN with a session during password recovery
+            if (event === 'SIGNED_IN' && session && isMounted) {
                 setIsValidSession(true);
             }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            isMounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
