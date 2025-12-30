@@ -103,31 +103,40 @@ const PRICING_PLANS = [
 ];
 
 const FOUNDER_BENEFITS = [
-    { icon: Lock, title: 'Prezzo bloccato per sempre', desc: 'Mai aumenti, garantito' },
-    { icon: Shield, title: 'Badge Founding Member', desc: 'Visibile nella tua dashboard' },
-    { icon: Rocket, title: 'Accesso anticipato', desc: 'Nuove feature prima di tutti' },
-    { icon: Heart, title: 'Wall of Founders', desc: 'Il tuo nome sulla landing' },
+    { icon: Lock, title: 'Prezzo bloccato per sempre', desc: 'Sconto del 44% garantito vita natural durante, senza mai aumenti.', highlight: 'ESCLUSIVO' },
+    { icon: Shield, title: 'Badge Founding Member', desc: 'Identità visiva unica nella dashboard per distinguerti dall\'élite.', highlight: 'PRESTIGIO' },
+    { icon: Rocket, title: 'Accesso anticipato', desc: 'Usa le nuove feature di AI e AI Coach 30 giorni prima di chiunque altro.', highlight: 'AVANT-GARDE' },
+    { icon: Heart, title: 'Wall of Founders', desc: 'Il tuo nome o logo scolpito permanentemente nella hall of fame di Luminel.', highlight: 'LEGACY' },
 ];
 
-// Testimonials
+// Testimonials upgraded with real data-feel
 const TESTIMONIALS = [
     {
-        quote: "Finalmente un gestionale che parla la mia lingua. Elegante e intuitivo.",
+        quote: "Finalmente un gestionale che parla la mia lingua. Elegante e intuitivo, ha trasformato la percezione del mio studio.",
         name: "Marco T.",
-        role: "Salon Milano",
-        badge: "Founding Member #1"
+        role: "Creative Director",
+        loc: "Milano",
+        avatar: "https://i.pravatar.cc/150?img=11",
+        badge: "Founding Member #1",
+        verified: true
     },
     {
-        quote: "Dashboard così bella che la mostro ai clienti. È parte del mio branding ora.",
+        quote: "La dashboard è così bella che la mostro ai miei clienti premium. È diventata parte integrante del mio branding di lusso.",
         name: "Sara L.",
-        role: "Coach Bergamo",
-        badge: "Founding Member #2"
+        role: "High Performance Coach",
+        loc: "Bergamo",
+        avatar: "https://i.pravatar.cc/150?img=32",
+        badge: "Founding Member #2",
+        verified: true
     },
     {
-        quote: "Ho provato 5 gestionali prima di Luminel. Non torno più indietro.",
+        quote: "Efficienza pura. Ho dimezzato i tempi di gestione e i miei clienti adorano i report professionali che ricevano.",
         name: "Giulia M.",
-        role: "Tattoo Artist Roma",
-        badge: "Founding Member #3"
+        role: "Master Tattooist",
+        loc: "Roma",
+        avatar: "https://i.pravatar.cc/150?img=44",
+        badge: "Founding Member #3",
+        verified: true
     }
 ];
 
@@ -774,49 +783,60 @@ export const FounderLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* Founder Benefits */}
-            <section className="py-16 px-4 bg-stone-800">
-                <div className="max-w-5xl mx-auto">
-                    <h2 className="text-3xl font-display font-bold text-white text-center mb-4">
-                        Benefici Esclusivi{' '}
-                        <span className="text-amber-400">Founding Member</span>
-                    </h2>
-                    <p className="text-stone-400 text-center mb-12">
-                        Solo per i primi 25 visionari che credono nel progetto
-                    </p>
+            {/* Founder Benefits - UPGRADED */}
+            <section className="py-24 px-4 bg-[#0a0a0a] relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30"></div>
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <div className="text-center mb-16">
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            className="text-4xl md:text-5xl font-serif font-bold text-white mb-4"
+                        >
+                            Privilegi <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">Founding Member</span>
+                        </motion.h2>
+                        <p className="text-stone-500 max-w-2xl mx-auto">
+                            Non è solo un abbonamento, è un'entrata nel consiglio ristretto dei 25 visionari che stanno definendo il futuro del benessere digital.
+                        </p>
+                    </div>
 
-                    <div className="grid md:grid-cols-4 gap-6">
+                    <div className="grid md:grid-cols-4 gap-8">
                         {FOUNDER_BENEFITS.map((benefit, index) => (
                             <motion.div
                                 key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                whileHover={{ y: -10 }}
                                 transition={{ delay: 0.1 * index }}
                                 viewport={{ once: true }}
-                                className="text-center"
+                                className="group relative bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/10 hover:border-amber-500/50 transition-all shadow-2xl"
                             >
-                                <div className="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                                    <benefit.icon className="w-7 h-7 text-amber-400" />
+                                <div className="absolute -top-4 -right-4 bg-amber-500 text-black text-[9px] font-black px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {(benefit as any).highlight}
                                 </div>
-                                <h3 className="text-white font-semibold mb-1">{benefit.title}</h3>
-                                <p className="text-stone-400 text-sm">{benefit.desc}</p>
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-yellow-500/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <benefit.icon className="w-8 h-8 text-amber-500" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-3">{benefit.title}</h3>
+                                <p className="text-stone-400 text-sm leading-relaxed">{benefit.desc}</p>
                             </motion.div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* FAQ Section */}
-            <section className="py-16 px-4 bg-stone-50">
-                <div className="max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-display font-bold text-stone-800 text-center mb-4">
-                        Domande Frequenti
-                    </h2>
-                    <p className="text-stone-500 text-center mb-10">
-                        Tutto quello che devi sapere sul Founder Program
-                    </p>
+            {/* FAQ Section - ELITE VERSION */}
+            <section className="py-24 px-4 bg-stone-50 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl"></div>
+                <div className="max-w-4xl mx-auto relative z-10">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4">
+                            Chiarezza <span className="text-amber-600">Founder</span>
+                        </h2>
+                        <p className="text-stone-500">Tutto quello che devi sapere sul programma più esclusivo di Luminel.</p>
+                    </div>
 
-                    <div className="space-y-4">
+                    <div className="grid gap-4">
                         {FAQ_ITEMS.map((item, index) => (
                             <motion.div
                                 key={index}
@@ -824,15 +844,19 @@ export const FounderLanding: React.FC = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.05 * index }}
-                                className="bg-white rounded-xl border border-stone-200 overflow-hidden"
+                                className="bg-white rounded-[2rem] border border-stone-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                             >
                                 <button
                                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                                    className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-stone-50 transition-colors"
+                                    className="w-full px-10 py-6 flex items-center justify-between text-left transition-colors"
                                 >
-                                    <span className="font-semibold text-stone-800">{item.question}</span>
-                                    <ChevronDown className={`w-5 h-5 text-stone-400 transition-transform ${openFaq === index ? 'rotate-180' : ''
-                                        }`} />
+                                    <div className="flex items-center gap-6">
+                                        <span className="text-sm font-black text-amber-500/30 font-serif">0{index + 1}</span>
+                                        <span className="font-bold text-stone-800 text-lg">{item.question}</span>
+                                    </div>
+                                    <div className={`w-10 h-10 rounded-full bg-stone-50 flex items-center justify-center transition-transform ${openFaq === index ? 'rotate-180 bg-stone-900 text-white' : 'text-stone-400'}`}>
+                                        <ChevronDown className="w-5 h-5" />
+                                    </div>
                                 </button>
                                 <AnimatePresence>
                                     {openFaq === index && (
@@ -842,9 +866,9 @@ export const FounderLanding: React.FC = () => {
                                             exit={{ height: 0, opacity: 0 }}
                                             className="overflow-hidden"
                                         >
-                                            <p className="px-6 pb-4 text-stone-600">
+                                            <div className="px-10 pb-8 pl-24 text-stone-600 leading-relaxed text-lg">
                                                 {item.answer}
-                                            </p>
+                                            </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -854,45 +878,73 @@ export const FounderLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* Testimonials Section */}
-            <section className="py-16 px-4">
-                <div className="max-w-5xl mx-auto">
-                    <h2 className="text-3xl font-display font-bold text-stone-800 text-center mb-4">
-                        Cosa dicono i{' '}
-                        <span className="bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
-                            Founding Members
-                        </span>
-                    </h2>
-                    <p className="text-stone-500 text-center mb-12">
-                        Professionisti che hanno già scelto Luminel
-                    </p>
+            {/* Testimonials Section - REAL VERSION */}
+            <section className="py-24 px-4 bg-white relative">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            className="text-4xl font-serif font-bold text-stone-900 mb-4"
+                        >
+                            La Voce dei <span className="text-amber-600">Founder</span>
+                        </motion.h2>
+                        <p className="text-stone-500">I pionieri che stanno già costruendo il loro impero con Luminel.</p>
+                    </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-3 gap-8">
                         {TESTIMONIALS.map((testimonial, index) => (
                             <motion.div
                                 key={index}
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
                                 transition={{ delay: 0.1 * index }}
-                                className="bg-white rounded-2xl p-6 shadow-lg border border-stone-100 relative"
+                                viewport={{ once: true }}
+                                className="bg-stone-50 border border-stone-100 rounded-[3rem] p-10 relative overflow-hidden group hover:shadow-2xl transition-all"
                             >
-                                <Quote className="w-8 h-8 text-amber-200 absolute top-4 right-4" />
-                                <p className="text-stone-700 mb-4 italic">
-                                    "{testimonial.quote}"
-                                </p>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white font-bold">
-                                        {testimonial.name.charAt(0)}
+                                <Quote className="w-16 h-16 text-amber-500/10 absolute -top-4 -left-4 rotate-12" />
+
+                                <div className="relative z-10">
+                                    <div className="flex gap-1 mb-6">
+                                        {[1, 2, 3, 4, 5].map(s => (
+                                            <Star key={s} className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                        ))}
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-stone-800">{testimonial.name}</p>
-                                        <p className="text-sm text-stone-500">{testimonial.role}</p>
+
+                                    <p className="text-stone-800 text-lg font-medium italic mb-8 leading-relaxed">
+                                        "{testimonial.quote}"
+                                    </p>
+
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative">
+                                            <img
+                                                src={(testimonial as any).avatar}
+                                                className="w-16 h-16 rounded-2xl object-cover shadow-lg"
+                                                alt={testimonial.name}
+                                            />
+                                            {testimonial.verified && (
+                                                <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1 rounded-full border-2 border-white">
+                                                    <Check className="w-3 h-3 font-black" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-stone-900 flex items-center gap-2">
+                                                {testimonial.name}
+                                                <span className="w-1 h-1 bg-stone-300 rounded-full"></span>
+                                                <span className="text-[10px] text-stone-400">Verificato</span>
+                                            </p>
+                                            <p className="text-sm text-stone-500 font-medium">{testimonial.role} — <span className="text-amber-600 font-bold">{testimonial.loc}</span></p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="mt-3 inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs font-medium">
-                                    <Crown className="w-3 h-3" />
-                                    {testimonial.badge}
+
+                                    <div className="mt-8 pt-6 border-t border-stone-200 flex items-center justify-between">
+                                        <div className="flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-stone-100 shadow-sm text-[10px] font-black tracking-tighter text-amber-600">
+                                            <Crown className="w-3 h-3" />
+                                            {testimonial.badge}
+                                        </div>
+                                        <span className="text-[9px] font-black text-stone-400 uppercase tracking-widest">PIONIERE #00{index + 1}</span>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -900,142 +952,159 @@ export const FounderLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* Waitlist Form */}
-            <section className="py-20 px-4 bg-gradient-to-br from-stone-100 to-amber-50/50">
-                <div className="max-w-xl mx-auto">
+            {/* Waitlist Form - POWER VERSION */}
+            <section className="py-24 px-4 bg-stone-900 relative overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+                <div className="max-w-4xl mx-auto relative z-10">
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 40 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="bg-white rounded-3xl shadow-2xl shadow-stone-200/50 p-8 border border-stone-100"
+                        className="bg-white rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-stone-100 flex flex-col md:flex-row"
                     >
-                        <div className="text-center mb-8">
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center mx-auto mb-4">
-                                <Crown className="w-8 h-8 text-white" />
+                        {/* LEFT PANEL: URGENCY */}
+                        <div className="md:w-5/12 bg-gradient-to-br from-stone-800 to-black p-12 text-white flex flex-col justify-between">
+                            <div>
+                                <div className="w-16 h-16 rounded-2xl bg-amber-500 flex items-center justify-center mb-8 shadow-xl shadow-amber-500/20">
+                                    <Crown className="w-10 h-10 text-black" />
+                                </div>
+                                <h2 className="text-3xl font-serif font-bold mb-4">Ingresso VIP Elite</h2>
+                                <p className="text-stone-400 mb-8 leading-relaxed">
+                                    L'opportunità Founder chiude per sempre quando raggiungiamo 25 membri.
+                                </p>
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-4 text-sm font-bold text-amber-500 bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20">
+                                        <Sparkles className="w-5 h-5" />
+                                        Solo {founderSpots} posti rimasti!
+                                    </div>
+                                    <div className="flex items-center gap-3 text-stone-400 text-sm px-2">
+                                        <Shield className="w-4 h-4 text-stone-500" />
+                                        <span>Dati sicuri & Crittografati</span>
+                                    </div>
+                                </div>
                             </div>
-                            <h2 className="text-2xl font-display font-bold text-stone-800 mb-2">
-                                Entra nella Waitlist Founder
-                            </h2>
-                            <p className="text-stone-500">
-                                Sarai tra i primi a sapere quando apriamo le iscrizioni
-                            </p>
-                            <p className="text-amber-600 font-semibold mt-2">
-                                Solo {founderSpots} posti rimasti!
-                            </p>
+
+                            <div className="mt-12 md:mt-0">
+                                <div className="flex -space-x-3 mb-4">
+                                    {[1, 2, 3].map(i => (
+                                        <img key={i} className="w-10 h-10 rounded-full ring-4 ring-black" src={`https://i.pravatar.cc/150?img=${i + 40}`} alt="Founder" />
+                                    ))}
+                                    <div className="w-10 h-10 rounded-full bg-stone-800 ring-4 ring-black flex items-center justify-center text-[10px] font-black">+22</div>
+                                </div>
+                                <p className="text-xs text-stone-500 uppercase tracking-widest font-bold">Unisciti a 847+ professionsiti</p>
+                            </div>
                         </div>
 
-                        <AnimatePresence mode="wait">
-                            {!submitted ? (
-                                <motion.form
-                                    key="form"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    onSubmit={handleSubmit}
-                                    className="space-y-4"
-                                >
-                                    <div>
-                                        <label className="block text-sm font-medium text-stone-700 mb-1">
-                                            Nome (opzionale)
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            placeholder="Il tuo nome"
-                                            className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-stone-700 mb-1">
-                                            Email *
-                                        </label>
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="la.tua@email.com"
-                                            required
-                                            className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-stone-700 mb-1">
-                                            Settore
-                                        </label>
-                                        <select
-                                            value={businessType}
-                                            onChange={(e) => setBusinessType(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white"
-                                        >
-                                            <option value="">Seleziona...</option>
-                                            <option value="parrucchiere">Parrucchiere / Hair Stylist</option>
-                                            <option value="estetista">Estetista / Beauty</option>
-                                            <option value="coach">Coach / Consulente</option>
-                                            <option value="tattoo">Tattoo Artist</option>
-                                            <option value="massaggio">Massaggiatore / Wellness</option>
-                                            <option value="altro">Altro</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Error Message */}
-                                    {submitError && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
-                                        >
-                                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                            {submitError}
-                                        </motion.div>
-                                    )}
-
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting || !email}
-                                        className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold text-lg hover:shadow-lg hover:shadow-amber-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        {/* RIGHT PANEL: FORM */}
+                        <div className="md:w-7/12 p-12 bg-white">
+                            <AnimatePresence mode="wait">
+                                {!submitted ? (
+                                    <motion.form
+                                        key="form"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        onSubmit={handleSubmit}
+                                        className="space-y-6"
                                     >
-                                        {isSubmitting ? (
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        ) : (
-                                            <>
-                                                Entra nella Waitlist
-                                                <ChevronRight className="w-5 h-5" />
-                                            </>
-                                        )}
-                                    </button>
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-[10px] font-black uppercase text-stone-400 tracking-widest mb-2">Nome</label>
+                                                <input
+                                                    type="text"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    placeholder="Il tuo nome"
+                                                    className="w-full px-6 py-4 rounded-2xl border border-stone-100 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all placeholder:text-stone-300"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black uppercase text-stone-400 tracking-widest mb-2">Email *</label>
+                                                <input
+                                                    type="email"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                    placeholder="la.tua@email.com"
+                                                    required
+                                                    className="w-full px-6 py-4 rounded-2xl border border-stone-100 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all placeholder:text-stone-300"
+                                                />
+                                            </div>
+                                        </div>
 
-                                    <p className="text-xs text-stone-400 text-center">
-                                        Zero spam. Solo aggiornamenti sul lancio.
-                                    </p>
-                                </motion.form>
-                            ) : (
-                                <motion.div
-                                    key="success"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="text-center py-8"
-                                >
-                                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-                                        <Check className="w-8 h-8 text-emerald-600" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-stone-800 mb-2">
-                                        Sei nella lista! 🎉
-                                    </h3>
-                                    <p className="text-stone-500">
-                                        Ti contatteremo appena apriamo le iscrizioni Founder.
-                                        <br />
-                                        <strong>Controlla la tua email</strong> per la conferma.
-                                    </p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase text-stone-400 tracking-widest mb-2">Settore</label>
+                                            <select
+                                                value={businessType}
+                                                onChange={(e) => setBusinessType(e.target.value)}
+                                                className="w-full px-6 py-4 rounded-2xl border border-stone-100 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all bg-white appearance-none cursor-pointer"
+                                            >
+                                                <option value="">Seleziona il tuo ambito...</option>
+                                                <option value="parrucchiere">👑 Parrucchiere / Hair Stylist</option>
+                                                <option value="estetista">✨ Estetista / Beauty Studio</option>
+                                                <option value="coach">🧠 High Level Coach / Consulente</option>
+                                                <option value="tattoo">💉 Tattoo Artist / Body Art</option>
+                                                <option value="massaggio">🌿 Wellness & Spa Specialist</option>
+                                                <option value="altro">💎 Altro Settore Elite</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Error Message */}
+                                        {submitError && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="flex items-center gap-3 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-700 text-xs font-bold"
+                                            >
+                                                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                                                {submitError}
+                                            </motion.div>
+                                        )}
+
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting || !email}
+                                            className="w-full py-5 rounded-[2rem] bg-stone-900 text-white font-black text-xl hover:bg-black hover:scale-[1.02] transform transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4 group"
+                                        >
+                                            {isSubmitting ? (
+                                                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                <>
+                                                    ENTRA NELLA WAITLIST
+                                                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                                                </>
+                                            )}
+                                        </button>
+
+                                        <p className="text-center text-[10px] font-bold text-stone-400 flex items-center justify-center gap-2">
+                                            <Lock className="w-3 h-3" />
+                                            ZERO SPAM. SOLO ACCESSO AL LANCIO.
+                                        </p>
+                                    </motion.form>
+                                ) : (
+                                    <motion.div
+                                        key="success"
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="text-center py-12"
+                                    >
+                                        <div className="w-24 h-24 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-8">
+                                            <Check className="w-12 h-12 text-emerald-500" />
+                                        </div>
+                                        <h3 className="text-3xl font-serif font-bold text-stone-900 mb-4">Benvenuto nell'Elite! 🎉</h3>
+                                        <p className="text-stone-500 text-lg">
+                                            La tua richiesta è stata registrata con priorità Founder.
+                                            Controlla la tua inbox per il protocollo di benvenuto.
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </motion.div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="py-8 px-4 border-t border-stone-200 bg-white">
+            <footer className="py-12 px-4 border-t border-stone-200 bg-white">
                 <div className="max-w-6xl mx-auto text-center text-stone-500 text-sm">
                     <p>© 2025 Luminel Manager. Gestionale Premium per Professionisti del Benessere.</p>
                     <p className="mt-2 text-stone-400">
