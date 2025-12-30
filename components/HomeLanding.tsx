@@ -48,17 +48,18 @@ const VERTICALS = [
 
 export const HomeLanding: React.FC = () => {
     const [activeVertical, setActiveVertical] = useState(VERTICALS[0]);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-white text-stone-900 overflow-x-hidden">
             {/* Header / Nav */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-stone-900 rounded-xl flex items-center justify-center">
-                            <Crown className="w-6 h-6 text-amber-400" />
+                        <div className="w-9 h-9 md:w-10 md:h-10 bg-stone-900 rounded-xl flex items-center justify-center">
+                            <Crown className="w-5 h-5 md:w-6 md:h-6 text-amber-400" />
                         </div>
-                        <span className="text-xl font-serif font-bold tracking-tight">Luminel <span className="text-stone-400">Manager</span></span>
+                        <span className="text-lg md:text-xl font-serif font-bold tracking-tight">Luminel <span className="text-stone-400">Manager</span></span>
                     </div>
 
                     <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest text-stone-500">
@@ -67,7 +68,7 @@ export const HomeLanding: React.FC = () => {
                         <Link to="/founder" className="hover:text-stone-900 transition-colors">Founder Program</Link>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-4">
                         <Link to="/login" className="px-6 py-2.5 text-sm font-bold text-stone-900 hover:text-stone-600 transition-colors">Log In</Link>
                         <Link
                             to="/founder"
@@ -76,7 +77,39 @@ export const HomeLanding: React.FC = () => {
                             Inizia l'Impero
                         </Link>
                     </div>
+
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5"
+                    >
+                        <span className={`w-6 h-0.5 bg-stone-900 transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+                        <span className={`w-6 h-0.5 bg-stone-900 transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
+                        <span className={`w-6 h-0.5 bg-stone-900 transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                    </button>
                 </div>
+
+                {/* Mobile Menu Dropdown */}
+                <AnimatePresence>
+                    {mobileMenuOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="md:hidden bg-white border-t border-stone-100 overflow-hidden"
+                        >
+                            <div className="px-6 py-6 space-y-4">
+                                <a href="#manifesto" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-stone-900">Manifesto</a>
+                                <a href="#soluzioni" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-stone-900">Soluzioni</a>
+                                <Link to="/founder" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-amber-600">Founder Program</Link>
+                                <div className="pt-4 border-t border-stone-100 flex flex-col gap-3">
+                                    <Link to="/login" className="py-3 text-center font-bold text-stone-600 border border-stone-200 rounded-xl">Accedi</Link>
+                                    <Link to="/founder" className="py-3 text-center font-bold text-white bg-stone-900 rounded-xl">Inizia l'Impero</Link>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </nav>
 
             {/* HERO: The Manifesto Start */}
