@@ -62,7 +62,7 @@ export const Login: React.FC = () => {
       } else {
         // Login
         await login(email, password);
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (error: any) {
       console.error('Auth error:', error);
