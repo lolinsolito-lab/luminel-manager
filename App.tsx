@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { Clients } from './components/Clients';
@@ -35,6 +35,35 @@ const ScrollToTop: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  return null;
+};
+
+// Handle Supabase auth redirects (especially password recovery)
+const AuthRedirectHandler: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Import supabase dynamically to avoid circular deps
+    import('./services/supabaseClient').then(({ supabase }) => {
+      // Check if URL contains recovery tokens (Supabase puts them in hash)
+      const hash = window.location.hash;
+      if (hash.includes('access_token') && hash.includes('type=recovery')) {
+        // This is a password recovery link, redirect to reset page
+        navigate('/reset-password');
+        return;
+      }
+
+      // Also listen for auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          navigate('/reset-password');
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    });
+  }, [navigate]);
+
   return null;
 };
 
@@ -86,6 +115,7 @@ const App: React.FC = () => {
               <SubscriptionProvider>
                 <HashRouter>
                   <ScrollToTop />
+                  <AuthRedirectHandler />
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomeLanding />} />
