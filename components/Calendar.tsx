@@ -10,7 +10,6 @@ import {
   Zap, BookOpen, Layers
 } from 'lucide-react';
 import { Session, SessionStatus, Program, Client, VaultCategory } from '../types';
-import { syncSession, fetchSessionsFromSheets, syncTask } from '../services/integrationService';
 import { validateEmail } from '../utils/validation';
 import { usePrograms } from '../contexts/ProgramContext';
 import { useUI } from '../contexts/UIContext';
@@ -157,38 +156,9 @@ export const CalendarView: React.FC = () => {
           }
         }
 
-        // Fallback to Google Sheets
-        console.log('[Calendar] 📞 Loading sessions from Google Sheets (fallback)...');
-        const sheetsSessions = await fetchSessionsFromSheets();
-
-        if (sheetsSessions.length > 0) {
-          const mappedSessions = sheetsSessions.map((row: any) => {
-            const getValue = (key: string, index: string) => {
-              return row[key] !== undefined ? row[key] : row[index];
-            };
-
-            return {
-              id: getValue('id', '0') || String(Math.random()),
-              title: getValue('title', '1') || '',
-              clientName: getValue('clientName', '2') || '',
-              clientEmail: getValue('clientEmail', '3') || '',
-              clientPhone: getValue('clientPhone', '4') || '',
-              serviceId: getValue('serviceId', '5'),
-              category: getValue('category', '6') || 'Coaching',
-              date: new Date(getValue('startTime', '7')),
-              duration: Number(getValue('durationHours', '9')) || 1,
-              price: Number(getValue('price', '10')) || 0,
-              notes: getValue('notes', '11') || '',
-              type: getValue('type', '12') || '1:1',
-              status: SessionStatus.SCHEDULED,
-              programId: getValue('serviceId', '5')
-            };
-          });
-          setSessions(mappedSessions);
-          localStorage.setItem('lumina_sessions_cache', JSON.stringify(mappedSessions));
-          console.log(`[Calendar] ✅ Loaded ${mappedSessions.length} sessions from Google Sheets`);
-        } else if (!cachedSessions) {
-          console.warn('⚠️ No sessions found');
+        // Note: Google Sheets fallback removed - using Supabase only
+        if (!isSupabaseConfigured()) {
+          console.log('[Calendar] 💡 Using local cache only - Supabase not configured');
         }
       } catch (error) {
         console.error('[Calendar] ❌ Error loading sessions:', error);
@@ -457,7 +427,7 @@ export const CalendarView: React.FC = () => {
           programId: created.programId
         };
       } else {
-        // Fallback to Make.com
+        // Save locally only without Supabase
         savedSession = {
           id: Math.random().toString(36).substr(2, 9),
           date: formData.date || new Date(),
@@ -473,14 +443,7 @@ export const CalendarView: React.FC = () => {
           price: formData.price,
           programId: formData.programId
         };
-
-        const sessionPayload = {
-          ...savedSession,
-          date: savedSession.date.toISOString()
-        };
-
-        await syncSession(sessionPayload);
-        console.log('[Calendar] ✅ Session synced to Make.com');
+        console.log('[Calendar] 💾 Session saved locally');
       }
 
       // Add to local state

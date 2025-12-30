@@ -12,7 +12,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Resource, Client } from '../types';
 import { useResources } from '../contexts/ResourceContext';
 import { getClients } from '../services/clientService';
-import { shareResource } from '../services/integrationService';
 import { LUMINA_COLORS } from '../constants';
 
 // Animation variants for Elite UX
@@ -123,22 +122,15 @@ export const Library: React.FC = () => {
     const clientName = client ? `${client.firstName} ${client.lastName}` : 'Cliente';
 
     try {
-      // Integration with Make.com/Email service
-      await shareResource(
-        selectedResource,
-        clientName,
-        sendForm.message,
-        sendForm.method,
-        client?.phone // Pass phone for WhatsApp
-      );
-
-      // If WhatsApp, handle the redirect
+      // Handle WhatsApp directly
       if (sendForm.method === 'whatsapp' && client?.phone) {
         const waMessage = encodeURIComponent(sendForm.message + "\n\n🔗 Risorsa: " + selectedResource.url);
         window.open(`https://wa.me/${client.phone.replace(/\D/g, '')}?text=${waMessage}`, '_blank');
+        alert(`Eccellenza confermata. "${selectedResource.title}" è in viaggio verso ${clientName}.`);
+      } else if (sendForm.method === 'email') {
+        // TODO: Implement email sending via Supabase Edge Function
+        alert('📧 Funzionalità email in arrivo. Per ora, usa WhatsApp.');
       }
-
-      alert(`Eccellenza confermata. "${selectedResource.title}" è in viaggio verso ${clientName}.`);
       setIsSendOpen(false);
     } catch (err) {
       alert('Impossibile inviare la risorsa. Riprova.');

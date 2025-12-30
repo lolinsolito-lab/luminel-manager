@@ -38,7 +38,6 @@ import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { usePrograms } from '../contexts/ProgramContext';
 import { useUI } from '../contexts/UIContext';
-import { syncTask } from '../services/integrationService';
 import * as clientService from '../services/clientService';
 import * as sessionService from '../services/sessionService';
 import * as transactionService from '../services/transactionService';
@@ -198,16 +197,12 @@ export const Dashboard: React.FC = () => {
     localStorage.setItem('lumina_dashboard_tasks', JSON.stringify(tasks));
   }, [tasks]);
 
-  const toggleTask = async (id: string) => {
+  const toggleTask = (id: string) => {
     const updatedTasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
     setTasks(updatedTasks);
-
-    // Sync change
-    const changedTask = updatedTasks.find(t => t.id === id);
-    if (changedTask) await syncTask(changedTask);
   };
 
-  const addTask = async () => {
+  const addTask = () => {
     if (!newTaskText.trim()) {
       setIsAddingTask(false);
       return;
@@ -223,9 +218,6 @@ export const Dashboard: React.FC = () => {
     setTasks([newTask, ...tasks]);
     setNewTaskText('');
     setIsAddingTask(false);
-
-    // Sync to integration
-    await syncTask(newTask);
   };
 
   const handleDeleteTask = (id: string) => {

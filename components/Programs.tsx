@@ -10,7 +10,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Program, VaultCategory } from '../types';
 import { usePrograms } from '../contexts/ProgramContext';
-import { syncProgram } from '../services/integrationService';
 import { LUMINA_COLORS } from '../constants';
 
 // Icon mapping helper
@@ -105,7 +104,6 @@ export const Programs: React.FC = () => {
       } else {
         await addProgram(formData as Omit<Program, 'id'>);
       }
-      await syncProgram({ ...editingProgram, ...formData } as Program);
       setIsModalOpen(false);
     } catch (error) {
       alert('Errore nel salvataggio del programma.');

@@ -29,7 +29,6 @@ import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Logo } from './Logo';
 import { APP_CONFIG } from '../config';
-import { syncCompanyProfile } from '../services/integrationService';
 import { NotificationDrawer } from './NotificationDrawer';
 import { useUI } from '../contexts/UIContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
@@ -90,12 +89,8 @@ export const Layout = ({ children }: LayoutProps) => {
   };
 
   const handleProfileSave = async () => {
-    // 1. Update Local Context/Storage
+    // Update Local Context/Storage
     updateProfile(formData);
-
-    // 2. Sync to Make.com (Google Sheets, Drive, etc)
-    await syncCompanyProfile(formData);
-
     setIsProfileModalOpen(false);
   };
 

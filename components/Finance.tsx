@@ -40,7 +40,6 @@ import {
    Legend
 } from 'recharts';
 import { Transaction, TransactionType } from '../types';
-import { syncTransaction, syncTransactionToSheets, sendReceiptEmail } from '../services/integrationService';
 import { APP_CONFIG } from '../config';
 import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -273,16 +272,8 @@ export const Finance: React.FC = () => {
                throw error;
             }
          } else {
-            // Fallback to Make.com
-            await syncTransaction(transaction);
-
-            // Sync to Google Sheets for persistence
-            try {
-               await syncTransactionToSheets(transaction);
-               console.log('[Finance] ✅ Transaction saved to Sheets');
-            } catch (error) {
-               console.warn('[Finance] ⚠️ Failed to save to Sheets:', error);
-            }
+            // Save to localStorage only if Supabase is not configured
+            console.log('[Finance] 💾 Saving transaction locally');
          }
 
          // Update local state
@@ -348,22 +339,12 @@ export const Finance: React.FC = () => {
          }
 
          setEmailStatus('sending');
-         try {
-            const success = await sendReceiptEmail(selectedReceipt, recipientEmail);
-            if (success) {
-               setEmailStatus('sent');
-               setIsGenerateModalOpen(false);
-               alert(`Email sent successfully to ${recipientEmail}`);
-               setRecipientEmail('');
-            } else {
-               setEmailStatus('idle');
-               alert("Failed to send receipt to Make.com. Please check your internet connection or Webhook URL.");
-            }
-         } catch (error) {
-            console.error("Failed to send receipt:", error);
+         // TODO: Implement email sending via Supabase Edge Function
+         // For now, show a message that this feature will be available soon
+         setTimeout(() => {
             setEmailStatus('idle');
-            alert("An unexpected error occurred.");
-         }
+            alert('📧 Funzionalità email ricevuta in arrivo. Per ora, usa Stampa o WhatsApp.');
+         }, 1000);
       }
    }
 

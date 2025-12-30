@@ -5,7 +5,6 @@ import { useUser } from '../contexts/UserContext';
 import { Logo } from './Logo';
 import { ArrowRight, Mail, Lock, User, Sparkles, ArrowLeft, Send } from 'lucide-react';
 import { APP_CONFIG } from '../config';
-import { registerAdmin } from '../services/integrationService';
 import { resetPassword } from '../services/supabaseClient';
 
 type ViewState = 'login' | 'register' | 'forgot-password';
@@ -54,11 +53,8 @@ export const Login: React.FC = () => {
           setError('Inserisci il tuo nome completo.');
           return;
         }
-        // Register with Supabase or offline mode
+        // Register with Supabase
         await register(name, email, password);
-
-        // Sync to Make.com (New Admin Event)
-        await registerAdmin({ name, email });
 
         setSuccessMsg('Registrazione completata! Controlla la tua email per verificare l\'account.');
         // In Supabase mode, user needs to verify email first

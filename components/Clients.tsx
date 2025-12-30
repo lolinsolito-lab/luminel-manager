@@ -3,7 +3,6 @@ import React, { useState, useRef } from 'react';
 import { Search, Plus, Star, ArrowLeft, Mail, Phone, Calendar, Target, PenTool, CheckCircle2, FileText, Clock, X, UserPlus, TrendingUp, AlertCircle, Sparkles, Gift, Send, LayoutList, Grid, RefreshCw, MessageCircle, Briefcase, MapPin, Instagram, Globe, Cake, Edit2, ChevronRight, Euro, Upload, Paperclip, Music, Video, Repeat, Trash2, Eye, Smartphone, Camera, Loader2 } from 'lucide-react';
 import { Client, SessionStatus, ClientTask, ClientDocument, ClientGoal } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { syncClient, triggerFullSync, sendPromo, syncSession, syncTransaction, syncTask, fetchClientsFromSheets, syncBookingBatch } from '../services/integrationService';
 import { validateEmail, validatePhone } from '../utils/validation';
 import { useLanguage } from '../contexts/LanguageContext';
 import { usePrograms } from '../contexts/ProgramContext';
@@ -198,45 +197,9 @@ export const Clients: React.FC = () => {
                     }
                 }
 
-                // Fallback to Google Sheets
-                console.log('[Lumina] 📞 Loading clients from Google Sheets (fallback)...');
-                const sheetsClients = await fetchClientsFromSheets();
-
-                if (sheetsClients.length > 0) {
-                    const mappedClients = sheetsClients.map((row: any) => {
-                        const getValue = (key: string, index: string) => {
-                            return row[key] !== undefined ? row[key] : row[index];
-                        };
-
-                        return {
-                            id: getValue('id', '0') || String(Math.random()),
-                            firstName: getValue('firstName', '1') || '',
-                            lastName: getValue('lastName', '2') || '',
-                            email: getValue('email', '3') || '',
-                            phone: getValue('phone', '4') || '',
-                            profession: getValue('profession', '5') || '',
-                            birthday: getValue('birthday', '6') || '',
-                            address: getValue('address', '7') || '',
-                            instagram: getValue('instagram', '8') || '',
-                            source: getValue('source', '9') || 'Unknown',
-                            lastSession: getValue('lastSession', '10') || '',
-                            loyaltyPoints: Number(getValue('loyaltyPoints', '14')) || 0,
-                            isVIP: String(getValue('isVIP', '15')).toUpperCase() === 'TRUE',
-                            notes: getValue('notes', '16') || '',
-                            avatar: getValue('avatar', '17') || `https://ui-avatars.com/api/?name=${getValue('firstName', '1')}+${getValue('lastName', '2')}&background=random`,
-                            totalSpend: Number(getValue('totalSpend', '12')) || 0,
-                            totalSessions: Number(getValue('totalSessions', '13')) || 0,
-                            sessionNotes: [],
-                            goals: [],
-                            tasks: [],
-                            documents: []
-                        };
-                    });
-                    setClients(mappedClients);
-                    localStorage.setItem('lumina_clients_cache', JSON.stringify(mappedClients));
-                    console.log(`[Lumina] ✅ Loaded ${mappedClients.length} clients from Google Sheets`);
-                } else if (!cachedClients) {
-                    console.warn('⚠️ No clients found');
+                // Note: Google Sheets fallback removed - using Supabase only
+                if (!isSupabaseConfigured()) {
+                    console.log('[Lumina] 💡 Using local cache only - Supabase not configured');
                 }
             } catch (error) {
                 console.error('[Lumina] ❌ Error loading clients:', error);
@@ -454,10 +417,7 @@ export const Clients: React.FC = () => {
                 setClients(newClientsList);
                 localStorage.setItem('lumina_clients_cache', JSON.stringify(newClientsList));
                 setIsModalOpen(false);
-
-                // Sync to Make.com
-                await syncClient(updatedClient);
-                console.log('[Lumina] ✅ Client synced to Make.com');
+                console.log('[Lumina] 💾 Client saved locally');
             }
         } catch (error) {
             console.error('[Lumina] ❌ Failed to save client:', error);
@@ -769,34 +729,10 @@ export const Clients: React.FC = () => {
                 setIsBookingModalOpen(false);
                 alert("✅ Sessione confermata e salvata! Stats + Finanza aggiornati.");
             } else {
-                // Fallback to Make.com batch booking
-                console.log('[Clients] 🚀 Booking session via Make.com batch API...');
-
-                await syncBookingBatch({
-                    session: {
-                        ...sessionPayload,
-                        programId: program.id
-                    },
-                    transaction: bookingData.createInvoice ? {
-                        type: 'Income',
-                        amount: program.price,
-                        category: program.category,
-                        description: `${program.title} - ${updatedClient.firstName} ${updatedClient.lastName}`,
-                        date: bookingData.date,
-                        paymentMethod: 'Credit Card'
-                    } : undefined,
-                    clientUpdate: {
-                        id: updatedClient.id,
-                        totalSessions: updatedClient.totalSessions,
-                        totalSpend: updatedClient.totalSpend,
-                        loyaltyPoints: updatedClient.loyaltyPoints,
-                        lastSession: updatedClient.lastSession
-                    }
-                });
-
-                console.log('[Clients] ✅ Booking complete via Make.com!');
+                // Save locally only without Supabase
+                console.log('[Clients] 💾 Saved locally - Supabase not configured');
                 setIsBookingModalOpen(false);
-                alert("✅ Session confirmed! Calendar invite sent, Invoice created, and Client Stats updated!");
+                alert("✅ Sessione salvata localmente!");
             }
         } catch (error) {
             console.error('[Clients] ❌ Booking failed:', error);
