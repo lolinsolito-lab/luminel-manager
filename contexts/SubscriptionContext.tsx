@@ -36,7 +36,7 @@ const PLAN_DEFINITIONS: Record<SubscriptionTier, {
     free: {
         displayName: 'Free Trial',
         features: ['dashboard', 'calendar', 'crm_basic'],
-        limits: { maxUsers: 1, maxClients: 10, maxSessionsPerMonth: 20, maxLocations: 1 }
+        limits: { maxUsers: 1, maxClients: 5, maxSessionsPerMonth: 10, maxLocations: 1 }
     },
     starter: {
         displayName: 'Starter',
