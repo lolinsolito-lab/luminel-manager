@@ -39,8 +39,10 @@ const ScrollToTop: React.FC = () => {
 };
 
 // Handle Supabase auth state changes (password recovery, etc.)
+// Only navigates if THIS tab has the recovery tokens in URL
 const AuthRedirectHandler: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Import supabase dynamically to avoid circular deps
@@ -48,13 +50,23 @@ const AuthRedirectHandler: React.FC = () => {
       // Listen for auth state changes (works cleanly with BrowserRouter)
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
         if (event === 'PASSWORD_RECOVERY') {
-          navigate('/reset-password');
+          // Only redirect if THIS tab has recovery tokens in URL
+          // This prevents ALL open tabs from redirecting when one receives recovery link
+          const hash = window.location.hash;
+          const hasRecoveryTokens = hash.includes('access_token') && hash.includes('type=recovery');
+
+          // Also redirect if already on reset-password page (tokens already consumed)
+          const isOnResetPage = location.pathname === '/reset-password';
+
+          if (hasRecoveryTokens || isOnResetPage) {
+            navigate('/reset-password');
+          }
         }
       });
 
       return () => subscription.unsubscribe();
     });
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   return null;
 };
