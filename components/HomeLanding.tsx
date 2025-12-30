@@ -50,6 +50,15 @@ export const HomeLanding: React.FC = () => {
     const [activeVertical, setActiveVertical] = useState(VERTICALS[0]);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    // Smooth scroll helper
+    const scrollToSection = (sectionId: string) => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        setMobileMenuOpen(false);
+    };
+
     return (
         <div className="min-h-screen bg-[#FAF8F5] text-stone-900 overflow-x-hidden">
             {/* Header / Nav - Champagne Edition */}
@@ -65,9 +74,9 @@ export const HomeLanding: React.FC = () => {
                     </div>
 
                     <div className="hidden md:flex items-center gap-10 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8B8178]">
-                        <a href="#manifesto" className="hover:text-[#3D3D3D] transition-colors">Manifesto</a>
-                        <a href="#soluzioni" className="hover:text-[#3D3D3D] transition-colors">Soluzioni</a>
-                        <a href="#founder" className="hover:text-[#3D3D3D] transition-colors">Founder</a>
+                        <button onClick={() => scrollToSection('manifesto')} className="hover:text-[#3D3D3D] transition-colors">Manifesto</button>
+                        <button onClick={() => scrollToSection('soluzioni')} className="hover:text-[#3D3D3D] transition-colors">Soluzioni</button>
+                        <button onClick={() => scrollToSection('founder')} className="hover:text-[#3D3D3D] transition-colors">Founder</button>
                     </div>
 
                     <div className="hidden md:flex items-center gap-4">
@@ -101,8 +110,9 @@ export const HomeLanding: React.FC = () => {
                             className="md:hidden bg-[#FAF8F5] border-t border-[#E8E4DF]"
                         >
                             <div className="px-6 py-8 space-y-5">
-                                <a href="#manifesto" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-serif text-[#3D3D3D]">Manifesto</a>
-                                <a href="#soluzioni" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-serif text-[#3D3D3D]">Soluzioni</a>
+                                <button onClick={() => scrollToSection('manifesto')} className="block text-lg font-serif text-[#3D3D3D] text-left w-full">Manifesto</button>
+                                <button onClick={() => scrollToSection('soluzioni')} className="block text-lg font-serif text-[#3D3D3D] text-left w-full">Soluzioni</button>
+                                <button onClick={() => scrollToSection('founder')} className="block text-lg font-serif text-[#3D3D3D] text-left w-full">Founder</button>
                                 <div className="pt-5 border-t border-[#E8E4DF] space-y-3">
                                     <Link to="/login" className="block w-full py-3 text-center font-medium text-[#5C5549] border border-[#D4CFC7] rounded-xl">Accedi</Link>
                                     <Link to="/founder" className="block w-full py-3 text-center font-semibold text-[#F5F0E8] bg-[#3D3D3D] rounded-xl">Inizia Ora</Link>
