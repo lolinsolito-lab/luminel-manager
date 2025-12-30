@@ -129,7 +129,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="flex flex-col h-full">
           {/* Logo Area */}
           <div className="p-8 pb-4 pl-6 flex justify-between items-center">
-            <Logo logoUrl={businessSettings.logoUrl} />
+            <Logo logoUrl={businessSettings.logoUrl} businessName={businessSettings.name} />
             {/* Close button for mobile inside the drawer */}
             <button
               onClick={() => setIsSidebarOpen(false)}

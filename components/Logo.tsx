@@ -7,19 +7,22 @@ interface LogoProps {
   variant?: 'light' | 'dark';
   layout?: 'horizontal' | 'vertical';
   logoUrl?: string;
+  businessName?: string;
 }
 
 export const Logo: React.FC<LogoProps> = ({
   className = "",
   variant = 'dark',
   layout = 'horizontal',
-  logoUrl
+  logoUrl,
+  businessName
 }) => {
   const textColor = variant === 'dark' ? 'text-stone-900' : 'text-white';
   const taglineColor = variant === 'dark' ? 'text-stone-400' : 'text-stone-300';
   const borderColor = variant === 'dark' ? 'border-gold-300' : 'border-gold-400';
 
   const isVertical = layout === 'vertical';
+  const displayTitle = businessName || APP_CONFIG.appName;
 
   return (
     <div className={`flex items-center gap-3 ${isVertical ? 'flex-col text-center' : 'flex-row'} ${className}`}>
@@ -53,7 +56,7 @@ export const Logo: React.FC<LogoProps> = ({
       */}
       <div className={`flex flex-col justify-center ${isVertical ? 'items-center' : ''}`}>
         <h1 className={`font-serif text-2xl font-bold tracking-tight leading-none ${textColor}`}>
-          {APP_CONFIG.appName}<span className="text-gold-500">.</span>
+          {displayTitle}<span className="text-gold-500">.</span>
         </h1>
         <span className={`text-[8px] uppercase tracking-[0.15em] font-medium leading-none mt-1.5 ${taglineColor}`}>
           {APP_CONFIG.tagline}
