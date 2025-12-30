@@ -25,6 +25,9 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { APP_CONFIG } from './config';
 
+// Admin email - only this user can access GOD Mode
+const ADMIN_EMAIL = 'jaramichael@hotmail.com';
+
 // Protected Route Wrapper with Splash Screen
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
   const { isAuthenticated } = useUser();
@@ -42,6 +45,19 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
   }
 
   // Render main app content
+  return <>{children}</>;
+};
+
+// Admin-only Route Protection
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useUser();
+
+  // Check if user email matches admin email
+  if (user?.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    // Redirect non-admins to dashboard
+    return <Navigate to="/" replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -80,7 +96,7 @@ const App: React.FC = () => {
                             <Route path="/resources" element={<Library />} />
                             <Route path="/analytics" element={<Analytics />} />
                             <Route path="/settings" element={<Settings />} />
-                            <Route path="/admin" element={<AdminDashboard />} />
+                            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                             <Route path="*" element={<Navigate to="/" replace />} />
                           </Routes>
                           <AIAssistant />
