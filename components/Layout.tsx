@@ -141,7 +141,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 space-y-fib-5 mt-fib-21 overflow-y-auto no-scrollbar">
-            <SidebarItem to="/" icon={LayoutDashboard} label={t('nav.overview')} onClick={closeSidebar} />
+            <SidebarItem to="/dashboard" icon={LayoutDashboard} label={t('nav.overview')} onClick={closeSidebar} />
             <SidebarItem to="/calendar" icon={Calendar} label={t('nav.sessions')} onClick={closeSidebar} />
             <SidebarItem to="/clients" icon={Users} label={t('nav.community')} onClick={closeSidebar} />
             <SidebarItem to="/team" icon={Briefcase} label={t('nav.team')} onClick={closeSidebar} />
