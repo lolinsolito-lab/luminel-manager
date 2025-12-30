@@ -661,21 +661,24 @@ export const Dashboard: React.FC = () => {
                     {task.completed && <Plus className="w-3 h-3 text-white transform rotate-45" />}
                   </button>
                   <span className={`text-sm flex-1 ${task.completed ? 'text-stone-300 line-through' : 'text-stone-700'}`}>
-                    {task.text}
+                    {task.title}
                   </span>
                   {/* Priority Badge */}
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${task.priority === 'urgente'
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${task.priority === 'urgent'
                     ? 'bg-red-100 text-red-600 border border-red-200'
-                    : task.priority === 'vendite'
+                    : task.priority === 'low'
                       ? 'bg-emerald-100 text-emerald-600 border border-emerald-200'
-                      : task.type === 'FollowUp'
+                      : task.category === 'follow_up'
                         ? 'bg-blue-100 text-blue-600 border border-blue-200'
-                        : 'bg-stone-100 text-stone-500 border border-stone-200'
+                        : task.category === 'sales'
+                          ? 'bg-amber-100 text-amber-600 border border-amber-200'
+                          : 'bg-stone-100 text-stone-500 border border-stone-200'
                     }`}>
-                    {task.priority === 'urgente' ? '🔴 Urgente' :
-                      task.priority === 'vendite' ? '🟢 Vendite' :
-                        task.type === 'FollowUp' ? '🔵 Follow-up' :
-                          'Admin'}
+                    {task.priority === 'urgent' ? '🔴 Urgente' :
+                      task.priority === 'low' ? '🟢 Low' :
+                        task.category === 'follow_up' ? '🔵 Follow-up' :
+                          task.category === 'sales' ? '💰 Vendite' :
+                            'Admin'}
                   </span>
                   <motion.button
                     whileHover={{ scale: 1.1, color: '#ef4444' }}
