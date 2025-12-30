@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { Clients } from './components/Clients';
@@ -38,22 +38,14 @@ const ScrollToTop: React.FC = () => {
   return null;
 };
 
-// Handle Supabase auth redirects (especially password recovery)
+// Handle Supabase auth state changes (password recovery, etc.)
 const AuthRedirectHandler: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     // Import supabase dynamically to avoid circular deps
     import('./services/supabaseClient').then(({ supabase }) => {
-      // Check if URL contains recovery tokens (Supabase puts them in hash)
-      const hash = window.location.hash;
-      if (hash.includes('access_token') && hash.includes('type=recovery')) {
-        // This is a password recovery link, redirect to reset page
-        navigate('/reset-password');
-        return;
-      }
-
-      // Also listen for auth state changes
+      // Listen for auth state changes (works cleanly with BrowserRouter)
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
         if (event === 'PASSWORD_RECOVERY') {
           navigate('/reset-password');
@@ -113,7 +105,7 @@ const App: React.FC = () => {
           <LanguageProvider>
             <UIProvider>
               <SubscriptionProvider>
-                <HashRouter>
+                <BrowserRouter>
                   <ScrollToTop />
                   <AuthRedirectHandler />
                   <Routes>
@@ -147,7 +139,7 @@ const App: React.FC = () => {
                       </ProtectedRoute>
                     } />
                   </Routes>
-                </HashRouter>
+                </BrowserRouter>
               </SubscriptionProvider>
             </UIProvider>
           </LanguageProvider>
