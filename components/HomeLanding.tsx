@@ -4,7 +4,7 @@ import {
     Crown, Sparkles, ArrowRight, Shield, Rocket, Heart,
     Users, Building2, Zap, Star, ChevronRight, MessageCircle,
     Check, Play, Calendar, Table, Clock, Menu, X, Coffee,
-    AlertTriangle, TrendingDown, Briefcase, Quote, ChevronDown
+    AlertTriangle, TrendingDown, Briefcase, Quote, ChevronDown, Gift
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -582,6 +582,72 @@ export const HomeLanding: React.FC = () => {
             </section>
 
             {/* ═══════════════════════════════════════════════════════════════════════
+                SECTION 4.5: PRODUCT VISUAL - Dashboard Screenshot
+            ═══════════════════════════════════════════════════════════════════════ */}
+            <section className="py-20 md:py-28 px-4 md:px-8 bg-white">
+                <div className="max-w-6xl mx-auto">
+                    {/* Section Title */}
+                    <div className="text-center mb-12">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C9A962] mb-4">Product Preview</p>
+                        <h2 className="text-3xl md:text-4xl font-serif text-stone-900">
+                            Ecco Cosa Vedi <span className="italic text-[#C9A962]">Domani Mattina</span>
+                        </h2>
+                    </div>
+
+                    {/* Dashboard Screenshot */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="relative"
+                    >
+                        {/* Browser Frame */}
+                        <div className="bg-[#1A1A1A] rounded-t-2xl p-3 flex items-center gap-2">
+                            <div className="flex gap-1.5">
+                                <div className="w-3 h-3 rounded-full bg-red-500" />
+                                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                                <div className="w-3 h-3 rounded-full bg-green-500" />
+                            </div>
+                            <div className="flex-1 flex justify-center">
+                                <div className="bg-stone-800 rounded-lg px-4 py-1 text-stone-400 text-xs font-mono">
+                                    luminel-manager.vercel.app/dashboard
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Screenshot */}
+                        <div className="bg-gradient-to-br from-[#1c1917] to-[#292524] rounded-b-2xl overflow-hidden shadow-2xl border border-stone-800">
+                            <img
+                                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000"
+                                className="w-full h-auto opacity-90"
+                                alt="Luminel Dashboard Preview"
+                            />
+                            {/* Overlay Stats */}
+                            <div className="absolute bottom-6 left-6 right-6 flex flex-wrap gap-3 md:gap-6">
+                                <div className="bg-[#1A1A1A]/90 backdrop-blur-sm rounded-xl px-4 py-2 border border-[#C9A962]/30">
+                                    <p className="text-[#C9A962] font-bold text-xl">€12,340</p>
+                                    <p className="text-stone-400 text-[10px] uppercase tracking-wider">Revenue Mese</p>
+                                </div>
+                                <div className="bg-[#1A1A1A]/90 backdrop-blur-sm rounded-xl px-4 py-2 border border-[#C9A962]/30">
+                                    <p className="text-emerald-400 font-bold text-xl">47</p>
+                                    <p className="text-stone-400 text-[10px] uppercase tracking-wider">Clienti Attivi</p>
+                                </div>
+                                <div className="bg-[#1A1A1A]/90 backdrop-blur-sm rounded-xl px-4 py-2 border border-[#C9A962]/30">
+                                    <p className="text-white font-bold text-xl">19min</p>
+                                    <p className="text-stone-400 text-[10px] uppercase tracking-wider">Tempo/Giorno</p>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Caption */}
+                    <p className="text-center text-stone-500 mt-8 text-sm">
+                        Dashboard reale. Zero mockup. Questo è quello che vedrai.
+                    </p>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════════════════
                 SECTION 5: FAILURE - StoryBrand: What Happens If You Don't Act
             ═══════════════════════════════════════════════════════════════════════ */}
             <section className="py-20 md:py-28 px-4 md:px-8 bg-[#1A1A1A] text-white">
@@ -666,6 +732,64 @@ export const HomeLanding: React.FC = () => {
                             </p>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════════════════
+                SECTION 5.5: LEAD MAGNET - Email Capture for Hesitant Visitors
+            ═══════════════════════════════════════════════════════════════════════ */}
+            <section className="py-20 md:py-28 px-4 md:px-8 bg-gradient-to-br from-[#F5F0E8] to-[#E8E0D4]">
+                <div className="max-w-3xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-stone-200 text-center"
+                    >
+                        {/* Icon */}
+                        <div className="w-16 h-16 bg-[#C9A962]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <Gift className="w-8 h-8 text-[#C9A962]" />
+                        </div>
+
+                        {/* Title */}
+                        <h2 className="text-2xl md:text-3xl font-serif text-stone-900 mb-4">
+                            Non Pronto a Decidere?
+                        </h2>
+                        <p className="text-stone-600 mb-8 max-w-lg mx-auto">
+                            Scarica gratis la guida che hanno usato i nostri Founder per passare
+                            da 50 a 180 clienti senza assumere staff.
+                        </p>
+
+                        {/* Lead Magnet Title */}
+                        <div className="bg-stone-50 rounded-2xl p-6 mb-8 border border-stone-100">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#C9A962] mb-2">PDF GRATUITO</p>
+                            <h3 className="text-xl md:text-2xl font-serif font-bold text-stone-900">
+                                "I 7 Sistemi Che Ogni Coach €100K+ <br className="hidden md:block" />
+                                Usa Per Gestire 50+ Clienti"
+                            </h3>
+                            <p className="text-stone-500 text-sm mt-2">24 pagine • Niente fluff • Implementabile oggi</p>
+                        </div>
+
+                        {/* Email Form */}
+                        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
+                            <input
+                                type="email"
+                                placeholder="La tua email migliore"
+                                className="flex-1 px-5 py-4 rounded-xl border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#C9A962]/50 focus:border-[#C9A962]"
+                            />
+                            <button
+                                type="submit"
+                                className="px-8 py-4 bg-[#C9A962] text-[#1A1A1A] rounded-xl font-bold hover:bg-[#D4B572] transition-colors whitespace-nowrap"
+                            >
+                                Scarica →
+                            </button>
+                        </form>
+
+                        {/* Trust Note */}
+                        <p className="text-stone-400 text-xs mt-6">
+                            Zero spam. Solo valore. Puoi disiscriverti in un click.
+                        </p>
+                    </motion.div>
                 </div>
             </section>
 
