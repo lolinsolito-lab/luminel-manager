@@ -5,7 +5,8 @@ import { useUser } from '../contexts/UserContext';
 import { Logo } from './Logo';
 import { ArrowRight, Mail, Lock, User, Sparkles, ArrowLeft, Send } from 'lucide-react';
 import { APP_CONFIG } from '../config';
-import { registerAdmin, requestPasswordReset } from '../services/integrationService';
+import { registerAdmin } from '../services/integrationService';
+import { resetPassword } from '../services/supabaseClient';
 
 type ViewState = 'login' | 'register' | 'forgot-password';
 
@@ -31,9 +32,14 @@ export const Login: React.FC = () => {
         setError('Inserisci la tua email.');
         return;
       }
-      // Sync with Make.com to trigger email automation
-      await requestPasswordReset(email);
-      setSuccessMsg('Se l\'email esiste, riceverai istruzioni per il reset a breve.');
+      try {
+        // Use Supabase to send password reset email via configured SMTP (Resend)
+        await resetPassword(email);
+        setSuccessMsg('Se l\'email esiste, riceverai istruzioni per il reset a breve.');
+      } catch (err: any) {
+        console.error('Password reset error:', err);
+        setSuccessMsg('Se l\'email esiste, riceverai istruzioni per il reset a breve.');
+      }
       return;
     }
 
