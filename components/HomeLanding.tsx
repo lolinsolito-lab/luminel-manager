@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Crown, Sparkles, ArrowRight, Shield, Rocket, Heart,
     Users, Building2, Zap, Star, ChevronRight, MessageCircle,
-    Check, Play, UserCircle, Scissors, HeartPulse, Truck
+    Check, Play, UserCircle, Scissors, HeartPulse, Truck, Quote, Menu, X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -12,26 +12,26 @@ const VERTICALS = [
         id: 'coaching',
         icon: UserCircle,
         title: 'Coach & Mentor',
-        desc: 'Gestisci il tuo roster di talenti con eleganza. Da 1 a 1000 allievi, senza mai perdere il tocco personale.',
-        features: ['Progress Tracker', 'LTV Dashboard', 'AI Coaching Assistant'],
-        image: 'https://images.unsplash.com/photo-1515162305285-0293e4767cc2?auto=format&fit=crop&q=80&w=1000',
+        desc: 'Il tuo percorso verso la maestria, supportato da strumenti che comprendono il valore del tempo.',
+        features: ['Progress Tracker', 'LTV Dashboard', 'AI Assistant'],
+        image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=1000',
         term: 'Sessione'
     },
     {
         id: 'wellness',
         icon: HeartPulse,
         title: 'Operatori Olistici',
-        desc: 'Trasforma il tuo studio in un tempio di efficienza. Focus totale sul trattamento, zero stress gestionale.',
-        features: ['Schede Cliente 360°', 'Consensi Digitali', 'Reminder WhatsApp'],
-        image: 'https://images.unsplash.com/photo-1544161515-436cefb54041?auto=format&fit=crop&q=80&w=1000',
+        desc: 'Lascia che l\'energia fluisca. Noi pensiamo alla gestione, tu al benessere dei tuoi clienti.',
+        features: ['Schede 360°', 'Consensi Digitali', 'Reminder'],
+        image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&q=80&w=1000',
         term: 'Trattamento'
     },
     {
         id: 'beauty',
         icon: Scissors,
         title: 'Parrucchieri & Saloni',
-        desc: 'Il lusso incontra la logistica. Gestisci team, cabine e prodotti con una dashboard da vera Boutique.',
-        features: ['Gestione Cabine', 'Inventory Pro', 'Team Analytics'],
+        desc: 'Dove l\'eleganza incontra l\'efficienza. Il tuo salone merita una gestione all\'altezza.',
+        features: ['Gestione Cabine', 'Inventory', 'Team Analytics'],
         image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1000',
         term: 'Appuntamento'
     },
@@ -39,10 +39,10 @@ const VERTICALS = [
         id: 'logistics',
         icon: Truck,
         title: 'Cooperative & Turni',
-        desc: 'Dominio operativo totale. Gestisci centinaia di operatori e rotte con il sistema Batch Booking.',
-        features: ['Batch Booking (Pro)', 'Multi-Location', 'Resource Planning'],
+        desc: 'Dalla complessità alla semplicità. Gestisci centinaia di operatori con un solo sguardo.',
+        features: ['Batch Booking', 'Multi-Location', 'Planning'],
         image: 'https://images.unsplash.com/photo-1586864387917-f575a62244af?auto=format&fit=crop&q=80&w=1000',
-        term: 'Corsa / Spostamento'
+        term: 'Corsa'
     }
 ];
 
@@ -51,60 +51,61 @@ export const HomeLanding: React.FC = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-white text-stone-900 overflow-x-hidden">
-            {/* Header / Nav */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100">
-                <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 md:w-10 md:h-10 bg-stone-900 rounded-xl flex items-center justify-center">
-                            <Crown className="w-5 h-5 md:w-6 md:h-6 text-amber-400" />
+        <div className="min-h-screen bg-[#FAF8F5] text-stone-900 overflow-x-hidden">
+            {/* Header / Nav - Champagne Edition */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FAF8F5]/90 backdrop-blur-xl border-b border-[#E8E4DF]">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 md:h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#C9A962] to-[#8B7355] rounded-xl flex items-center justify-center shadow-lg shadow-[#C9A962]/20">
+                            <Crown className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-lg md:text-xl font-serif font-bold tracking-tight">Luminel <span className="text-stone-400">Manager</span></span>
+                        <span className="text-xl font-serif font-bold tracking-tight text-[#3D3D3D]">
+                            Luminel <span className="text-[#A89068] font-normal">Manager</span>
+                        </span>
                     </div>
 
-                    <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest text-stone-500">
-                        <a href="#manifesto" className="hover:text-stone-900 transition-colors">Manifesto</a>
-                        <a href="#soluzioni" className="hover:text-stone-900 transition-colors">Soluzioni</a>
-                        <Link to="/founder" className="hover:text-stone-900 transition-colors">Founder Program</Link>
+                    <div className="hidden md:flex items-center gap-10 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8B8178]">
+                        <a href="#manifesto" className="hover:text-[#3D3D3D] transition-colors">Manifesto</a>
+                        <a href="#soluzioni" className="hover:text-[#3D3D3D] transition-colors">Soluzioni</a>
+                        <a href="#founder" className="hover:text-[#3D3D3D] transition-colors">Founder</a>
                     </div>
 
                     <div className="hidden md:flex items-center gap-4">
-                        <Link to="/login" className="px-6 py-2.5 text-sm font-bold text-stone-900 hover:text-stone-600 transition-colors">Log In</Link>
+                        <Link to="/login" className="px-5 py-2 text-sm font-medium text-[#5C5549] hover:text-[#3D3D3D] transition-colors">
+                            Accedi
+                        </Link>
                         <Link
                             to="/founder"
-                            className="px-6 py-2.5 bg-stone-900 text-white rounded-full text-sm font-bold hover:bg-stone-800 transition-all shadow-lg shadow-stone-200"
+                            className="px-6 py-2.5 bg-gradient-to-r from-[#3D3D3D] to-[#1A1A1A] text-[#F5F0E8] rounded-full text-sm font-semibold hover:shadow-xl hover:shadow-stone-300/30 transition-all"
                         >
-                            Inizia l'Impero
+                            Inizia Ora
                         </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5"
+                        className="md:hidden w-10 h-10 flex items-center justify-center text-[#5C5549]"
                     >
-                        <span className={`w-6 h-0.5 bg-stone-900 transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                        <span className={`w-6 h-0.5 bg-stone-900 transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-                        <span className={`w-6 h-0.5 bg-stone-900 transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                        {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </button>
                 </div>
 
-                {/* Mobile Menu Dropdown */}
+                {/* Mobile Menu */}
                 <AnimatePresence>
                     {mobileMenuOpen && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="md:hidden bg-white border-t border-stone-100 overflow-hidden"
+                            className="md:hidden bg-[#FAF8F5] border-t border-[#E8E4DF]"
                         >
-                            <div className="px-6 py-6 space-y-4">
-                                <a href="#manifesto" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-stone-900">Manifesto</a>
-                                <a href="#soluzioni" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-stone-900">Soluzioni</a>
-                                <Link to="/founder" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-amber-600">Founder Program</Link>
-                                <div className="pt-4 border-t border-stone-100 flex flex-col gap-3">
-                                    <Link to="/login" className="py-3 text-center font-bold text-stone-600 border border-stone-200 rounded-xl">Accedi</Link>
-                                    <Link to="/founder" className="py-3 text-center font-bold text-white bg-stone-900 rounded-xl">Inizia l'Impero</Link>
+                            <div className="px-6 py-8 space-y-5">
+                                <a href="#manifesto" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-serif text-[#3D3D3D]">Manifesto</a>
+                                <a href="#soluzioni" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-serif text-[#3D3D3D]">Soluzioni</a>
+                                <div className="pt-5 border-t border-[#E8E4DF] space-y-3">
+                                    <Link to="/login" className="block w-full py-3 text-center font-medium text-[#5C5549] border border-[#D4CFC7] rounded-xl">Accedi</Link>
+                                    <Link to="/founder" className="block w-full py-3 text-center font-semibold text-[#F5F0E8] bg-[#3D3D3D] rounded-xl">Inizia Ora</Link>
                                 </div>
                             </div>
                         </motion.div>
@@ -112,153 +113,174 @@ export const HomeLanding: React.FC = () => {
                 </AnimatePresence>
             </nav>
 
-            {/* HERO: The Manifesto Start */}
-            <section className="pt-40 pb-24 px-6 relative">
-                <div className="max-w-5xl mx-auto text-center relative z-10">
+            {/* HERO: Magazine Editorial Style */}
+            <section className="pt-32 md:pt-40 pb-20 md:pb-32 px-4 md:px-8 relative overflow-hidden">
+                {/* Subtle Background Elements */}
+                <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#C9A962]/10 to-transparent rounded-full blur-[100px]" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#D4CFC7]/30 to-transparent rounded-full blur-[80px]" />
+
+                <div className="max-w-6xl mx-auto text-center relative z-10">
+                    {/* Editorial Badge */}
                     <motion.div
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-full text-xs font-black uppercase tracking-[0.2em] mb-8"
+                        className="inline-flex items-center gap-2 px-5 py-2 bg-[#F5F0E8] border border-[#E8E4DF] rounded-full text-[10px] font-bold uppercase tracking-[0.3em] text-[#A89068] mb-10"
                     >
-                        <Sparkles className="w-4 h-4" />
-                        Il Futuro del Management Elite
+                        <Sparkles className="w-3 h-3" />
+                        Edizione Fondatori • 2025
                     </motion.div>
 
+                    {/* Main Headline - Magazine Style */}
                     <motion.h1
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-8xl font-serif font-bold text-stone-900 mb-8 leading-[1]"
+                        className="text-4xl md:text-7xl lg:text-8xl font-serif text-[#2D2D2D] leading-[0.95] mb-8"
                     >
-                        Il Tuo Impero Merita <br />
-                        <span className="text-stone-400 italic">Uno Strumento Sovrano.</span>
+                        Siamo Qui <br />
+                        <span className="italic text-[#A89068]">Per Te.</span>
                     </motion.h1>
 
+                    {/* Subtitle - Refined */}
                     <motion.p
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-xl text-stone-500 max-w-2xl mx-auto mb-12 leading-relaxed"
+                        className="text-lg md:text-xl text-[#8B8178] max-w-2xl mx-auto mb-14 leading-relaxed font-light"
                     >
-                        Non è solo software. È l'estensione digitale della tua professionalità. Luminel è il pivot su cui ruota il tuo business luxury, dal coaching granulare alle cooperative su larga scala.
+                        Luminel non è un semplice gestionale. È il silenzioso partner che lavora dietro le quinte,
+                        così tu puoi concentrarti su ciò che ami davvero: <em className="text-[#5C5549] not-italic font-medium">i tuoi clienti</em>.
                     </motion.p>
 
+                    {/* CTAs - Refined */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="flex flex-col md:flex-row items-center justify-center gap-6"
+                        className="flex flex-col sm:flex-row items-center justify-center gap-4"
                     >
                         <Link
                             to="/founder"
-                            className="group px-10 py-5 bg-stone-900 text-white rounded-[2rem] text-lg font-bold flex items-center gap-3 hover:bg-black transition-all shadow-2xl shadow-stone-300"
+                            className="group px-8 py-4 bg-gradient-to-r from-[#3D3D3D] to-[#1A1A1A] text-[#F5F0E8] rounded-full text-base font-semibold flex items-center gap-3 hover:shadow-2xl hover:shadow-stone-400/20 transition-all"
                         >
-                            Diventa Founding Member
-                            <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                            Scopri il Programma Founder
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
-                        <button className="flex items-center gap-3 px-8 py-5 border border-stone-200 rounded-[2rem] text-stone-600 font-bold hover:bg-stone-50 transition-all">
-                            <Play className="w-5 h-5 fill-stone-600" />
-                            Guarda il Manifesto
+                        <button className="flex items-center gap-3 px-6 py-4 text-[#5C5549] font-medium hover:text-[#3D3D3D] transition-colors">
+                            <div className="w-10 h-10 rounded-full border border-[#D4CFC7] flex items-center justify-center">
+                                <Play className="w-4 h-4 fill-[#A89068] text-[#A89068]" />
+                            </div>
+                            Guarda il Video
                         </button>
                     </motion.div>
                 </div>
 
-                {/* Floating Elements */}
-                <div className="absolute top-1/2 left-0 w-64 h-64 bg-amber-200/20 rounded-full blur-[100px] -translate-x-1/2" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-violet-200/20 rounded-full blur-[120px] translate-x-1/4" />
+                {/* Decorative Line */}
+                <div className="max-w-6xl mx-auto mt-20 md:mt-32">
+                    <div className="h-px bg-gradient-to-r from-transparent via-[#D4CFC7] to-transparent" />
+                </div>
             </section>
 
-            {/* SEZIONE: Chi Siamo / Storytelling */}
-            <section id="manifesto" className="py-24 bg-stone-50 overflow-hidden">
-                <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-20 items-center">
-                    <div className="relative">
-                        <div className="aspect-[4/5] bg-stone-200 rounded-[3rem] overflow-hidden shadow-2xl">
-                            <img
-                                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=1000"
-                                className="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 transition-all duration-1000"
-                                alt="Founder"
-                            />
+            {/* SEZIONE: Manifesto - Magazine Editorial */}
+            <section id="manifesto" className="py-20 md:py-32 px-4 md:px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+                        {/* Image Column */}
+                        <div className="relative order-2 md:order-1">
+                            <div className="aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl shadow-stone-200/50">
+                                <img
+                                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800"
+                                    className="w-full h-full object-cover"
+                                    alt="Michael Jara, Founder"
+                                />
+                            </div>
+                            {/* Floating Card */}
+                            <div className="absolute -bottom-6 -right-6 md:-right-10 bg-[#FAF8F5] rounded-2xl p-6 shadow-xl border border-[#E8E4DF]">
+                                <p className="text-3xl font-serif font-bold text-[#C9A962]">12+</p>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B8178]">Anni di Design</p>
+                            </div>
                         </div>
-                        <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-stone-900 rounded-[2rem] p-8 text-white flex flex-col justify-end shadow-2xl">
-                            <p className="text-4xl font-serif font-bold text-amber-400">12+</p>
-                            <p className="text-xs font-black uppercase tracking-widest text-stone-400">Anni di Experience Design</p>
-                        </div>
-                    </div>
 
-                    <div>
-                        <h2 className="text-4xl font-serif font-bold text-stone-900 mb-8 leading-tight">
-                            "Ho creato Luminel perché <br />
-                            ero stanco di strumenti <br />
-                            senza anima."
-                        </h2>
-                        <div className="space-y-6 text-stone-600 leading-relaxed text-lg">
-                            <p>
-                                Sono Michael, e ho passato l'ultimo decennio a costruire esperienze per brand di lusso e leader olistici. Ho visto troppe menti brillanti soffocare sotto il peso di fogli Excel disordinati e software obsoleti.
-                            </p>
-                            <p>
-                                <strong>Protocollo Sovrano</strong> è nato così: un'esigenza viscerale di riportare l'ordine, l'eleganza e la sovranità nel quotidiano di chi offre valore agli altri.
-                            </p>
-                            <p>
-                                Luminel non è un gestionale. È il luogo dove il tuo tempo acquista valore e ogni tuo cliente riceve l'esperienza premium che merita.
-                            </p>
-                        </div>
-                        <div className="mt-12 flex items-center gap-4">
-                            <div className="w-12 h-0.5 bg-stone-300" />
-                            <p className="text-sm font-black uppercase tracking-widest text-stone-400">Michael Jara, Fondatore</p>
+                        {/* Text Column */}
+                        <div className="order-1 md:order-2">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#A89068] mb-6">Il Manifesto</p>
+                            <h2 className="text-3xl md:text-5xl font-serif text-[#2D2D2D] leading-tight mb-8">
+                                "Ho creato Luminel perché
+                                <span className="block italic text-[#A89068]">ero stanco di software senz'anima."</span>
+                            </h2>
+
+                            <div className="space-y-6 text-[#8B8178] leading-relaxed">
+                                <p>
+                                    Sono Michael. Ho passato l'ultimo decennio a creare esperienze digitali per brand di lusso.
+                                    Ho visto menti brillanti soffocare sotto Excel infiniti e software che sembrano odiare i loro utenti.
+                                </p>
+                                <p>
+                                    <strong className="text-[#5C5549]">Luminel è nato da un'esigenza viscerale.</strong> Volevo qualcosa
+                                    che non fosse solo funzionale, ma che ti facesse sentire supportato. Un alleato silenzioso.
+                                </p>
+                                <p className="text-[#5C5549] font-medium italic">
+                                    "Non sei solo un numero. Sei la ragione per cui esistiamo."
+                                </p>
+                            </div>
+
+                            <div className="mt-10 flex items-center gap-4">
+                                <div className="w-12 h-px bg-[#D4CFC7]" />
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-[#A89068]">Michael Jara, Fondatore</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* SEZIONE: Multi-Verticale (IL CAMALEONTE) */}
-            <section id="soluzioni" className="py-24 px-6 bg-white">
+            {/* SEZIONE: Soluzioni Multi-Verticale */}
+            <section id="soluzioni" className="py-20 md:py-32 px-4 md:px-8 bg-[#FAF8F5]">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-serif font-bold mb-4">Un Prodotto, <span className="text-stone-400 italic">Infiniti Mercati.</span></h2>
-                        <p className="text-stone-500 max-w-2xl mx-auto">
-                            Luminel si adatta dinamicamente al tuo settore, cambiando terminologia, KPI e flussi di lavoro in un clic.
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#A89068] mb-4">Per Ogni Professione</p>
+                        <h2 className="text-3xl md:text-5xl font-serif text-[#2D2D2D] mb-4">
+                            Un Solo Strumento, <span className="italic text-[#A89068]">Infinite Possibilità.</span>
+                        </h2>
+                        <p className="text-[#8B8178] max-w-xl mx-auto">
+                            Luminel si adatta al tuo mondo. Cambia terminologia, metriche e flussi in base al tuo settore.
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        {/* LEFT: Navigazione Verticali */}
-                        <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+                        {/* Vertical Tabs */}
+                        <div className="space-y-3">
                             {VERTICALS.map((v) => (
                                 <button
                                     key={v.id}
                                     onClick={() => setActiveVertical(v)}
-                                    className={`w-full text-left p-8 rounded-[2rem] transition-all flex items-center gap-6 group ${activeVertical.id === v.id
-                                        ? 'bg-stone-900 text-white shadow-2xl scale-[1.02]'
-                                        : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                                    className={`w-full text-left p-6 rounded-2xl transition-all flex items-center gap-5 group ${activeVertical.id === v.id
+                                        ? 'bg-[#3D3D3D] text-[#F5F0E8] shadow-xl'
+                                        : 'bg-white text-[#5C5549] hover:bg-[#F5F0E8] border border-[#E8E4DF]'
                                         }`}
                                 >
-                                    <div className={`p-4 rounded-2xl transition-colors ${activeVertical.id === v.id ? 'bg-white/10' : 'bg-white shadow-sm'
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${activeVertical.id === v.id ? 'bg-[#C9A962]/20' : 'bg-[#FAF8F5]'
                                         }`}>
-                                        <v.icon className={`w-8 h-8 ${activeVertical.id === v.id ? 'text-amber-400' : 'text-stone-800'
-                                            }`} />
+                                        <v.icon className={`w-6 h-6 ${activeVertical.id === v.id ? 'text-[#C9A962]' : 'text-[#A89068]'}`} />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-xl font-bold mb-1">{v.title}</h3>
-                                        <p className={`text-sm leading-relaxed ${activeVertical.id === v.id ? 'text-stone-400' : 'text-stone-500'
-                                            }`}>
-                                            Terminologia: <span className="font-bold underline italic">"{v.term}"</span>
+                                        <h3 className="text-lg font-serif font-semibold">{v.title}</h3>
+                                        <p className={`text-sm ${activeVertical.id === v.id ? 'text-[#A89068]/80' : 'text-[#8B8178]'}`}>
+                                            Terminologia: <span className="italic">"{v.term}"</span>
                                         </p>
                                     </div>
-                                    <ChevronRight className={`w-6 h-6 transition-transform ${activeVertical.id === v.id ? 'translate-x-2 text-amber-400' : 'text-stone-300 opacity-0 group-hover:opacity-100'
-                                        }`} />
+                                    <ChevronRight className={`w-5 h-5 transition-transform ${activeVertical.id === v.id ? 'translate-x-1 text-[#C9A962]' : 'text-[#D4CFC7]'}`} />
                                 </button>
                             ))}
                         </div>
 
-                        {/* RIGHT: Visual Showcase */}
+                        {/* Visual Card */}
                         <div className="relative">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={activeVertical.id}
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="bg-stone-50 rounded-[3rem] overflow-hidden shadow-2xl border border-stone-100"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    className="bg-white rounded-[2rem] overflow-hidden shadow-xl border border-[#E8E4DF]"
                                 >
                                     <div className="aspect-video relative">
                                         <img
@@ -266,23 +288,19 @@ export const HomeLanding: React.FC = () => {
                                             className="w-full h-full object-cover"
                                             alt={activeVertical.title}
                                         />
-                                        <div className="absolute inset-0 bg-stone-900/20 backdrop-blur-[2px]" />
-                                        <div className="absolute top-6 right-6 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-stone-800 flex items-center gap-2">
-                                                <Zap className="w-3 h-3 text-amber-500" /> Pre-Configurato
-                                            </p>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-[#2D2D2D]/60 to-transparent" />
+                                        <div className="absolute bottom-6 left-6 right-6">
+                                            <h4 className="text-2xl font-serif font-bold text-white mb-2">{activeVertical.title}</h4>
+                                            <p className="text-white/80 text-sm leading-relaxed">{activeVertical.desc}</p>
                                         </div>
                                     </div>
-                                    <div className="p-10">
-                                        <h4 className="text-2xl font-serif font-bold text-stone-900 mb-4">{activeVertical.title}</h4>
-                                        <p className="text-stone-500 mb-8 leading-relaxed">
-                                            {activeVertical.desc}
-                                        </p>
-                                        <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-8">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#A89068] mb-4">Funzionalità Incluse</p>
+                                        <div className="grid grid-cols-2 gap-3">
                                             {activeVertical.features.map(f => (
-                                                <div key={f} className="flex items-center gap-2 text-sm font-bold text-stone-700">
-                                                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
-                                                        <Check className="w-3 h-3 text-emerald-600" />
+                                                <div key={f} className="flex items-center gap-2 text-sm text-[#5C5549]">
+                                                    <div className="w-5 h-5 rounded-full bg-[#C9A962]/10 flex items-center justify-center">
+                                                        <Check className="w-3 h-3 text-[#C9A962]" />
                                                     </div>
                                                     {f}
                                                 </div>
@@ -292,8 +310,8 @@ export const HomeLanding: React.FC = () => {
                                 </motion.div>
                             </AnimatePresence>
 
-                            {/* Decorative Badge */}
-                            <div className="absolute -bottom-6 -left-6 bg-amber-400 text-stone-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl rotate-[-5deg]">
+                            {/* Badge */}
+                            <div className="absolute -bottom-4 left-6 bg-[#C9A962] text-[#2D2D2D] px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">
                                 White Label Ready
                             </div>
                         </div>
@@ -301,66 +319,83 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* SEZIONE: Trust / Stats */}
-            <section className="py-24 bg-stone-900 text-white relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-30" />
-                <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="grid md:grid-cols-4 gap-12 text-center">
-                        <div className="space-y-4">
-                            <h3 className="text-5xl font-serif font-bold text-amber-400">847+</h3>
-                            <p className="text-xs font-black uppercase tracking-[0.3em] text-stone-400">Professionisti Elite</p>
+            {/* SEZIONE: Trust Stats - Champagne Dark */}
+            <section id="founder" className="py-20 md:py-24 bg-[#2D2D2D] text-[#F5F0E8] relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+                <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
+                    <div className="text-center mb-12">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C9A962] mb-4">Numeri Che Parlano</p>
+                        <h2 className="text-3xl md:text-4xl font-serif">
+                            La Community Cresce, <span className="italic text-[#C9A962]">Insieme.</span>
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
+                        <div>
+                            <h3 className="text-4xl md:text-5xl font-serif font-bold text-[#C9A962]">847+</h3>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B8178] mt-2">Professionisti</p>
                         </div>
-                        <div className="space-y-4">
-                            <h3 className="text-5xl font-serif font-bold text-amber-400">€2.4M</h3>
-                            <p className="text-xs font-black uppercase tracking-[0.3em] text-stone-400">Volume Gestito</p>
+                        <div>
+                            <h3 className="text-4xl md:text-5xl font-serif font-bold text-[#C9A962]">€2.4M</h3>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B8178] mt-2">Volume Gestito</p>
                         </div>
-                        <div className="space-y-4">
-                            <h3 className="text-5xl font-serif font-bold text-amber-400">25</h3>
-                            <p className="text-xs font-black uppercase tracking-[0.3em] text-stone-400">Posti Founder Totali</p>
+                        <div>
+                            <h3 className="text-4xl md:text-5xl font-serif font-bold text-[#C9A962]">25</h3>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B8178] mt-2">Posti Founder</p>
                         </div>
-                        <div className="space-y-4">
-                            <h3 className="text-5xl font-serif font-bold text-amber-400">44%</h3>
-                            <p className="text-xs font-black uppercase tracking-[0.3em] text-stone-400">Sconto Founder Life-time</p>
+                        <div>
+                            <h3 className="text-4xl md:text-5xl font-serif font-bold text-[#C9A962]">44%</h3>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B8178] mt-2">Sconto Lifetime</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* CTA FINALE */}
-            <section className="py-24 px-6">
-                <div className="max-w-5xl mx-auto bg-stone-50 rounded-[4rem] p-12 md:p-20 text-center relative overflow-hidden border border-stone-100">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600" />
+            {/* CTA FINALE - Refined */}
+            <section className="py-20 md:py-32 px-4 md:px-8 bg-[#FAF8F5]">
+                <div className="max-w-4xl mx-auto bg-white rounded-[3rem] p-10 md:p-16 text-center shadow-xl border border-[#E8E4DF] relative overflow-hidden">
+                    {/* Gold Top Line */}
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#C9A962] to-transparent" />
 
-                    <Crown className="w-16 h-16 text-amber-400 mx-auto mb-8 animate-bounce" />
-                    <h2 className="text-4xl md:text-6xl font-serif font-bold text-stone-900 mb-8 leading-tight">
-                        Sei pronto a reclamare <br />
-                        la tua sovranità?
+                    <div className="w-16 h-16 bg-gradient-to-br from-[#C9A962] to-[#8B7355] rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-[#C9A962]/20">
+                        <Crown className="w-8 h-8 text-white" />
+                    </div>
+
+                    <h2 className="text-3xl md:text-5xl font-serif text-[#2D2D2D] mb-6 leading-tight">
+                        Pronto a Reclamare <br />
+                        <span className="italic text-[#A89068]">la Tua Sovranità?</span>
                     </h2>
-                    <p className="text-xl text-stone-500 mb-12 max-w-2xl mx-auto">
-                        Le iscrizioni al programma Founder chiudono al raggiungimento del 25° membro. Blocca ora il tuo prezzo e la tua eredità digitale.
+                    <p className="text-[#8B8178] mb-10 max-w-lg mx-auto leading-relaxed">
+                        Le iscrizioni al programma Founder chiudono al raggiungimento del 25° membro.
+                        Blocca ora il tuo prezzo e la tua eredità digitale.
                     </p>
 
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             to="/founder"
-                            className="bg-stone-900 text-white px-12 py-6 rounded-[2rem] text-xl font-bold hover:bg-black hover:scale-105 transition-all shadow-2xl"
+                            className="px-10 py-4 bg-gradient-to-r from-[#3D3D3D] to-[#1A1A1A] text-[#F5F0E8] rounded-full text-lg font-semibold hover:shadow-2xl transition-all"
                         >
                             Assicurati il Posto Founder
                         </Link>
                         <Link
                             to="/login"
-                            className="text-stone-900 font-bold hover:text-amber-600 transition-colors"
+                            className="text-[#5C5549] font-medium hover:text-[#3D3D3D] transition-colors"
                         >
-                            Accedi alla tua Dashboard
+                            Accedi alla Dashboard
                         </Link>
                     </div>
                 </div>
             </section>
 
-            {/* Footer Minimal */}
-            <footer className="py-12 border-t border-stone-100 text-center">
-                <div className="max-w-7xl mx-auto px-6">
-                    <p className="text-stone-400 text-sm font-medium">© 2025 Luminel Manager. Crafted for Empires by Michael Jara.</p>
+            {/* Footer - Minimal Elegance */}
+            <footer className="py-10 border-t border-[#E8E4DF] bg-white">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        <Crown className="w-5 h-5 text-[#C9A962]" />
+                        <span className="font-serif font-bold text-[#3D3D3D]">Luminel</span>
+                    </div>
+                    <p className="text-[11px] text-[#8B8178] uppercase tracking-widest">
+                        © 2025 Luminel Manager • Crafted for Empires • Made in Italia
+                    </p>
                 </div>
             </footer>
         </div>
