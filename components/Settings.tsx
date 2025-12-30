@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
    Building,
    Clock,
@@ -7,17 +7,18 @@ import {
    Save,
    Upload,
    CheckCircle2,
-   Webhook,
    CreditCard,
    Calendar,
    AlertCircle,
    Loader2,
    Cloud,
-   CloudOff
+   CloudOff,
+   Image as ImageIcon
 } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as settingsService from '../services/settingsService';
+import * as storageService from '../services/storageService';
 import { isSupabaseConfigured } from '../services/supabaseClient';
 
 export const Settings: React.FC = () => {
@@ -61,6 +62,11 @@ export const Settings: React.FC = () => {
       maxConcurrentAppointments: 1,
       cabinNames: ['Cabina Principale']
    });
+
+   // Logo Upload
+   const [logoUrl, setLogoUrl] = useState<string>('');
+   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+   const logoInputRef = useRef<HTMLInputElement>(null);
 
    // --- LOAD FROM SUPABASE ---
    useEffect(() => {
@@ -133,7 +139,35 @@ export const Settings: React.FC = () => {
       setSchedule(newSchedule);
    };
 
-   const isWebhookSet = integrations.makeWebhook && integrations.makeWebhook.trim().length > 10;
+   // Handle logo upload
+   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      setIsUploadingLogo(true);
+      try {
+         const url = await storageService.uploadLogo(file);
+         setLogoUrl(url);
+         // Save logo URL to settings
+         await settingsService.saveSettings({
+            ...general,
+            logoUrl: url,
+            schedule: schedule,
+            makeWebhook: '',
+            googleCalendarEnabled: integrations.googleCalendar,
+            stripeEnabled: integrations.stripe,
+            zoomEnabled: integrations.zoom,
+            maxConcurrentAppointments: capacity.maxConcurrentAppointments,
+            cabinNames: capacity.cabinNames
+         });
+         console.log('[Settings] ☁️ Logo uploaded and saved');
+      } catch (error: any) {
+         console.error('[Settings] ❌ Logo upload failed:', error);
+         alert(error.message || 'Upload fallito. Riprova.');
+      } finally {
+         setIsUploadingLogo(false);
+      }
+   };
 
    return (
       <div className="w-full max-w-[1600px] space-y-8 pb-10">
@@ -196,13 +230,44 @@ export const Settings: React.FC = () => {
                      <div className="space-y-6">
                         {/* Logo Upload */}
                         <div className="flex items-center gap-6">
-                           <div className="w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center border-2 border-dashed border-stone-300">
-                              <Upload className="w-8 h-8 text-stone-400" />
+                           <div
+                              onClick={() => logoInputRef.current?.click()}
+                              className="w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center border-2 border-dashed border-stone-300 cursor-pointer hover:border-gold-400 hover:bg-gold-50/30 transition-all overflow-hidden relative group"
+                           >
+                              {isUploadingLogo ? (
+                                 <Loader2 className="w-8 h-8 text-gold-500 animate-spin" />
+                              ) : logoUrl ? (
+                                 <>
+                                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                       <Upload className="w-6 h-6 text-white" />
+                                    </div>
+                                 </>
+                              ) : (
+                                 <Upload className="w-8 h-8 text-stone-400 group-hover:text-gold-500 transition-colors" />
+                              )}
                            </div>
                            <div>
-                              <button className="text-sm font-bold text-gold-600 hover:underline mb-1">Upload New Logo</button>
-                              <p className="text-xs text-stone-400">Recommended: 400x400px PNG.</p>
+                              <button
+                                 onClick={() => logoInputRef.current?.click()}
+                                 className="text-sm font-bold text-gold-600 hover:underline mb-1"
+                              >
+                                 {logoUrl ? 'Cambia Logo' : 'Carica Logo'}
+                              </button>
+                              <p className="text-xs text-stone-400">Consigliato: 400x400px PNG. Max 2MB.</p>
+                              {logoUrl && (
+                                 <p className="text-[10px] text-emerald-600 flex items-center gap-1 mt-1">
+                                    <Cloud className="w-3 h-3" /> Salvato su cloud
+                                 </p>
+                              )}
                            </div>
+                           <input
+                              ref={logoInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                           />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -378,47 +443,45 @@ export const Settings: React.FC = () => {
                {activeTab === 'Integrations' && (
                   <div className="space-y-6 animate-in fade-in duration-300">
 
-                     {/* Make.com Section */}
+                     {/* Supabase Cloud Status */}
                      <div className="bg-white p-8 rounded-2xl border border-stone-100 shadow-sm relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-5">
-                           <Webhook className="w-32 h-32" />
+                           <Cloud className="w-32 h-32" />
                         </div>
                         <div className="relative z-10">
                            <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-3">
-                                 <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                                    <Webhook className="w-6 h-6" />
+                                 <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                                    <Cloud className="w-6 h-6" />
                                  </div>
-                                 <h2 className="font-serif font-bold text-xl text-stone-800">Make.com (Integromat)</h2>
+                                 <h2 className="font-serif font-bold text-xl text-stone-800">Supabase Cloud</h2>
                               </div>
-                              {isWebhookSet ? (
+                              {isCloudConnected ? (
                                  <span className="text-xs font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1">
-                                    <CheckCircle2 className="w-3 h-3" /> Connected
+                                    <CheckCircle2 className="w-3 h-3" /> Connesso
                                  </span>
                               ) : (
-                                 <span className="text-xs font-bold bg-stone-100 text-stone-500 px-3 py-1 rounded-full flex items-center gap-1">
-                                    <AlertCircle className="w-3 h-3" /> Not Configured
+                                 <span className="text-xs font-bold bg-red-100 text-red-600 px-3 py-1 rounded-full flex items-center gap-1">
+                                    <AlertCircle className="w-3 h-3" /> Non Configurato
                                  </span>
                               )}
                            </div>
-                           <p className="text-stone-500 text-sm mb-6 max-w-lg">
-                              Connect {APP_CONFIG.appName} to thousands of apps. We send data to this Webhook URL whenever a client is created, a session is booked, or a resource is sent.
+                           <p className="text-stone-500 text-sm mb-4 max-w-lg">
+                              Tutti i tuoi dati sono sincronizzati automaticamente con Supabase. Database PostgreSQL, autenticazione e storage file inclusi.
                            </p>
-
-                           <div className="space-y-2">
-                              <label className="text-xs font-bold uppercase text-stone-500">Primary Webhook URL</label>
-                              <div className="flex gap-2">
-                                 <input
-                                    value={integrations.makeWebhook}
-                                    onChange={e => setIntegrations({ ...integrations, makeWebhook: e.target.value })}
-                                    className={`flex-1 p-3 bg-stone-50 border rounded-xl outline-none font-mono text-sm ${isWebhookSet ? 'border-purple-200 text-purple-800 bg-purple-50/50' : 'border-stone-200 text-stone-800'}`}
-                                    placeholder="https://hook.make.com/..."
-                                 />
-                                 <button className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200">
-                                    Test
-                                 </button>
+                           <div className="flex gap-4">
+                              <div className="bg-stone-50 p-3 rounded-xl text-center flex-1">
+                                 <p className="text-xs text-stone-400 uppercase font-bold">Database</p>
+                                 <p className="text-emerald-600 font-bold mt-1">✓ PostgreSQL</p>
                               </div>
-                              <p className="text-[10px] text-stone-400">Last synced: Just now</p>
+                              <div className="bg-stone-50 p-3 rounded-xl text-center flex-1">
+                                 <p className="text-xs text-stone-400 uppercase font-bold">Auth</p>
+                                 <p className="text-emerald-600 font-bold mt-1">✓ Supabase Auth</p>
+                              </div>
+                              <div className="bg-stone-50 p-3 rounded-xl text-center flex-1">
+                                 <p className="text-xs text-stone-400 uppercase font-bold">Storage</p>
+                                 <p className="text-emerald-600 font-bold mt-1">✓ Cloud Files</p>
+                              </div>
                            </div>
                         </div>
                      </div>
