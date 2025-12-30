@@ -129,10 +129,12 @@ export const getCurrentUser = async () => {
 
 /**
  * Reset password (send email)
+ * NOTE: Using just origin as redirectTo because HashRouter conflicts with Supabase tokens.
+ * The AuthRedirectHandler in App.tsx will detect recovery tokens and navigate to /reset-password.
  */
 export const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/#/reset-password`
+        redirectTo: window.location.origin
     });
     if (error) throw error;
 };
