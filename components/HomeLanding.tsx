@@ -191,86 +191,52 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* SEZIONE: Manifesto - Elite Royal Edition */}
-            <section id="manifesto" className="py-24 md:py-40 px-4 md:px-8 bg-[#1A1A1A] text-[#F5F0E8] relative overflow-hidden">
-                {/* Decorative Gold Lines */}
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#C9A962]/30 to-transparent" />
-                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#C9A962]/30 to-transparent" />
-
-                {/* Background Texture */}
-                <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23C9A962\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")' }} />
-
-                <div className="max-w-5xl mx-auto relative z-10">
-                    {/* Section Label */}
-                    <div className="text-center mb-16">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#C9A962] mb-4">✦ Il Manifesto ✦</p>
-                        <div className="w-24 h-px bg-gradient-to-r from-transparent via-[#C9A962] to-transparent mx-auto" />
-                    </div>
-
-                    {/* Quote Block */}
-                    <div className="relative">
-                        {/* Giant Quote Mark */}
-                        <div className="absolute -top-10 -left-4 md:-left-16 text-[120px] md:text-[180px] font-serif text-[#C9A962]/10 leading-none select-none">"</div>
-
-                        <motion.blockquote
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            className="text-center"
-                        >
-                            <p className="text-3xl md:text-5xl lg:text-6xl font-serif leading-[1.2] mb-12">
-                                Ho creato Luminel perché ero stanco di strumenti
-                                <span className="block text-[#C9A962] italic mt-2">che non rispettano il tuo tempo.</span>
-                            </p>
-                        </motion.blockquote>
-
-                        {/* Giant Closing Quote Mark */}
-                        <div className="absolute -bottom-16 -right-4 md:-right-16 text-[120px] md:text-[180px] font-serif text-[#C9A962]/10 leading-none select-none rotate-180">"</div>
-                    </div>
-
-                    {/* Author & Philosophy */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="mt-20 grid md:grid-cols-3 gap-12 text-center"
-                    >
-                        <div className="space-y-4">
-                            <div className="w-12 h-12 mx-auto rounded-full bg-[#C9A962]/10 flex items-center justify-center">
-                                <Heart className="w-6 h-6 text-[#C9A962]" />
+            {/* SEZIONE: Manifesto - Magazine Editorial */}
+            <section id="manifesto" className="py-20 md:py-32 px-4 md:px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+                        {/* Image Column */}
+                        <div className="relative order-2 md:order-1">
+                            <div className="aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl shadow-stone-200/50">
+                                <img
+                                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800"
+                                    className="w-full h-full object-cover"
+                                    alt="Michael Jara, Founder"
+                                />
                             </div>
-                            <h3 className="text-lg font-serif font-semibold">Siamo Qui Per Te</h3>
-                            <p className="text-sm text-[#8B8178] leading-relaxed">
-                                Non sei un numero. Sei la ragione per cui costruiamo ogni singola funzionalità.
-                            </p>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="w-12 h-12 mx-auto rounded-full bg-[#C9A962]/10 flex items-center justify-center">
-                                <Shield className="w-6 h-6 text-[#C9A962]" />
+                            {/* Floating Card */}
+                            <div className="absolute -bottom-6 -right-6 md:-right-10 bg-[#FAF8F5] rounded-2xl p-6 shadow-xl border border-[#E8E4DF]">
+                                <p className="text-3xl font-serif font-bold text-[#C9A962]">12+</p>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8B8178]">Anni di Design</p>
                             </div>
-                            <h3 className="text-lg font-serif font-semibold">La Tua Fortezza</h3>
-                            <p className="text-sm text-[#8B8178] leading-relaxed">
-                                I tuoi dati sono sacri. La tua privacy è non negoziabile. Il tuo successo è la nostra missione.
-                            </p>
                         </div>
-                        <div className="space-y-4">
-                            <div className="w-12 h-12 mx-auto rounded-full bg-[#C9A962]/10 flex items-center justify-center">
-                                <Rocket className="w-6 h-6 text-[#C9A962]" />
-                            </div>
-                            <h3 className="text-lg font-serif font-semibold">Evoluzione Continua</h3>
-                            <p className="text-sm text-[#8B8178] leading-relaxed">
-                                Ogni mese, nuove funzionalità. Ogni feedback, un'opportunità di crescita.
-                            </p>
-                        </div>
-                    </motion.div>
 
-                    {/* Signature */}
-                    <div className="mt-20 text-center">
-                        <div className="inline-flex items-center gap-4">
-                            <div className="w-16 h-px bg-[#C9A962]/30" />
-                            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#C9A962]">Michael Jara, Fondatore</p>
-                            <div className="w-16 h-px bg-[#C9A962]/30" />
+                        {/* Text Column */}
+                        <div className="order-1 md:order-2">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#A89068] mb-6">Il Manifesto</p>
+                            <h2 className="text-3xl md:text-5xl font-serif text-[#2D2D2D] leading-tight mb-8">
+                                "Ho creato Luminel perché
+                                <span className="block italic text-[#A89068]">ero stanco di software senz'anima."</span>
+                            </h2>
+
+                            <div className="space-y-6 text-[#8B8178] leading-relaxed">
+                                <p>
+                                    Sono Michael. Ho passato l'ultimo decennio a creare esperienze digitali per brand di lusso.
+                                    Ho visto menti brillanti soffocare sotto Excel infiniti e software che sembrano odiare i loro utenti.
+                                </p>
+                                <p>
+                                    <strong className="text-[#5C5549]">Luminel è nato da un'esigenza viscerale.</strong> Volevo qualcosa
+                                    che non fosse solo funzionale, ma che ti facesse sentire supportato. Un alleato silenzioso.
+                                </p>
+                                <p className="text-[#5C5549] font-medium italic">
+                                    "Non sei solo un numero. Sei la ragione per cui esistiamo."
+                                </p>
+                            </div>
+
+                            <div className="mt-10 flex items-center gap-4">
+                                <div className="w-12 h-px bg-[#D4CFC7]" />
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-[#A89068]">Michael Jara, Fondatore</p>
+                            </div>
                         </div>
                     </div>
                 </div>
