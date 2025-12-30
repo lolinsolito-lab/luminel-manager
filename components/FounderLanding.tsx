@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import {
     Crown, Sparkles, Check, Zap, Users, Building2,
     Star, Shield, Clock, Gift, ChevronRight, ArrowRight,
@@ -435,15 +436,43 @@ export const FounderLanding: React.FC = () => {
                                 key="soldout"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="inline-flex flex-col items-center gap-1 mb-6"
+                                className="inline-flex flex-col items-center gap-4 mb-6 max-w-xl"
                             >
-                                <div className="bg-red-600 text-white px-8 py-2 rounded-full text-sm font-black uppercase tracking-widest shadow-xl flex items-center gap-2">
-                                    <X className="w-4 h-4" />
-                                    FOUNDER EDITION SOLD OUT
+                                {/* Sold Out Badge */}
+                                <div className="bg-stone-800 text-white px-8 py-3 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl flex items-center gap-3 border border-stone-700">
+                                    <Crown className="w-5 h-5 text-amber-400" />
+                                    FOUNDER EDITION ESAURITA
                                 </div>
-                                <div className="text-[10px] font-bold text-stone-500 mt-2 flex flex-wrap justify-center gap-4">
-                                    <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> Pricing Pubblico Attivo (PRO €99/m)</span>
-                                    <span className="flex items-center gap-1 bg-amber-100 px-2 py-0.5 rounded text-amber-700 font-black">🔥 EARLY BIRD: 20% OFF (Primi 100)</span>
+
+                                {/* Public Pricing Card */}
+                                <div className="bg-white rounded-2xl p-6 shadow-xl border border-stone-100 w-full">
+                                    <p className="text-sm text-stone-500 text-center mb-4">
+                                        I 25 posti Founder sono stati assegnati. Puoi comunque iniziare con il nostro <strong className="text-stone-800">Pricing Pubblico</strong>:
+                                    </p>
+
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <div className="text-center p-3 bg-stone-50 rounded-xl">
+                                            <p className="text-xs font-bold text-stone-400 uppercase">Starter</p>
+                                            <p className="text-2xl font-bold text-stone-800">€59<span className="text-sm font-normal">/m</span></p>
+                                        </div>
+                                        <div className="text-center p-3 bg-amber-50 rounded-xl border-2 border-amber-200">
+                                            <p className="text-xs font-bold text-amber-600 uppercase">Pro 🔥</p>
+                                            <p className="text-2xl font-bold text-stone-800">€99<span className="text-sm font-normal">/m</span></p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center mb-4">
+                                        <p className="text-sm text-emerald-700 font-semibold">
+                                            🎁 EARLY BIRD: <span className="font-black">20% OFF</span> per i primi 100 iscritti pubblici!
+                                        </p>
+                                    </div>
+
+                                    <Link
+                                        to="/login"
+                                        className="block w-full py-4 bg-stone-900 text-white rounded-xl text-center font-bold hover:bg-stone-800 transition-colors"
+                                    >
+                                        Inizia con il Pricing Pubblico →
+                                    </Link>
                                 </div>
                             </motion.div>
                         )}

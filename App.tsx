@@ -29,6 +29,15 @@ import { APP_CONFIG } from './config';
 // Admin email - only this user can access GOD Mode
 const ADMIN_EMAIL = 'jaramichael@hotmail.com';
 
+// Scroll to top on route change
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 // Protected Route Wrapper with Splash Screen
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
   const { isAuthenticated } = useUser();
@@ -76,6 +85,7 @@ const App: React.FC = () => {
             <UIProvider>
               <SubscriptionProvider>
                 <HashRouter>
+                  <ScrollToTop />
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomeLanding />} />
