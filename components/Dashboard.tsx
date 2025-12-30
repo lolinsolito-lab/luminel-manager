@@ -41,14 +41,15 @@ import { useUI } from '../contexts/UIContext';
 import * as clientService from '../services/clientService';
 import * as sessionService from '../services/sessionService';
 import * as transactionService from '../services/transactionService';
+import * as taskService from '../services/taskService';
 
-// Task interface with priority badges
-interface Task {
+// Task interface matching Supabase schema
+interface DashboardTask {
   id: string;
-  text: string;
+  title: string;
   completed: boolean;
-  type: 'Admin' | 'FollowUp';
-  priority?: 'urgente' | 'followup' | 'vendite';
+  category?: 'follow_up' | 'admin' | 'sales' | 'content';
+  priority?: 'urgent' | 'normal' | 'low';
 }
 
 const KpiCard = ({ label, value, trend, icon: Icon, color, subLabel, onClick }: any) => (
@@ -96,11 +97,9 @@ export const Dashboard: React.FC = () => {
   const [todaySessions, setTodaySessions] = useState<Session[]>([]);
   const [chartData, setChartData] = useState<{ name: string; revenue: number }[]>([]);
 
-  // Task State (localStorage persisted)
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('lumina_dashboard_tasks');
-    return saved ? JSON.parse(saved) : [];
-  });
+  // Task State (Supabase cloud storage)
+  const [tasks, setTasks] = useState<DashboardTask[]>([]);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
 
@@ -192,36 +191,73 @@ export const Dashboard: React.FC = () => {
     loadDashboardData();
   }, []);
 
-  // Save tasks to localStorage
+  // Load tasks from Supabase
   useEffect(() => {
-    localStorage.setItem('lumina_dashboard_tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    const loadTasks = async () => {
+      setIsLoadingTasks(true);
+      try {
+        const supabaseTasks = await taskService.getTasks();
+        setTasks(supabaseTasks.map(t => ({
+          id: t.id,
+          title: t.title,
+          completed: t.completed,
+          category: t.category,
+          priority: t.priority
+        })));
+        console.log('[Dashboard] ☁️ Loaded', supabaseTasks.length, 'tasks from Supabase');
+      } catch (error) {
+        console.error('[Dashboard] ❌ Error loading tasks:', error);
+      } finally {
+        setIsLoadingTasks(false);
+      }
+    };
+    loadTasks();
+  }, []);
 
-  const toggleTask = (id: string) => {
-    const updatedTasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-    setTasks(updatedTasks);
+  const toggleTask = async (id: string) => {
+    // Optimistic update
+    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    try {
+      await taskService.toggleTaskCompleted(id);
+    } catch (error) {
+      console.error('[Dashboard] ❌ Failed to toggle task:', error);
+      // Revert on error
+      setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    }
   };
 
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTaskText.trim()) {
       setIsAddingTask(false);
       return;
     }
 
-    const newTask: Task = {
-      id: Math.random().toString(36).substr(2, 9),
-      text: newTaskText,
-      completed: false,
-      type: 'Admin'
-    };
-
-    setTasks([newTask, ...tasks]);
-    setNewTaskText('');
-    setIsAddingTask(false);
+    try {
+      const created = await taskService.createTask({
+        title: newTaskText,
+        completed: false,
+        category: 'admin',
+        priority: 'normal'
+      });
+      setTasks([{ id: created.id, title: created.title, completed: created.completed, category: created.category, priority: created.priority }, ...tasks]);
+      setNewTaskText('');
+      setIsAddingTask(false);
+    } catch (error) {
+      console.error('[Dashboard] ❌ Failed to create task:', error);
+      alert('Errore nel salvataggio del task. Riprova.');
+    }
   };
 
-  const handleDeleteTask = (id: string) => {
+  const handleDeleteTask = async (id: string) => {
+    // Optimistic update
+    const originalTasks = [...tasks];
     setTasks(tasks.filter(t => t.id !== id));
+    try {
+      await taskService.deleteTask(id);
+    } catch (error) {
+      console.error('[Dashboard] ❌ Failed to delete task:', error);
+      setTasks(originalTasks); // Revert on error
+    }
   };
 
   // Dynamic greeting based on time
