@@ -8,30 +8,30 @@ const PRICING_PLANS = [
     {
         id: 'starter',
         name: 'Luminel STARTER',
-        description: 'Per il professionista indipendente - Founder Offer',
-        priceMonthly: 39,
-        priceAnnual: 390,
+        description: 'Per il professionista indipendente - Elite Founder Offer',
+        priceMonthly: 33,
+        priceAnnual: 330,
     },
     {
         id: 'pro',
         name: 'Luminel PRO',
-        description: 'Per il salone moderno che scala - Founder Offer',
-        priceMonthly: 79,
-        priceAnnual: 790,
+        description: 'Per il salone moderno che scala - Elite Founder Offer',
+        priceMonthly: 55,
+        priceAnnual: 550,
     },
     {
         id: 'signature',
         name: 'Luminel SIGNATURE',
-        description: 'Per saloni che crescono velocemente - Founder Offer',
-        priceMonthly: 109,
-        priceAnnual: 1090,
+        description: 'L\'esperienza definitiva per studi premium - Elite Founder Offer',
+        priceMonthly: 88,
+        priceAnnual: 880,
     },
     {
         id: 'empire',
         name: 'Luminel EMPIRE',
-        description: 'Per le catene che dominano - Founder Offer',
-        priceMonthly: 179,
-        priceAnnual: 1790,
+        description: 'Controllo totale per imperi multicentro - Elite Founder Offer',
+        priceMonthly: 138,
+        priceAnnual: 1380,
     }
 ];
 

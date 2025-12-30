@@ -24,17 +24,20 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Price ID to Tier mapping (update these with your actual price IDs)
+// Price ID to Tier mapping for Option A (Updated Dec 30 2024)
 const PRICE_TO_TIER: Record<string, { tier: string; cycle: string }> = {
-    // Monthly
-    "price_1SjeK2BXiYadZ8OVxr2EsCIG": { tier: "starter", cycle: "monthly" },
-    "price_1SjeK3BXiYadZ8OVkb3wyHT3": { tier: "pro", cycle: "monthly" },
-    "price_1SjeK5BXiYadZ8OVbuXkgj7R": { tier: "signature", cycle: "monthly" },
-    "price_1SjeK7BXiYadZ8OVPB3qAX67": { tier: "empire", cycle: "monthly" },
-    // Annual
-    "price_1SjeK2BXiYadZ8OVCHWIP4tW": { tier: "starter", cycle: "annual" },
-    "price_1SjeK4BXiYadZ8OVZ22TgrdS": { tier: "pro", cycle: "annual" },
-    "price_1SjeK6BXiYadZ8OV9PrB9xYB": { tier: "signature", cycle: "annual" },
-    "price_1SjeK8BXiYadZ8OV96K5vcKN": { tier: "empire", cycle: "annual" },
+    // Starter
+    "price_1Sk65GBXiYadZ8OVDiYnzozM": { tier: "starter", cycle: "monthly" },
+    "price_1Sk65GBXiYadZ8OVOUODJRRb": { tier: "starter", cycle: "annual" },
+    // Pro
+    "price_1Sk65IBXiYadZ8OVwrIIMP04": { tier: "pro", cycle: "monthly" },
+    "price_1Sk65IBXiYadZ8OVC8L3Wrxv": { tier: "pro", cycle: "annual" },
+    // Signature
+    "price_1Sk65KBXiYadZ8OVCunAw8Yc": { tier: "signature", cycle: "monthly" },
+    "price_1Sk65KBXiYadZ8OVrDL5rPvU": { tier: "signature", cycle: "annual" },
+    // Empire
+    "price_1Sk65LBXiYadZ8OVjdEcb06f": { tier: "empire", cycle: "monthly" },
+    "price_1Sk65MBXiYadZ8OVTWPuKJ7U": { tier: "empire", cycle: "annual" },
 };
 
 serve(async (req: Request) => {

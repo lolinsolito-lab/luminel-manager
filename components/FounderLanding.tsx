@@ -8,6 +8,13 @@ import {
 import { joinFounderWaitlist, getFounderSpotsRemaining } from '../services/waitlistService';
 import stripeService from '../services/stripeService';
 import { PlanId } from '../services/stripePrices';
+import { LegalModal } from './LegalModals';
+
+declare global {
+    interface Window {
+        fbq: any;
+    }
+}
 
 // Pricing data v3.0 - Option A: Uniform 44% Founder Discount
 const PRICING_PLANS = [
@@ -253,13 +260,13 @@ const FloatingContact: React.FC = () => {
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </a>
                             <a
-                                href="https://calendly.com/luminel/founder-demo"
+                                href="https://calendar.google.com/calendar/appointments/schedules/YOUR_GOOGLE_SCHEDULE"
                                 target="_blank"
                                 className="flex items-center justify-between p-3 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors group"
                             >
                                 <div className="flex items-center gap-3">
                                     <Calendar className="w-5 h-5" />
-                                    <span className="text-sm font-semibold">Demo Founder 1:1</span>
+                                    <span className="text-sm font-semibold">Demo Founder (Google Calendar)</span>
                                 </div>
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </a>
@@ -298,6 +305,11 @@ export const FounderLanding: React.FC = () => {
     const [showExitIntent, setShowExitIntent] = useState(false);
     const [liveViewers, setLiveViewers] = useState(2);
     const [lastPurchase, setLastPurchase] = useState({ city: 'Roma', time: 3 });
+    const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+    const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: 'privacy' | 'terms' | 'cookie' }>({
+        isOpen: false,
+        type: 'privacy'
+    });
 
     // Exit Intent Logic
     useEffect(() => {
@@ -372,10 +384,19 @@ export const FounderLanding: React.FC = () => {
                 } else {
                     setFounderSpots(prev => Math.max(0, prev - 1));
                 }
+                // 📊 TRACK LEAD (Meta Pixel)
+                if (typeof window !== 'undefined' && (window as any).fbq) {
+                    (window as any).fbq('track', 'Lead', {
+                        content_name: 'Founder Waitlist',
+                        content_category: 'Empire Launch',
+                        value: 0,
+                        currency: 'EUR'
+                    });
+                }
             } else {
                 setSubmitError(response.error || 'Errore durante l\'iscrizione');
             }
-        } catch (err) {
+        } catch (err: any) {
             setSubmitError('Errore di connessione. Riprova più tardi.');
         } finally {
             setIsSubmitting(false);
@@ -395,21 +416,44 @@ export const FounderLanding: React.FC = () => {
                 </div>
 
                 <div className="max-w-6xl mx-auto text-center relative z-10">
-                    {/* Urgency Banner */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-6 py-2 rounded-full text-sm font-semibold mb-6 shadow-lg shadow-amber-500/30"
-                    >
-                        <Sparkles className="w-4 h-4" />
-                        Solo {founderSpots}/25 posti Founder disponibili
-                        <Sparkles className="w-4 h-4" />
-                    </motion.div>
+                    {/* Urgency Banner / Sold Out Pivot */}
+                    <AnimatePresence mode="wait">
+                        {founderSpots > 0 ? (
+                            <motion.div
+                                key="active"
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 20 }}
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-6 py-2 rounded-full text-sm font-semibold mb-6 shadow-lg shadow-amber-500/30"
+                            >
+                                <Sparkles className="w-4 h-4" />
+                                Solo {founderSpots}/25 posti Founder disponibili
+                                <Sparkles className="w-4 h-4" />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="soldout"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="inline-flex flex-col items-center gap-1 mb-6"
+                            >
+                                <div className="bg-red-600 text-white px-8 py-2 rounded-full text-sm font-black uppercase tracking-widest shadow-xl flex items-center gap-2">
+                                    <X className="w-4 h-4" />
+                                    FOUNDER EDITION SOLD OUT
+                                </div>
+                                <div className="text-[10px] font-bold text-stone-500 mt-2 flex flex-wrap justify-center gap-4">
+                                    <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> Pricing Pubblico Attivo (PRO €99/m)</span>
+                                    <span className="flex items-center gap-1 bg-amber-100 px-2 py-0.5 rounded text-amber-700 font-black">🔥 EARLY BIRD: 20% OFF (Primi 100)</span>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* LIVE STATS */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
                         className="flex flex-wrap justify-center gap-6 mb-8 text-sm font-medium"
                     >
                         <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-2 rounded-full border border-red-100">
@@ -425,7 +469,7 @@ export const FounderLanding: React.FC = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-6xl font-display font-bold text-stone-800 mb-4"
+                        className="text-3xl md:text-6xl font-display font-bold text-stone-800 mb-6 leading-[1.1]"
                     >
                         Diventa{' '}
                         <span className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
@@ -1060,9 +1104,23 @@ export const FounderLanding: React.FC = () => {
                                             </motion.div>
                                         )}
 
+                                        {/* Terms Checkbox */}
+                                        <div className="flex items-start gap-3 px-2">
+                                            <input
+                                                type="checkbox"
+                                                id="terms"
+                                                checked={isTermsAccepted}
+                                                onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                                                className="mt-1 w-4 h-4 rounded border-stone-300 text-amber-500 focus:ring-amber-500"
+                                            />
+                                            <label htmlFor="terms" className="text-[10px] font-medium text-stone-500 leading-normal">
+                                                Accetto la <button type="button" onClick={() => setLegalModal({ isOpen: true, type: 'privacy' })} className="text-amber-600 font-bold hover:underline">Privacy Policy</button> e i <button type="button" onClick={() => setLegalModal({ isOpen: true, type: 'terms' })} className="text-amber-600 font-bold hover:underline">Termini di Servizio</button>. I tuoi dati sono al sicuro.
+                                            </label>
+                                        </div>
+
                                         <button
                                             type="submit"
-                                            disabled={isSubmitting || !email}
+                                            disabled={isSubmitting || !email || !isTermsAccepted}
                                             className="w-full py-5 rounded-[2rem] bg-stone-900 text-white font-black text-xl hover:bg-black hover:scale-[1.02] transform transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4 group"
                                         >
                                             {isSubmitting ? (
@@ -1107,11 +1165,23 @@ export const FounderLanding: React.FC = () => {
             <footer className="py-12 px-4 border-t border-stone-200 bg-white">
                 <div className="max-w-6xl mx-auto text-center text-stone-500 text-sm">
                     <p>© 2025 Luminel Manager. Gestionale Premium per Professionisti del Benessere.</p>
-                    <p className="mt-2 text-stone-400">
+                    <div className="flex justify-center gap-6 mt-4 text-[11px] font-bold uppercase tracking-widest text-stone-400">
+                        <button onClick={() => setLegalModal({ isOpen: true, type: 'privacy' })} className="hover:text-stone-900 transition-colors">Privacy</button>
+                        <button onClick={() => setLegalModal({ isOpen: true, type: 'terms' })} className="hover:text-stone-900 transition-colors">Termini</button>
+                        <button onClick={() => setLegalModal({ isOpen: true, type: 'cookie' })} className="hover:text-stone-900 transition-colors">Cookie</button>
+                    </div>
+                    <p className="mt-6 text-stone-300 text-[10px]">
                         Made with ❤️ in Italia
                     </p>
                 </div>
             </footer>
+
+            {/* LEGAL MODALS */}
+            <LegalModal
+                isOpen={legalModal.isOpen}
+                type={legalModal.type}
+                onClose={() => setLegalModal({ ...legalModal, isOpen: false })}
+            />
 
             {/* EXIT INTENT POPUP */}
             <AnimatePresence>

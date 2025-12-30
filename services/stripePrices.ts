@@ -2,42 +2,42 @@
 export const STRIPE_PRICES = {
   "starter": {
     "monthly": {
-      "priceId": "price_1SjeK2BXiYadZ8OVxr2EsCIG",
-      "url": "https://buy.stripe.com/test_aFa00ibu3dQj0aIfZi1VK00"
+      "priceId": "price_1Sk65GBXiYadZ8OVDiYnzozM",
+      "url": "https://buy.stripe.com/test_fZucN4bu3fYr4qYaEY1VK08"
     },
     "annual": {
-      "priceId": "price_1SjeK2BXiYadZ8OVCHWIP4tW",
-      "url": "https://buy.stripe.com/test_bJe6oGdCbfYrcXu4gA1VK01"
+      "priceId": "price_1Sk65GBXiYadZ8OVOUODJRRb",
+      "url": "https://buy.stripe.com/test_28E7sK1Tt9A36z65kE1VK09"
     }
   },
   "pro": {
     "monthly": {
-      "priceId": "price_1SjeK3BXiYadZ8OVkb3wyHT3",
-      "url": "https://buy.stripe.com/test_6oU6oG41B4fJ5v29AU1VK02"
+      "priceId": "price_1Sk65IBXiYadZ8OVwrIIMP04",
+      "url": "https://buy.stripe.com/test_4gMdR869J7rVe1ybJ21VK0a"
     },
     "annual": {
-      "priceId": "price_1SjeK4BXiYadZ8OVZ22TgrdS",
-      "url": "https://buy.stripe.com/test_cNicN4dCb8vZf5C7sM1VK03"
+      "priceId": "price_1Sk65IBXiYadZ8OVC8L3Wrxv",
+      "url": "https://buy.stripe.com/test_4gMaEW41Bh2vcXu3cw1VK0b"
     }
   },
   "signature": {
     "monthly": {
-      "priceId": "price_1SjeK5BXiYadZ8OVbuXkgj7R",
-      "url": "https://buy.stripe.com/test_00weVc0PpdQjaPmeVe1VK04"
+      "priceId": "price_1Sk65KBXiYadZ8OVCunAw8Yc",
+      "url": "https://buy.stripe.com/test_aFaeVc2Xx3bF6z64gA1VK0c"
     },
     "annual": {
-      "priceId": "price_1SjeK6BXiYadZ8OV9PrB9xYB",
-      "url": "https://buy.stripe.com/test_8x2aEW7dNdQjg9G6oI1VK05"
+      "priceId": "price_1Sk65KBXiYadZ8OVrDL5rPvU",
+      "url": "https://buy.stripe.com/test_14A3cueGf5jNaPm3cw1VK0d"
     }
   },
   "empire": {
     "monthly": {
-      "priceId": "price_1SjeK7BXiYadZ8OVPB3qAX67",
-      "url": "https://buy.stripe.com/test_fZueVcdCb9A30aI3cw1VK06"
+      "priceId": "price_1Sk65LBXiYadZ8OVjdEcb06f",
+      "url": "https://buy.stripe.com/test_aFa00i9lVbIbg9G4gA1VK0e"
     },
     "annual": {
-      "priceId": "price_1SjeK8BXiYadZ8OV96K5vcKN",
-      "url": "https://buy.stripe.com/test_aFacN40Pp9A3aPmcN61VK07"
+      "priceId": "price_1Sk65MBXiYadZ8OVTWPuKJ7U",
+      "url": "https://buy.stripe.com/test_8x2cN41TtdQje1yaEY1VK0f"
     }
   }
 } as const;

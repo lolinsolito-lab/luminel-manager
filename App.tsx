@@ -13,6 +13,7 @@ import { Settings } from './components/Settings';
 import { AIAssistant } from './components/AIAssistant';
 import { Login } from './components/Login';
 import { SplashIntro } from './components/SplashIntro';
+import { HomeLanding } from './components/HomeLanding';
 import { FounderLanding } from './components/FounderLanding';
 import PaymentSuccess from './components/PaymentSuccess';
 import { ResetPassword } from './components/ResetPassword';
@@ -77,6 +78,7 @@ const App: React.FC = () => {
                 <HashRouter>
                   <Routes>
                     {/* Public Routes */}
+                    <Route path="/" element={<HomeLanding />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/founder" element={<FounderLanding />} />
                     <Route path="/success" element={<PaymentSuccess />} />
@@ -87,7 +89,8 @@ const App: React.FC = () => {
                       <ProtectedRoute>
                         <Layout>
                           <Routes>
-                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
                             <Route path="/clients" element={<Clients />} />
                             <Route path="/calendar" element={<CalendarView />} />
                             <Route path="/team" element={<Team />} />

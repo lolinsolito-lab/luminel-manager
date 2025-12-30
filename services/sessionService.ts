@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
+import { isLimitReached, SubscriptionTier } from './tierLimits';
 import { SessionStatus } from '../types';
 import type { Session } from '../types';
 
@@ -216,6 +217,30 @@ export const createSession = async (session: Omit<Session, 'id'>): Promise<Sessi
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
+
+    // --- TIER LIMIT ENFORCEMENT (FORTRESS) ---
+    const { data: userData } = await supabase
+        .from('users')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single();
+
+    // Count sessions for the current month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { count: currentMonthSessions } = await supabase
+        .from('sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('coach_id', user.id)
+        .gte('date', startOfMonth.toISOString());
+
+    const tier = (userData?.subscription_tier || 'free') as SubscriptionTier;
+    if (isLimitReached(tier, 'sessions', currentMonthSessions || 0)) {
+        throw new Error(`LIMIT_REACHED: Hai raggiunto il limite di ${currentMonthSessions} appuntamenti mensili per il piano ${tier.toUpperCase()}. Passa a un livello superiore per sbloccare sessioni illimitate.`);
+    }
+    // ----------------------------------------
 
     const row = sessionToRow(session, user.id);
     row.status = 'scheduled';

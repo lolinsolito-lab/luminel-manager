@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
+import { isLimitReached, SubscriptionTier } from './tierLimits';
 import type { Client, ClientGoal, ClientTask, ClientDocument } from '../types';
 
 // ==============================================
@@ -168,6 +169,24 @@ export const createClient = async (client: Omit<Client, 'id'>): Promise<Client> 
     if (!user) {
         throw new Error('User not authenticated');
     }
+
+    // --- TIER LIMIT ENFORCEMENT (FORTRESS) ---
+    const { data: userData } = await supabase
+        .from('users')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single();
+
+    const { count: currentClientCount } = await supabase
+        .from('clients')
+        .select('*', { count: 'exact', head: true })
+        .eq('coach_id', user.id);
+
+    const tier = (userData?.subscription_tier || 'free') as SubscriptionTier;
+    if (isLimitReached(tier, 'clients', currentClientCount || 0)) {
+        throw new Error(`LIMIT_REACHED: Hai raggiunto il limite di ${currentClientCount} clienti per il piano ${tier.toUpperCase()}. Passa a un livello superiore per aggiungere altri contatti.`);
+    }
+    // ----------------------------------------
 
     const row = clientToRow(client, user.id);
 

@@ -653,16 +653,29 @@ export const Finance: React.FC = () => {
                               {translatePaymentMethod(t.paymentMethod)}
                            </span>
                         </div>
-                        <button
-                           onClick={(e) => {
-                              e.stopPropagation();
-                              openReceipt(t);
-                           }}
-                           className="text-stone-300 hover:text-stone-600 p-2 rounded-full hover:bg-stone-100 transition-all"
-                           title="View Receipt/Invoice"
-                        >
-                           <FileText className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                           <button
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 openReceipt(t);
+                              }}
+                              className="text-stone-300 hover:text-stone-600 p-2 rounded-full hover:bg-stone-100 transition-all"
+                              title="View Details"
+                           >
+                              <FileText className="w-4 h-4" />
+                           </button>
+                           <button
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 setSelectedReceipt(t);
+                                 handleDownloadReceipt();
+                              }}
+                              className="text-gold-400 hover:text-gold-600 p-2 rounded-full hover:bg-stone-100 transition-all"
+                              title="Download PDF"
+                           >
+                              <Download className="w-4 h-4" />
+                           </button>
+                        </div>
                      </div>
                   </div>
                )) : (
