@@ -9,7 +9,9 @@ export const translations = {
       resources: 'Resources',
       finance: 'Finance',
       analytics: 'Analytics',
-      settings: 'Settings'
+      settings: 'Settings',
+      logout: 'Logout',
+      team: 'Team'
     },
     dashboard: {
       welcome: 'Good Morning',
@@ -194,7 +196,9 @@ export const translations = {
       resources: 'Risorse',
       finance: 'Finanza',
       analytics: 'Analisi',
-      settings: 'Impostazioni'
+      settings: 'Impostazioni',
+      logout: 'Esci',
+      team: 'Team'
     },
     dashboard: {
       welcome: 'Buongiorno',

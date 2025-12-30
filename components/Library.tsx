@@ -10,6 +10,10 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Resource, Client } from '../types';
+import * as resourceService from '../services/resourceService';
+import * as notificationService from '../services/notificationService';
+import { useUser } from '../contexts/UserContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useResources } from '../contexts/ResourceContext';
 import { getClients } from '../services/clientService';
 import { LUMINA_COLORS } from '../constants';
@@ -44,6 +48,10 @@ export const Library: React.FC = () => {
   const [uploadForm, setUploadForm] = useState({ title: '', type: 'PDF', url: '', tags: '' });
   const [sendForm, setSendForm] = useState({ clientId: '', context: 'bonus', message: '', method: 'email' });
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  // Contexts
+  const { user, businessSettings } = useUser();
+  const { t, language } = useLanguage();
 
   // Load real clients for the "Send" modal
   useEffect(() => {
@@ -128,8 +136,17 @@ export const Library: React.FC = () => {
         window.open(`https://wa.me/${client.phone.replace(/\D/g, '')}?text=${waMessage}`, '_blank');
         alert(`Eccellenza confermata. "${selectedResource.title}" è in viaggio verso ${clientName}.`);
       } else if (sendForm.method === 'email') {
-        // TODO: Implement email sending via Supabase Edge Function
-        alert('📧 Funzionalità email in arrivo. Per ora, usa WhatsApp.');
+        // Local simulation as requested by user
+        await notificationService.simulateEmailSend({
+          to: client?.email || '',
+          resourceTitle: selectedResource.title,
+          resourceUrl: selectedResource.url,
+          message: sendForm.message,
+          businessName: businessSettings.name,
+          senderName: user.name
+        });
+
+        alert(`📧 Simulazione completata: Risorsa inviata a ${client?.email}. (In produzione chiamerà la Supabase Edge Function).`);
       }
       setIsSendOpen(false);
     } catch (err) {

@@ -42,6 +42,8 @@ import * as clientService from '../services/clientService';
 import * as sessionService from '../services/sessionService';
 import * as transactionService from '../services/transactionService';
 import * as taskService from '../services/taskService';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import { UpgradeBanner } from './UpgradeBanner';
 
 // Task interface matching Supabase schema
 interface DashboardTask {
@@ -82,6 +84,7 @@ export const Dashboard: React.FC = () => {
   const { t } = useLanguage();
   const { programs } = usePrograms();
   const { toggleNotifications } = useUI();
+  const { subscription } = useSubscription();
   const [timeRange, setTimeRange] = useState('This Week');
 
   // --- REAL DATA STATE ---
@@ -353,6 +356,13 @@ export const Dashboard: React.FC = () => {
       variants={containerVariants}
       className="space-y-fib-34 w-full max-w-[1600px] pb-fib-55"
     >
+
+      {/* Upgrade Banner for Free Users */}
+      {subscription.tier === 'free' && (
+        <motion.div variants={itemVariants}>
+          <UpgradeBanner variant="full" currentTier={subscription.tier} />
+        </motion.div>
+      )}
 
       {/* Elite Hero Header */}
       <motion.div variants={itemVariants} className="bg-gradient-to-br from-white via-white to-gold-50/30 p-8 rounded-[2rem] border border-stone-100 shadow-sm relative overflow-hidden glass-card">

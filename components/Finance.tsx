@@ -45,6 +45,8 @@ import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { isSupabaseConfigured } from '../services/supabaseClient';
 import * as transactionService from '../services/transactionService';
+import * as pdfService from '../services/pdfService';
+import * as settingsService from '../services/settingsService';
 
 // Helper to get dynamic dates relative to today
 const getRelativeDate = (daysOffset: number) => {
@@ -84,7 +86,7 @@ const initialTransactions: Transaction[] = [
 ];
 
 export const Finance: React.FC = () => {
-   const { user } = useUser();
+   const { user, businessSettings } = useUser();
    const { t, language } = useLanguage();
    const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
    const [timeRange, setTimeRange] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
@@ -359,7 +361,43 @@ export const Finance: React.FC = () => {
 
       window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
       setIsGenerateModalOpen(false);
-   }
+   };
+
+   const handleDownloadReceipt = async () => {
+      if (!selectedReceipt) return;
+
+      try {
+         const settings = businessSettings; // Use businessSettings from UserContext
+         const receiptData: pdfService.ReceiptData = {
+            receiptNumber: `REC-${selectedReceipt.id.substring(0, 8).toUpperCase()}`,
+            date: selectedReceipt.date,
+            clientName: getClientName(selectedReceipt.description),
+            items: [{
+               description: selectedReceipt.description,
+               quantity: 1,
+               price: selectedReceipt.amount,
+               total: selectedReceipt.amount
+            }],
+            totalAmount: selectedReceipt.amount,
+            paymentMethod: selectedReceipt.paymentMethod || 'Credit Card'
+         };
+
+         const pdfBlob = await pdfService.generateReceiptPDF(receiptData, settings);
+         const url = URL.createObjectURL(pdfBlob);
+         const link = document.createElement('a');
+         link.href = url;
+         link.download = `ricevuta-${receiptData.receiptNumber}.pdf`;
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+         URL.revokeObjectURL(url);
+
+         setIsGenerateModalOpen(false);
+      } catch (error) {
+         console.error('[Finance] PDF generation failed:', error);
+         alert('Errore nella generazione PDF.');
+      }
+   };
 
    const getClientName = (desc: string) => {
       if (desc.includes('-')) return desc.split('-')[1].trim();
@@ -780,6 +818,20 @@ export const Finance: React.FC = () => {
                            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:border-gold-400 text-stone-800"
                         />
                      </div>
+
+                     {/* 1. Download PDF Branded */}
+                     <button
+                        onClick={handleDownloadReceipt}
+                        className="flex items-center gap-4 p-4 border border-stone-200 rounded-xl hover:bg-gold-50 hover:border-gold-300 transition-all text-left group"
+                     >
+                        <div className="p-3 bg-stone-100 rounded-full text-stone-600 group-hover:bg-white group-hover:shadow-sm">
+                           <FileText className="w-6 h-6 text-gold-600" />
+                        </div>
+                        <div>
+                           <h3 className="font-bold text-stone-800 text-sm">Download PDF Elite</h3>
+                           <p className="text-xs text-stone-400">Scarica ricevuta con il tuo logo</p>
+                        </div>
+                     </button>
 
                      {/* 1. Print / PDF */}
                      <button

@@ -9,7 +9,7 @@ import { joinFounderWaitlist, getFounderSpotsRemaining } from '../services/waitl
 import stripeService from '../services/stripeService';
 import { PlanId } from '../services/stripePrices';
 
-// Pricing data v2.0
+// Pricing data v3.0 - Option A: Uniform 44% Founder Discount
 const PRICING_PLANS = [
     {
         id: 'starter',
@@ -17,14 +17,14 @@ const PRICING_PLANS = [
         icon: Star,
         tagline: 'Per il professionista indipendente',
         pricePublic: 59,
-        priceFounder: 39,
-        priceAnnual: 390,
-        discount: 34,
+        priceFounder: 33,
+        priceAnnual: 330,  // 10 months
+        discount: 44,
         limits: { users: 1, clients: 50, sessions: 100, locations: 1 },
         features: [
             'Dashboard KPI real-time',
             'Calendario appuntamenti',
-            'CRM clienti',
+            'CRM clienti (max 50)',
             'AI Coach Base',
             'Email reminder',
             'Mobile responsive',
@@ -37,17 +37,17 @@ const PRICING_PLANS = [
         name: 'PRO',
         icon: Zap,
         tagline: 'Per il salone moderno che scala',
-        pricePublic: 119,
-        priceFounder: 79,
-        priceAnnual: 790,
-        discount: 34,
+        pricePublic: 99,
+        priceFounder: 55,
+        priceAnnual: 550,  // 10 months
+        discount: 44,
         limits: { users: 5, clients: 250, sessions: 500, locations: 1 },
         features: [
             'Tutto di Starter +',
             '5 Utenti con ruoli',
+            '250 clienti',
             'WhatsApp Automation',
             'Fatturazione elettronica',
-            'Pagamenti Stripe/Nexi',
             'AI Coach Pro',
             'Export PDF Reports',
         ],
@@ -59,20 +59,20 @@ const PRICING_PLANS = [
         id: 'signature',
         name: 'SIGNATURE',
         icon: Crown,
-        tagline: 'Per saloni che crescono velocemente',
-        pricePublic: 179,
-        priceFounder: 109,
-        priceAnnual: 1090,
-        discount: 39,
+        tagline: 'Per studi che crescono velocemente',
+        pricePublic: 159,
+        priceFounder: 88,
+        priceAnnual: 880,  // 10 months
+        discount: 44,
         limits: { users: 10, clients: 500, sessions: -1, locations: 2 },
         features: [
             'Tutto di Pro +',
             '10 Utenti',
-            '✨ Perfetto per 2 sedi',
+            '✨ White Label (logo tuo)',
             'Inventory prodotti',
             'Programma fedeltà',
             'Team analytics',
-            'API access',
+            'Priority support',
         ],
         color: 'from-orange-500 to-red-500',
         borderColor: 'border-orange-400',
@@ -83,19 +83,19 @@ const PRICING_PLANS = [
         name: 'EMPIRE',
         icon: Building2,
         tagline: 'Per le catene che dominano',
-        pricePublic: 299,
-        priceFounder: 179,
-        priceAnnual: 1790,
-        discount: 40,
+        pricePublic: 249,
+        priceFounder: 138,
+        priceAnnual: 1380,  // 10 months
+        discount: 44,
         limits: { users: -1, clients: -1, sessions: -1, locations: -1 },
         features: [
             'Tutto illimitato',
-            'Multi-sede',
+            'Multi-sede illimitato',
             'Inventory completo',
-            'Membership',
+            'Membership & loyalty',
             'API Full + White-label',
-            'Success Manager',
-            'Onboarding 1:1',
+            'Success Manager dedicato',
+            'Onboarding VIP 1:1',
         ],
         color: 'from-violet-600 to-purple-700',
         borderColor: 'border-violet-400',
@@ -134,8 +134,8 @@ const TESTIMONIALS = [
 // FAQ
 const FAQ_ITEMS = [
     {
-        question: "Cosa succede dopo i 100 Founding Members?",
-        answer: "Il prezzo Founder chiude definitivamente. I nuovi clienti pagheranno il prezzo pubblico (€10-40 in più al mese). Chi è già Founder mantiene lo sconto per sempre."
+        question: "Cosa succede dopo i 25 Founding Members?",
+        answer: "Il prezzo Founder chiude definitivamente. I nuovi clienti pagheranno il prezzo pubblico (fino al 44% in più al mese). Chi è già Founder mantiene lo sconto per sempre."
     },
     {
         question: "Posso cambiare piano dopo?",
@@ -156,7 +156,7 @@ const FAQ_ITEMS = [
 ];
 
 export const FounderLanding: React.FC = () => {
-    const [founderSpots, setFounderSpots] = useState(73);
+    const [founderSpots, setFounderSpots] = useState(25);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
@@ -246,7 +246,7 @@ export const FounderLanding: React.FC = () => {
                         className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-6 py-2 rounded-full text-sm font-semibold mb-6 shadow-lg shadow-amber-500/30"
                     >
                         <Sparkles className="w-4 h-4" />
-                        Solo {founderSpots}/100 posti Founder disponibili
+                        Solo {founderSpots}/25 posti Founder disponibili
                         <Sparkles className="w-4 h-4" />
                     </motion.div>
 
@@ -269,7 +269,7 @@ export const FounderLanding: React.FC = () => {
                         className="text-xl text-stone-600 max-w-2xl mx-auto mb-6"
                     >
                         Blocca il prezzo Founder <strong>per sempre</strong>.
-                        Risparmia fino al 40% rispetto al prezzo pubblico.
+                        Risparmia il 44% rispetto al prezzo pubblico.
                     </motion.p>
 
                     {/* BIG Countdown Timer */}
@@ -365,7 +365,7 @@ export const FounderLanding: React.FC = () => {
                                 Confronto Prezzi: Pubblico vs Founder
                             </h3>
                             <p className="text-stone-400 text-sm mt-1">
-                                Il prezzo Founder è riservato ai primi 100 membri e bloccato per sempre
+                                Il prezzo Founder è riservato ai primi 25 membri e bloccato per sempre
                             </p>
                         </div>
 
@@ -526,7 +526,7 @@ export const FounderLanding: React.FC = () => {
                         <span className="text-amber-400">Founding Member</span>
                     </h2>
                     <p className="text-stone-400 text-center mb-12">
-                        Solo per i primi 100 visionari che credono nel progetto
+                        Solo per i primi 25 visionari che credono nel progetto
                     </p>
 
                     <div className="grid md:grid-cols-4 gap-6">

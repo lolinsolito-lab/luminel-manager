@@ -144,7 +144,7 @@ export const Layout = ({ children }: LayoutProps) => {
             <SidebarItem to="/" icon={LayoutDashboard} label={t('nav.overview')} onClick={closeSidebar} />
             <SidebarItem to="/calendar" icon={Calendar} label={t('nav.sessions')} onClick={closeSidebar} />
             <SidebarItem to="/clients" icon={Users} label={t('nav.community')} onClick={closeSidebar} />
-            <SidebarItem to="/team" icon={Briefcase} label="Team" onClick={closeSidebar} />
+            <SidebarItem to="/team" icon={Briefcase} label={t('nav.team')} onClick={closeSidebar} />
             <SidebarItem to="/programs" icon={BookOpen} label={t('nav.programs')} onClick={closeSidebar} />
             <SidebarItem to="/resources" icon={Library} label={t('nav.resources')} onClick={closeSidebar} />
             <SidebarItem to="/finance" icon={CreditCard} label={t('nav.finance')} onClick={closeSidebar} />
