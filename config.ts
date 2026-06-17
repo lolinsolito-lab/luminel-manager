@@ -49,5 +49,12 @@ export const APP_CONFIG = {
     email: "admin@portal.com",
     role: "Manager",
     avatar: "https://ui-avatars.com/api/?name=Admin&background=1c1917&color=fff"
-  }
+  },
+
+  // Ecosistema, WhatsApp & Calendario
+  adminEmail: import.meta.env.VITE_ADMIN_EMAIL || "jaramichael@hotmail.com",
+  whatsappNumber: "393478901234", // Esempio numero configurato
+  calendarUrl: "https://calendar.google.com/calendar/appointments/schedules/YOUR_GOOGLE_SCHEDULE",
+  founderDeadline: "2026-07-15T23:59:59"
 };
+

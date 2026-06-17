@@ -26,12 +26,11 @@ export const joinFounderWaitlist = async (
 ): Promise<WaitlistResponse> => {
     if (!isSupabaseConfigured()) {
         // Fallback for demo mode
-        console.warn('⚠️ Supabase not configured. Using demo mode.');
         return {
             success: true,
             message: 'Benvenuto nella Founder Waitlist! (Demo Mode)',
             position: Math.floor(Math.random() * 50) + 1,
-            spots_remaining: 73,
+            spots_remaining: 21,
         };
     }
 
@@ -68,7 +67,7 @@ export const joinFounderWaitlist = async (
 export const getFounderSpotsRemaining = async (): Promise<number> => {
     if (!isSupabaseConfigured()) {
         // Fallback for demo mode
-        return 73;
+        return 22;
     }
 
     try {
@@ -76,13 +75,13 @@ export const getFounderSpotsRemaining = async (): Promise<number> => {
 
         if (error) {
             console.error('Get spots error:', error);
-            return 73; // Fallback
+            return 22; // Fallback
         }
 
         return data as number;
     } catch (err) {
         console.error('Spots error:', err);
-        return 73; // Fallback
+        return 22; // Fallback
     }
 };
 

@@ -10,6 +10,7 @@ import { joinFounderWaitlist, getFounderSpotsRemaining } from '../services/waitl
 import stripeService from '../services/stripeService';
 import { PlanId } from '../services/stripePrices';
 import { LegalModal } from './LegalModals';
+import { APP_CONFIG } from '../config';
 
 declare global {
     interface Window {
@@ -296,6 +297,7 @@ const FloatingContact: React.FC = () => {
 export const FounderLanding: React.FC = () => {
     const [founderSpots, setFounderSpots] = useState(25);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+    const [plans, setPlans] = useState(PRICING_PLANS);
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [businessType, setBusinessType] = useState('');
@@ -335,13 +337,22 @@ export const FounderLanding: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Countdown timer - Launch date: 21 Gennaio 2025
-    const [timeLeft, setTimeLeft] = useState({
-        days: 23,
-        hours: 14,
-        minutes: 32,
-        seconds: 0
-    });
+    // Countdown calculation
+    const calculateTimeLeft = () => {
+        const difference = +new Date(APP_CONFIG.founderDeadline) - +new Date();
+        let dl = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        if (difference > 0) {
+            dl = {
+                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                minutes: Math.floor((difference / 1000 / 60) % 60),
+                seconds: Math.floor((difference / 1000) % 60)
+            };
+        }
+        return dl;
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
     // Load real spots remaining from Supabase
     useEffect(() => {
@@ -352,16 +363,44 @@ export const FounderLanding: React.FC = () => {
         loadSpots();
     }, []);
 
+    // Load real plans from Supabase
+    useEffect(() => {
+        const loadPlans = async () => {
+            try {
+                const { getSubscriptionPlans } = await import('../services/waitlistService');
+                const dbPlans = await getSubscriptionPlans();
+                if (dbPlans && dbPlans.length > 0) {
+                    const mapped = PRICING_PLANS.map(fallbackPlan => {
+                        const dbPlan = dbPlans.find((p: any) => p.name === fallbackPlan.id);
+                        if (dbPlan) {
+                            return {
+                                ...fallbackPlan,
+                                pricePublic: Number(dbPlan.price_monthly_public),
+                                priceFounder: Number(dbPlan.price_monthly_founder),
+                                priceAnnual: Number(dbPlan.price_annual_founder),
+                                limits: {
+                                    users: dbPlan.max_users,
+                                    clients: dbPlan.max_clients,
+                                    sessions: dbPlan.max_sessions_per_month,
+                                    locations: dbPlan.max_locations
+                                }
+                            };
+                        }
+                        return fallbackPlan;
+                    });
+                    setPlans(mapped);
+                }
+            } catch (e) {
+                console.warn('Could not load plans from DB, using fallback');
+            }
+        };
+        loadPlans();
+    }, []);
+
     // Countdown timer effect
     useEffect(() => {
         const timer = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-                if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-                if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-                if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-                return prev;
-            });
+            setTimeLeft(calculateTimeLeft());
         }, 1000);
         return () => clearInterval(timer);
     }, []);
@@ -674,7 +713,7 @@ export const FounderLanding: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-stone-100">
-                                    {PRICING_PLANS.map((plan) => (
+                                    {plans.map((plan) => (
                                         <tr key={plan.id} className={`${plan.popular ? 'bg-amber-50/50' : ''} hover:bg-stone-50 transition-colors`}>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
@@ -739,7 +778,7 @@ export const FounderLanding: React.FC = () => {
                                 <h3 className="text-2xl font-serif font-bold mb-2">"Ciao, sono Michael, founder di Luminel"</h3>
                                 <p className="text-stone-300 text-sm max-w-md mx-auto">
                                     Guarda come Luminel trasformerà il tuo business nel benessere.
-                                    Solo 22 posti Founder rimasti.
+                                    Solo {founderSpots} posti Founder rimasti.
                                 </p>
                             </div>
                             <img
@@ -767,7 +806,7 @@ export const FounderLanding: React.FC = () => {
                         </div>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {PRICING_PLANS.map((plan, index) => (
+                        {plans.map((plan, index) => (
                             <motion.div
                                 key={plan.id}
                                 initial={{ opacity: 0, y: 30 }}

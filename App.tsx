@@ -26,9 +26,6 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { APP_CONFIG } from './config';
 
-// Admin email - only this user can access GOD Mode
-const ADMIN_EMAIL = 'jaramichael@hotmail.com';
-
 // Scroll to top on route change
 const ScrollToTop: React.FC = () => {
   const { pathname } = useLocation();
@@ -95,8 +92,8 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUser();
 
-  // Check if user email matches admin email
-  if (user?.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+  // Check if user email matches admin email from config
+  if (user?.email?.toLowerCase() !== APP_CONFIG.adminEmail.toLowerCase()) {
     // Redirect non-admins to dashboard
     return <Navigate to="/" replace />;
   }

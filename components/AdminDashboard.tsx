@@ -69,12 +69,12 @@ export const AdminDashboard: React.FC = () => {
         byTier: {}
     });
 
-    const tierPricing: Record<string, number> = {
-        'starter': 29,
-        'pro': 79,
-        'signature': 149,
-        'empire': 299
-    };
+    const [tierPricing, setTierPricing] = useState<Record<string, number>>({
+        'starter': 33,
+        'pro': 55,
+        'signature': 88,
+        'empire': 138
+    });
 
     useEffect(() => {
         loadAllData();
@@ -83,9 +83,29 @@ export const AdminDashboard: React.FC = () => {
     const loadAllData = async () => {
         setIsLoading(true);
         try {
+            let activePricing = {
+                'starter': 33,
+                'pro': 55,
+                'signature': 88,
+                'empire': 138
+            };
+
+            try {
+                const { getSubscriptionPlans } = await import('../services/waitlistService');
+                const dbPlans = await getSubscriptionPlans();
+                if (dbPlans && dbPlans.length > 0) {
+                    dbPlans.forEach((plan: any) => {
+                        activePricing[plan.name] = Number(plan.price_monthly_founder);
+                    });
+                    setTierPricing(activePricing);
+                }
+            } catch (e) {
+                console.warn('Could not load pricing from DB, using fallback values');
+            }
+
             await Promise.all([
                 loadPendingSubscriptions(),
-                loadUsers()
+                loadUsers(activePricing)
             ]);
         } catch (error) {
             console.error('Error loading admin data:', error);
@@ -105,7 +125,7 @@ export const AdminDashboard: React.FC = () => {
         }
     };
 
-    const loadUsers = async () => {
+    const loadUsers = async (pricingMap = tierPricing) => {
         const { data, error } = await supabase
             .from('users')
             .select('*')
@@ -129,8 +149,17 @@ export const AdminDashboard: React.FC = () => {
                 if (user.is_founding_member) foundingMembers++;
                 if (new Date(user.created_at) >= startOfMonth) thisMonth++;
 
-                if (tierPricing[tier] && user.subscription_status === 'active') {
-                    mrr += tierPricing[tier];
+                if (pricingMap[tier] && user.subscription_status === 'active') {
+                    if (user.billing_cycle === 'annual') {
+                        let annualEquivalent = pricingMap[tier];
+                        if (tier === 'starter') annualEquivalent = 330 / 12;
+                        else if (tier === 'pro') annualEquivalent = 550 / 12;
+                        else if (tier === 'signature') annualEquivalent = 880 / 12;
+                        else if (tier === 'empire') annualEquivalent = 1380 / 12;
+                        mrr += Math.round(annualEquivalent);
+                    } else {
+                        mrr += pricingMap[tier];
+                    }
                 }
             });
 
@@ -146,7 +175,7 @@ export const AdminDashboard: React.FC = () => {
                 byTier: Object.fromEntries(
                     Object.entries(byTier).map(([tier, count]) => [
                         tier,
-                        (tierPricing[tier] || 0) * count
+                        (pricingMap[tier] || 0) * count
                     ])
                 )
             });
@@ -221,7 +250,7 @@ export const AdminDashboard: React.FC = () => {
     };
 
     const founderSpotsTaken = userStats.foundingMembers + pendingSubscriptions.filter(p => p.is_founding_member).length;
-    const founderSpotsTotal = 100;
+    const founderSpotsTotal = 25;
     const founderSpotsRemaining = founderSpotsTotal - founderSpotsTaken;
 
     if (isLoading) {
