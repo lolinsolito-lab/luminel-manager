@@ -1,3 +1,8 @@
+/**
+ * 👑 Luminel Manager Elite
+ * ----------------------------------------------------
+ * "Architecting Digital Empires for High-Performance Professionals 2026"
+ */
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from './components/Layout';

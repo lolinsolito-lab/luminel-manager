@@ -1,3 +1,8 @@
+/**
+ * 👑 Luminel Manager Elite
+ * ----------------------------------------------------
+ * "Architecting Digital Empires for High-Performance Professionals 2026"
+ */
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
