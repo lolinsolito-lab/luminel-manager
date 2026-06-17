@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Resource } from '../types';
 import resourceService from '../services/resourceService';
+import { useUser } from './UserContext';
 
 interface ResourceContextType {
     resources: Resource[];
@@ -17,6 +18,7 @@ const ResourceContext = createContext<ResourceContextType | undefined>(undefined
 export const ResourceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [resources, setResources] = useState<Resource[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { isAuthenticated } = useUser();
 
     const fetchResources = async () => {
         try {
@@ -31,8 +33,13 @@ export const ResourceProvider: React.FC<{ children: ReactNode }> = ({ children }
     };
 
     useEffect(() => {
-        fetchResources();
-    }, []);
+        if (isAuthenticated) {
+            fetchResources();
+        } else {
+            setIsLoading(false);
+        }
+    }, [isAuthenticated]);
+
 
     const addResource = async (resourceData: Omit<Resource, 'id'>) => {
         try {

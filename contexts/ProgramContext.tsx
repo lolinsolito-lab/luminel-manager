@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Program, VaultCategory } from '../types';
 import programService from '../services/programService';
 import categoryService from '../services/categoryService';
+import { useUser } from './UserContext';
 
 interface ProgramContextType {
   programs: Program[];
@@ -25,6 +26,7 @@ export const ProgramProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [programs, setPrograms] = useState<Program[]>([]);
   const [categories, setCategories] = useState<VaultCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated } = useUser();
 
   const fetchData = async () => {
     try {
@@ -43,8 +45,13 @@ export const ProgramProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthenticated) {
+      fetchData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
+
 
   const addProgram = async (programData: Omit<Program, 'id'>) => {
     try {
