@@ -55,6 +55,6 @@ export const APP_CONFIG = {
   adminEmail: import.meta.env.VITE_ADMIN_EMAIL || "jaramichael@hotmail.com",
   whatsappNumber: "393478901234", // Esempio numero configurato
   calendarUrl: "https://calendar.google.com/calendar/appointments/schedules/YOUR_GOOGLE_SCHEDULE",
-  founderDeadline: "2026-07-15T23:59:59"
+  founderDeadline: "2026-12-31T23:59:59"
 };
 
