@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Search, Plus, FileText, Music, Video,
@@ -6,7 +5,8 @@ import {
   Share2, Trash2, Cloud, CheckCircle2,
   DollarSign, Gift, BookOpen, Send, X,
   Euro, Sparkles, Filter, ArrowUpRight,
-  MessageCircle, Mail as MailIcon, ExternalLink
+  MessageCircle, Mail as MailIcon, ExternalLink,
+  Globe, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Resource, Client } from '../types';
@@ -45,7 +45,11 @@ export const Library: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Form States
-  const [uploadForm, setUploadForm] = useState({ title: '', type: 'PDF', url: '', tags: '' });
+  // FIX (28 ago 2026): aggiunto isFreeSample — decide se la risorsa è un
+  // assaggio pubblico (visibile a chiunque, per FOMO/lead-gen) o privata
+  // (solo per i tuoi clienti). Di default privata, così non capita per
+  // errore di pubblicare qualcosa di riservato.
+  const [uploadForm, setUploadForm] = useState({ title: '', type: 'PDF', url: '', tags: '', isFreeSample: false });
   const [sendForm, setSendForm] = useState({ clientId: '', context: 'bonus', message: '', method: 'email' });
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
@@ -93,10 +97,12 @@ export const Library: React.FC = () => {
         title: uploadForm.title,
         type: uploadForm.type as any,
         url: uploadForm.url || '#',
-        tags: uploadForm.tags.split(',').map(t => t.trim()).filter(t => t !== '')
-      });
+        tags: uploadForm.tags.split(',').map(t => t.trim()).filter(t => t !== ''),
+        // FIX: passa isFreeSample così viene salvato davvero su is_free_sample
+        isFreeSample: uploadForm.isFreeSample,
+      } as any);
       setIsUploadOpen(false);
-      setUploadForm({ title: '', type: 'PDF', url: '', tags: '' });
+      setUploadForm({ title: '', type: 'PDF', url: '', tags: '', isFreeSample: false });
     } catch (err) {
       alert('Errore durante il caricamento.');
     } finally {
@@ -248,7 +254,13 @@ export const Library: React.FC = () => {
                   <div className="p-4 bg-stone-50 rounded-2xl group-hover:bg-amber-50 transition-colors shadow-inner">
                     {getIcon(resource.type)}
                   </div>
-                  <div className="relative">
+                  <div className="relative flex items-center gap-2">
+                    {/* FIX: badge visivo che mostra se la risorsa è pubblica o privata */}
+                    {(resource as any).isFreeSample ? (
+                      <span title="Assaggio pubblico" className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600"><Globe className="w-3.5 h-3.5" /></span>
+                    ) : (
+                      <span title="Privata — solo tuoi clienti" className="p-1.5 rounded-lg bg-stone-50 text-stone-400"><Lock className="w-3.5 h-3.5" /></span>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -400,6 +412,24 @@ export const Library: React.FC = () => {
                       placeholder="https://..."
                     />
                   </div>
+                </div>
+
+                {/* FIX (28 ago 2026): nuovo toggle — decide se questa risorsa è
+                    visibile pubblicamente (assaggio/lead-magnet) o riservata */}
+                <div className="flex items-center justify-between p-5 bg-stone-50 border border-stone-100 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    {uploadForm.isFreeSample ? <Globe className="w-5 h-5 text-emerald-500" /> : <Lock className="w-5 h-5 text-stone-400" />}
+                    <div>
+                      <p className="font-bold text-stone-800 text-sm">Assaggio Gratuito Pubblico</p>
+                      <p className="text-xs text-stone-400">Visibile a chiunque, anche prima di registrarsi. Usalo per creare curiosità, non per contenuti riservati ai clienti paganti.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setUploadForm({ ...uploadForm, isFreeSample: !uploadForm.isFreeSample })}
+                    className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${uploadForm.isFreeSample ? 'bg-emerald-500' : 'bg-stone-300'}`}
+                  >
+                    <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${uploadForm.isFreeSample ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </button>
                 </div>
               </div>
 

@@ -1,8 +1,8 @@
 # 🧠 02 — Customer Avatar
 
 > **Responsabile**: Market Researcher  
-> **Ultimo aggiornamento**: 17 Giugno 2026  
-> **Status**: ✅ Definito — Aggiornare con dati reali post-lancio
+> **Ultimo aggiornamento**: 28 Agosto 2026 (Direttore — corrette le persona presentate erroneamente come testimonianze reali)  
+> **Status**: ✅ Definito — Sezione persona corretta, in attesa di testimonianze vere dai primi Founder
 
 ---
 
@@ -86,22 +86,24 @@
 
 ---
 
-## 👥 Testimonial Reali (Founder)
+## 👥 Persona Illustrative (⚠️ NON testimonianze reali)
 
-### Marco T. — Founding Member #1
-- **Ruolo**: Creative Director Salon, Milano
-- **Prima**: 3 dipendenti, calendario cartaceo, WhatsApp impossibile. Perdeva 2-3 appuntamenti/settimana. €600/m persi.
-- **Dopo**: AI automation conferme. White-label con logo suo. Zero appuntamenti persi. ROI: €2,800/mese.
+> **Aggiornamento 28 agosto 2026**: Marco T., Sara L. e Giulia M. sono personas illustrative create per definire il cliente ideale — **non sono founder reali**, non hanno mai usato Luminel. Erano presentati come "Testimonial Reali (Founder)" in una versione precedente di questo documento: era un errore, corretto qui. Vanno sostituiti con testimonianze vere non appena i primi Founder reali avranno risultati documentabili — mai prima.
 
-### Sara L. — Founding Member #2
-- **Ruolo**: High Performance Coach, Bergamo
-- **Prima**: 6 ore/settimana su gestione. Odiava lunedì = Excel fino alle 22:00.
-- **Dopo**: Setup in 1 ora. 20 minuti/settimana. Lanciato nuovo programma. +€4K/mese.
+### Esempio persona — "Il Creative Director" (archetipo salone)
+- **Ruolo tipo**: Creative Director Salon, città media-grande
+- **Prima (dolore tipico)**: team piccolo, calendario cartaceo o Excel, WhatsApp caotico, appuntamenti persi per errori di comunicazione
+- **Dopo (promessa del prodotto, non un risultato misurato)**: automazione conferme, white-label col proprio logo, zero appuntamenti persi
 
-### Giulia M. — Founding Member #3
-- **Ruolo**: Master Tattooist, Roma
-- **Prima**: Artista, non contabile. Fatture in ritardo, INPS la multava. Stress infinito.
-- **Dopo**: Fatturazione automatica. Reminder pagamenti. INPS sistemato. Dorme di nuovo.
+### Esempio persona — "La Coach ad Alte Prestazioni" (archetipo coach)
+- **Ruolo tipo**: High Performance Coach
+- **Prima (dolore tipico)**: molte ore/settimana su gestione manuale, weekend rovinati da Excel
+- **Dopo (promessa del prodotto)**: setup rapido, gestione quotidiana ridotta a pochi minuti, tempo liberato per far crescere il business
+
+### Esempio persona — "La Tatuatrice Master" (archetipo tattoo/body art)
+- **Ruolo tipo**: Master Tattooist
+- **Prima (dolore tipico)**: artista non contabile, fatture in ritardo, stress da adempimenti fiscali
+- **Dopo (promessa del prodotto)**: fatturazione automatica, reminder pagamenti, meno stress amministrativo
 
 ---
 

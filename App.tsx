@@ -19,6 +19,7 @@ import { AIAssistant } from './components/AIAssistant';
 import { Login } from './components/Login';
 import { SplashIntro } from './components/SplashIntro';
 import { HomeLanding } from './components/HomeLanding';
+import { LandingV2 } from './components/LandingV2';
 import { FounderLanding } from './components/FounderLanding';
 import PaymentSuccess from './components/PaymentSuccess';
 import { ResetPassword } from './components/ResetPassword';
@@ -94,12 +95,13 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 };
 
 // Admin-only Route Protection
+// FIX SICUREZZA (28 ago 2026): il controllo ora usa user.isAdmin, letto da
+// public.users.is_admin via RLS — nessuna email admin più presente nel bundle JS.
+// La vera protezione resta comunque la RLS lato database, questo è solo UX.
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUser();
 
-  // Check if user email matches admin email from config
-  if (user?.email?.toLowerCase() !== APP_CONFIG.adminEmail.toLowerCase()) {
-    // Redirect non-admins to dashboard
+  if (!user?.isAdmin) {
     return <Navigate to="/" replace />;
   }
 
@@ -125,6 +127,7 @@ const App: React.FC = () => {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomeLanding />} />
+          <Route path="/v2" element={<LandingV2 />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/founder" element={<FounderLanding />} />
                     <Route path="/success" element={<PaymentSuccess />} />

@@ -17,11 +17,14 @@ interface SupabaseResourceRow {
     file_path: string | null;
     tags: string[] | null;
     sent_count: number;
+    is_free_sample: boolean;
     created_at: string;
 }
 
 // ==============================================
 // Helper: Convert Frontend Resource to DB format
+// FIX (28 ago 2026): aggiunto is_free_sample — mancava completamente,
+// quindi anche impostandolo a mano nel DB l'app non lo leggeva né scriveva.
 // ==============================================
 const resourceToRow = (resource: Partial<Resource>, coachId: string): Partial<SupabaseResourceRow> => {
     const row: Partial<SupabaseResourceRow> = {
@@ -32,6 +35,7 @@ const resourceToRow = (resource: Partial<Resource>, coachId: string): Partial<Su
     if (resource.type !== undefined) row.type = resource.type;
     if (resource.url !== undefined) row.url = resource.url;
     if (resource.tags !== undefined) row.tags = resource.tags;
+    if ((resource as any).isFreeSample !== undefined) row.is_free_sample = (resource as any).isFreeSample;
 
     return row;
 };
@@ -45,8 +49,11 @@ const rowToResource = (row: SupabaseResourceRow): Resource => {
         title: row.title,
         type: row.type as any || 'Link',
         url: row.url || '#',
-        tags: row.tags || []
-    };
+        tags: row.tags || [],
+        // FIX: campo nuovo — se il tipo Resource in types.ts non lo ha ancora,
+        // aggiungilo lì come `isFreeSample?: boolean` per avere i tipi corretti
+        isFreeSample: row.is_free_sample || false,
+    } as Resource;
 };
 
 // ==============================================
@@ -70,6 +77,27 @@ export const getResources = async (): Promise<Resource[]> => {
     if (error) {
         console.error('❌ Error fetching resources:', error);
         throw error;
+    }
+
+    return (data || []).map(rowToResource);
+};
+
+// ==============================================
+// NUOVA: Fetch risorse pubbliche (assaggi gratuiti) — per landing page o
+// sezioni marketing, non richiede autenticazione grazie alla RLS aggiornata
+// ==============================================
+export const getPublicFreeSamples = async (): Promise<Resource[]> => {
+    if (!isSupabaseConfigured()) return [];
+
+    const { data, error } = await supabase
+        .from('resources')
+        .select('*')
+        .eq('is_free_sample', true)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('❌ Error fetching free samples:', error);
+        return [];
     }
 
     return (data || []).map(rowToResource);
@@ -151,6 +179,7 @@ export const deleteResource = async (resourceId: string): Promise<void> => {
 
 export default {
     getResources,
+    getPublicFreeSamples,
     createResource,
     updateResource,
     deleteResource

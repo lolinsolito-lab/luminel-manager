@@ -1,12 +1,112 @@
 // Storage Service - Upload files to Supabase Storage
 import { supabase, getCurrentUser } from './supabaseClient';
 
+// ==============================================================
+// FIX SICUREZZA (28 ago 2026): documenti cliente su bucket privato
+// ==============================================================
+// I documenti caricati nel profilo di un cliente (contratti, moduli
+// intake, allegati task) NON devono mai finire su un bucket pubblico.
+// Usa queste due funzioni invece di uploadFile()/getPublicUrl() per
+// qualunque file legato a un cliente specifico.
+
+/**
+ * Carica un documento legato a un cliente specifico sul bucket privato
+ * 'client-documents'. Ritorna il PATH del file (non un URL pubblico) —
+ * salva questo path nel DB, non un URL, perché gli URL firmati scadono.
+ */
+export const uploadClientDocument = async (file: File, clientId: string): Promise<string> => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}/${clientId}/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+        .from('client-documents')
+        .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+    if (error) {
+        console.error('[StorageService] Errore upload documento cliente:', error);
+        throw error;
+    }
+
+    return data.path; // path, non URL — la URL si genera al momento della visualizzazione
+};
+
+/**
+ * Genera una URL firmata temporanea (default 1 ora) per aprire un
+ * documento cliente. Da chiamare al momento del click "Visualizza",
+ * non da salvare/cacheare — scade.
+ */
+export const getSignedDocumentUrl = async (filePath: string, expiresInSeconds: number = 3600): Promise<string> => {
+    const { data, error } = await supabase.storage
+        .from('client-documents')
+        .createSignedUrl(filePath, expiresInSeconds);
+
+    if (error) {
+        console.error('[StorageService] Errore generazione signed URL:', error);
+        throw error;
+    }
+
+    return data.signedUrl;
+};
+
+// ==============================================================
+// FIX (28 ago 2026): risorse "vere" della libreria su bucket privato,
+// separate dagli assaggi gratuiti (che restano su 'resources', pubblico).
+// Usa queste per qualunque risorsa con is_free_sample = false.
+// ==============================================================
+
+/**
+ * Carica una risorsa "vera" (non assaggio gratuito) sul bucket privato
+ * 'resources-private'. Ritorna il PATH del file, non un URL — stesso
+ * pattern dei documenti cliente: si genera una signed URL al momento
+ * della visualizzazione, non si salva un link permanente.
+ */
+export const uploadPrivateResource = async (file: File): Promise<string> => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+        .from('resources-private')
+        .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+    if (error) {
+        console.error('[StorageService] Errore upload risorsa privata:', error);
+        throw error;
+    }
+
+    return data.path;
+};
+
+/**
+ * Genera una URL firmata temporanea (default 1 ora) per una risorsa privata.
+ */
+export const getSignedResourceUrl = async (filePath: string, expiresInSeconds: number = 3600): Promise<string> => {
+    const { data, error } = await supabase.storage
+        .from('resources-private')
+        .createSignedUrl(filePath, expiresInSeconds);
+
+    if (error) {
+        console.error('[StorageService] Errore generazione signed URL risorsa:', error);
+        throw error;
+    }
+
+    return data.signedUrl;
+};
+
 /**
  * Upload a file to Supabase Storage
  * @param file - The file to upload
  * @param bucket - The storage bucket name (e.g., 'logos', 'avatars', 'resources')
  * @param folder - Optional folder path within the bucket
  * @returns The public URL of the uploaded file
+ * NOTA: usa questa funzione SOLO per bucket pubblici by design (logo, avatar,
+ * assaggi gratuiti della libreria risorse). Mai per documenti cliente o
+ * risorse private — vedi le funzioni dedicate sopra.
  */
 export const uploadFile = async (
     file: File,

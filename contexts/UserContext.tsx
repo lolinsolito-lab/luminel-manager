@@ -13,14 +13,14 @@ interface UserProfile {
   role: string;
   email: string;
   phone?: string;
-  website?: string;
   avatar: string;
-  // Business / Billing Details
-  companyName?: string;
-  companyAddress?: string;
-  vatId?: string;
-  // Subscription
+  // FIX (28 ago 2026): companyName/companyAddress/vatId/website RIMOSSI da qui.
+  // Non venivano mai salvati (vedi TODO che c'era prima), e duplicavano campi
+  // che vivono già, funzionanti e verificati, in user_settings (pagina
+  // Impostazioni). Il profilo personale ora contiene solo identità individuale,
+  // non dati aziendali/fatturazione — quelli restano SOLO in Impostazioni.
   subscriptionTier?: string;
+  isAdmin?: boolean;
 }
 
 interface UserContextType {
@@ -37,7 +37,7 @@ interface UserContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (data: Partial<UserProfile>) => void;
+  updateProfile: (data: Partial<UserProfile>) => Promise<void>;
   refreshBusinessSettings: () => Promise<void>;
 }
 
@@ -46,12 +46,8 @@ const defaultUser: UserProfile = {
   role: APP_CONFIG.defaultAdmin.role,
   email: APP_CONFIG.defaultAdmin.email,
   phone: '',
-  website: '',
   avatar: APP_CONFIG.defaultAdmin.avatar,
-  companyName: 'Nome Azienda / Studio',
-  companyAddress: 'Via Esempio 123, Milano',
-  vatId: '',
-  subscriptionTier: 'trial'
+  subscriptionTier: 'free',
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -66,7 +62,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const isSupabaseMode = isSupabaseConfigured();
 
-  // Load Business Settings (Logo/Name)
   const refreshBusinessSettings = async () => {
     try {
       const { getSettings } = await import('../services/settingsService');
@@ -80,13 +75,50 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // ==============================================
-  // Initialize Auth State
-  // ==============================================
+  const fetchIsAdmin = async (userId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('is_admin')
+        .eq('id', userId)
+        .single();
+      if (error) {
+        console.error('[UserContext] Errore lettura is_admin:', error);
+        return false;
+      }
+      return Boolean(data?.is_admin);
+    } catch (error) {
+      console.error('[UserContext] Errore imprevisto lettura is_admin:', error);
+      return false;
+    }
+  };
+
+  // FIX (28 ago 2026): carica anche full_name, phone, avatar_url REALI dalla
+  // tabella users (non solo dai metadata di Auth) — così se updateProfile ha
+  // salvato qualcosa in precedenza, lo si rivede davvero al prossimo login,
+  // invece di ripartire sempre da defaultUser + metadata.
+  const fetchUserProfile = async (userId: string): Promise<Partial<UserProfile>> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('full_name, phone, avatar_url')
+        .eq('id', userId)
+        .single();
+      if (error || !data) return {};
+      return {
+        name: data.full_name || undefined,
+        phone: data.phone || undefined,
+        avatar: data.avatar_url || undefined,
+      };
+    } catch (error) {
+      console.error('[UserContext] Errore lettura profilo utente:', error);
+      return {};
+    }
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       if (isSupabaseMode) {
-        // SUPABASE MODE: Check for existing session
         try {
           const currentSession = await getSession();
           if (currentSession) {
@@ -94,24 +126,25 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setSupabaseUser(currentSession.user);
             setIsAuthenticated(true);
 
-            // Load user profile from metadata or defaults
             const metadata = currentSession.user.user_metadata;
+            const isAdmin = await fetchIsAdmin(currentSession.user.id);
+            const dbProfile = await fetchUserProfile(currentSession.user.id);
             setUser({
               ...defaultUser,
               id: currentSession.user.id,
-              name: metadata?.full_name || currentSession.user.email?.split('@')[0] || 'User',
+              name: dbProfile.name || metadata?.full_name || currentSession.user.email?.split('@')[0] || 'User',
               email: currentSession.user.email || '',
-              avatar: metadata?.avatar_url || `https://ui-avatars.com/api/?name=${metadata?.full_name || 'U'}&background=ce9341&color=fff`
+              phone: dbProfile.phone || '',
+              avatar: dbProfile.avatar || metadata?.avatar_url || `https://ui-avatars.com/api/?name=${metadata?.full_name || 'U'}&background=ce9341&color=fff`,
+              isAdmin
             });
 
-            // Also load business settings
             refreshBusinessSettings();
           }
         } catch (error) {
           console.error('Error loading session:', error);
         }
 
-        // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, newSession) => {
             console.log('[Auth] State changed:', event);
@@ -121,15 +154,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (newSession?.user) {
               const metadata = newSession.user.user_metadata;
+              const isAdmin = await fetchIsAdmin(newSession.user.id);
+              const dbProfile = await fetchUserProfile(newSession.user.id);
               setUser({
                 ...defaultUser,
                 id: newSession.user.id,
-                name: metadata?.full_name || newSession.user.email?.split('@')[0] || 'User',
+                name: dbProfile.name || metadata?.full_name || newSession.user.email?.split('@')[0] || 'User',
                 email: newSession.user.email || '',
-                avatar: metadata?.avatar_url || `https://ui-avatars.com/api/?name=${metadata?.full_name || 'U'}&background=ce9341&color=fff`
+                phone: dbProfile.phone || '',
+                avatar: dbProfile.avatar || metadata?.avatar_url || `https://ui-avatars.com/api/?name=${metadata?.full_name || 'U'}&background=ce9341&color=fff`,
+                isAdmin
               });
 
-              // Refresh business settings on login/state change
               refreshBusinessSettings();
             } else {
               setUser(defaultUser);
@@ -141,8 +177,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return () => subscription.unsubscribe();
 
       } else {
-        // OFFLINE MODE: Use localStorage (for development/demo)
-        console.warn('⚠️ Running in offline mode. Configure Supabase for cloud features.');
+        // FIX (28 ago 2026): la modalità offline/localStorage resta SOLO come
+        // fallback di sviluppo quando Supabase non è configurato affatto —
+        // non è più usata come persistenza reale quando sei online.
+        console.warn('⚠️ Supabase non configurato — modalità sviluppo locale, nessun dato persistente reale.');
 
         const storedAuth = localStorage.getItem('lumina_auth');
         const storedUser = localStorage.getItem('lumina_user');
@@ -158,12 +196,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     initAuth();
   }, [isSupabaseMode]);
 
-  // ==============================================
-  // Login
-  // ==============================================
   const login = async (email: string, password: string): Promise<void> => {
     if (isSupabaseMode) {
-      // SUPABASE MODE
       const { session: newSession, user: authUser } = await signIn(email, password);
 
       if (newSession && authUser) {
@@ -172,16 +206,17 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsAuthenticated(true);
 
         const metadata = authUser.user_metadata;
+        const dbProfile = await fetchUserProfile(authUser.id);
         setUser({
           ...defaultUser,
           id: authUser.id,
-          name: metadata?.full_name || email.split('@')[0],
+          name: dbProfile.name || metadata?.full_name || email.split('@')[0],
           email: email,
-          avatar: metadata?.avatar_url || `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=ce9341&color=fff`
+          phone: dbProfile.phone || '',
+          avatar: dbProfile.avatar || metadata?.avatar_url || `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=ce9341&color=fff`
         });
       }
     } else {
-      // OFFLINE MODE (for development)
       const DEFAULT_PASSWORD = 'lumina2025';
       if (password !== DEFAULT_PASSWORD) {
         throw new Error('Password non corretta. (Modalità offline: usa "lumina2025")');
@@ -201,25 +236,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // ==============================================
-  // Register
-  // ==============================================
   const register = async (name: string, email: string, password: string): Promise<void> => {
     if (isSupabaseMode) {
-      // SUPABASE MODE
       const { user: authUser } = await signUp(email, password, { full_name: name });
 
       if (authUser) {
-        // User may need to verify email before fully logged in
         console.log('[Auth] Registration successful. Check email for verification.');
       }
     } else {
-      // OFFLINE MODE
       const newUser = {
         ...defaultUser,
         name: name,
         email: email,
-        companyName: name + " Consulting",
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ce9341&color=fff`
       };
       setUser(newUser);
@@ -229,9 +257,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // ==============================================
-  // Logout
-  // ==============================================
   const logout = async (): Promise<void> => {
     if (isSupabaseMode) {
       await signOut();
@@ -245,19 +270,43 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // ==============================================
-  // Update Profile
+  // FIX (28 ago 2026): ora scrive davvero su Supabase (tabella users) invece
+  // di fermarsi al solo stato locale + localStorage. Solo i campi che vivono
+  // davvero su `users` (full_name, phone, avatar_url) — non companyName/
+  // companyAddress/vatId, che non esistono più qui (vivono in Impostazioni).
   // ==============================================
-  const updateProfile = (data: Partial<UserProfile>) => {
+  const updateProfile = async (data: Partial<UserProfile>): Promise<void> => {
     const updatedUser = { ...user, ...data };
-    setUser(updatedUser);
-    localStorage.setItem('lumina_user', JSON.stringify(updatedUser));
+    setUser(updatedUser); // aggiornamento ottimistico della UI
 
-    // TODO: Sync to Supabase users table if in cloud mode
+    if (isSupabaseMode && user.id) {
+      try {
+        const { error } = await supabase
+          .from('users')
+          .update({
+            full_name: updatedUser.name,
+            phone: updatedUser.phone,
+            avatar_url: updatedUser.avatar,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id);
+
+        if (error) {
+          console.error('[UserContext] ❌ Errore salvataggio profilo su Supabase:', error);
+          throw error;
+        }
+        console.log('[UserContext] ✅ Profilo salvato su Supabase');
+      } catch (error) {
+        // Rollback ottimistico se il salvataggio fallisce davvero
+        setUser(user);
+        throw error;
+      }
+    } else {
+      // Solo se Supabase non è configurato affatto (sviluppo locale)
+      localStorage.setItem('lumina_user', JSON.stringify(updatedUser));
+    }
   };
 
-  // ==============================================
-  // Loading State
-  // ==============================================
   if (isLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-stone-50">

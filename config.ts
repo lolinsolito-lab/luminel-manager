@@ -1,4 +1,3 @@
-
 // --- WHITE LABEL CONFIGURATION ---
 // Modifica questo file per personalizzare l'app per ogni cliente prima del deployment.
 
@@ -52,9 +51,17 @@ export const APP_CONFIG = {
   },
 
   // Ecosistema, WhatsApp & Calendario
-  adminEmail: import.meta.env.VITE_ADMIN_EMAIL || "jaramichael@hotmail.com",
-  whatsappNumber: "393478901234", // Esempio numero configurato
-  calendarUrl: "https://calendar.google.com/calendar/appointments/schedules/YOUR_GOOGLE_SCHEDULE",
-  founderDeadline: "2026-12-31T23:59:59"
+  // FIX SICUREZZA (28 ago 2026): nessun fallback hardcoded qui.
+  // L'email admin NON deve mai finire nel bundle JS pubblico — il controllo
+  // vero è lato database (colonna users.is_admin + RLS), non lato client.
+  // whatsappNumber e calendarUrl leggono solo da env: se mancano, l'UI deve
+  // mostrare uno stato "in configurazione", mai un placeholder che sembra reale.
+  whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || "",
+  calendarUrl: import.meta.env.VITE_CALENDAR_URL || "",
+  founderDeadline: import.meta.env.VITE_FOUNDER_DEADLINE || "2026-12-31T23:59:59"
 };
 
+// Helper: usa questi invece di leggere APP_CONFIG.whatsappNumber/calendarUrl
+// direttamente nei componenti, così l'UI sa quando mostrare "in configurazione"
+export const isWhatsAppConfigured = () => Boolean(APP_CONFIG.whatsappNumber);
+export const isCalendarConfigured = () => Boolean(APP_CONFIG.calendarUrl);

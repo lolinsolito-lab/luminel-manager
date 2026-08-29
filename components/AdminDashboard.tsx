@@ -14,7 +14,8 @@ import {
     UserPlus,
     Loader2,
     Sparkles,
-    Activity
+    Activity,
+    AlertTriangle
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
@@ -54,6 +55,8 @@ interface RevenueStats {
     byTier: Record<string, number>;
 }
 
+interface TierPrice { monthly: number; annual: number; }
+
 export const AdminDashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [pendingSubscriptions, setPendingSubscriptions] = useState<PendingSubscription[]>([]);
@@ -69,12 +72,11 @@ export const AdminDashboard: React.FC = () => {
         byTier: {}
     });
 
-    const [tierPricing, setTierPricing] = useState<Record<string, number>>({
-        'starter': 33,
-        'pro': 55,
-        'signature': 88,
-        'empire': 138
-    });
+    // FIX SICUREZZA/COERENZA (28 ago 2026): niente più fallback hardcoded.
+    // null = "non ancora caricato / fetch fallita" — la UI deve saperlo e dirlo,
+    // non calcolare silenziosamente su numeri vecchi.
+    const [tierPricing, setTierPricing] = useState<Record<string, TierPrice> | null>(null);
+    const [pricingError, setPricingError] = useState(false);
 
     useEffect(() => {
         loadAllData();
@@ -82,25 +84,28 @@ export const AdminDashboard: React.FC = () => {
 
     const loadAllData = async () => {
         setIsLoading(true);
+        setPricingError(false);
         try {
-            let activePricing = {
-                'starter': 33,
-                'pro': 55,
-                'signature': 88,
-                'empire': 138
-            };
+            let activePricing: Record<string, TierPrice> | null = null;
 
             try {
                 const { getSubscriptionPlans } = await import('../services/waitlistService');
                 const dbPlans = await getSubscriptionPlans();
                 if (dbPlans && dbPlans.length > 0) {
+                    activePricing = {};
                     dbPlans.forEach((plan: any) => {
-                        activePricing[plan.name] = Number(plan.price_monthly_founder);
+                        activePricing![plan.name] = {
+                            monthly: Number(plan.price_monthly_founder),
+                            annual: Number(plan.price_annual_founder)
+                        };
                     });
                     setTierPricing(activePricing);
+                } else {
+                    setPricingError(true);
                 }
             } catch (e) {
-                console.warn('Could not load pricing from DB, using fallback values');
+                console.error('[AdminDashboard] Impossibile caricare i prezzi dal DB:', e);
+                setPricingError(true);
             }
 
             await Promise.all([
@@ -125,7 +130,7 @@ export const AdminDashboard: React.FC = () => {
         }
     };
 
-    const loadUsers = async (pricingMap = tierPricing) => {
+    const loadUsers = async (pricingMap: Record<string, TierPrice> | null) => {
         const { data, error } = await supabase
             .from('users')
             .select('*')
@@ -149,16 +154,11 @@ export const AdminDashboard: React.FC = () => {
                 if (user.is_founding_member) foundingMembers++;
                 if (new Date(user.created_at) >= startOfMonth) thisMonth++;
 
-                if (pricingMap[tier] && user.subscription_status === 'active') {
+                if (pricingMap && pricingMap[tier] && user.subscription_status === 'active') {
                     if (user.billing_cycle === 'annual') {
-                        let annualEquivalent = pricingMap[tier];
-                        if (tier === 'starter') annualEquivalent = 330 / 12;
-                        else if (tier === 'pro') annualEquivalent = 550 / 12;
-                        else if (tier === 'signature') annualEquivalent = 880 / 12;
-                        else if (tier === 'empire') annualEquivalent = 1380 / 12;
-                        mrr += Math.round(annualEquivalent);
+                        mrr += Math.round(pricingMap[tier].annual / 12);
                     } else {
-                        mrr += pricingMap[tier];
+                        mrr += pricingMap[tier].monthly;
                     }
                 }
             });
@@ -170,15 +170,16 @@ export const AdminDashboard: React.FC = () => {
                 thisMonth
             });
 
-            setRevenueStats({
-                mrr,
-                byTier: Object.fromEntries(
-                    Object.entries(byTier).map(([tier, count]) => [
-                        tier,
-                        (pricingMap[tier] || 0) * count
-                    ])
-                )
-            });
+            // FIX: revenue per piano calcolato SOLO se pricingMap è reale — mai
+            // più numeri stimati su un fallback silenzioso
+            const revenueByTier: Record<string, number> = {};
+            if (pricingMap) {
+                Object.entries(byTier).forEach(([tier, count]) => {
+                    revenueByTier[tier] = (pricingMap[tier]?.monthly || 0) * count;
+                });
+            }
+
+            setRevenueStats({ mrr: pricingMap ? mrr : 0, byTier: revenueByTier });
         }
     };
 
@@ -203,11 +204,11 @@ export const AdminDashboard: React.FC = () => {
             if (response.ok) {
                 alert(`✅ Email reminder inviata a ${email}`);
             } else {
-                alert('❌ Errore nell\'invio dell\'email');
+                alert('❌ Errore nell\'invio dell\'email — verifica che la Edge Function "send-email" sia stata deployata su Supabase');
             }
         } catch (error) {
             console.error('Error sending reminder:', error);
-            alert('❌ Errore nell\'invio dell\'email');
+            alert('❌ Errore nell\'invio dell\'email — verifica che la Edge Function "send-email" sia stata deployata su Supabase');
         }
     };
 
@@ -296,9 +297,16 @@ export const AdminDashboard: React.FC = () => {
                     </motion.button>
                 </div>
 
-                {/* Stats Overview - Champagne/Ivory Theme */}
+                {/* FIX: banner di errore esplicito se i prezzi non sono caricati */}
+                {pricingError && (
+                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+                        <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                        <p className="text-sm font-medium">Impossibile caricare i prezzi dal database. MRR e Revenue per Piano non sono affidabili finché non risolvi — premi "Aggiorna" per riprovare.</p>
+                    </div>
+                )}
+
+                {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {/* MRR */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -312,12 +320,15 @@ export const AdminDashboard: React.FC = () => {
                                 </div>
                                 <span className="text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1 rounded-full">MRR</span>
                             </div>
-                            <p className="text-4xl font-bold text-stone-800">€{revenueStats.mrr.toLocaleString()}</p>
+                            {tierPricing ? (
+                                <p className="text-4xl font-bold text-stone-800">€{revenueStats.mrr.toLocaleString()}</p>
+                            ) : (
+                                <p className="text-2xl font-bold text-stone-300">— dato non disponibile —</p>
+                            )}
                             <p className="text-stone-500 text-sm mt-2">Ricavo Mensile Ricorrente</p>
                         </div>
                     </motion.div>
 
-                    {/* Total Users */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -341,7 +352,6 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Founding Members */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -363,7 +373,6 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Pending */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -388,7 +397,7 @@ export const AdminDashboard: React.FC = () => {
                     </motion.div>
                 </div>
 
-                {/* Revenue by Tier */}
+                {/* Revenue by Tier — FIX: stato esplicito se tierPricing è null */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -399,29 +408,33 @@ export const AdminDashboard: React.FC = () => {
                         <TrendingUp className="w-5 h-5 text-amber-600" />
                         Revenue per Piano
                     </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {Object.entries(tierPricing).map(([tier, price]) => {
-                            const count = userStats.byTier[tier] || 0;
-                            const revenue = count * price;
-                            return (
-                                <div key={tier} className="p-5 bg-gradient-to-br from-stone-50 to-amber-50/30 rounded-xl border border-stone-100 hover:border-amber-200 transition-all group">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${getTierBadge(tier)}`}>
-                                            {tier.toUpperCase()}
-                                        </span>
-                                        <span className="text-stone-400 text-sm">{count} utenti</span>
+                    {tierPricing ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {(Object.entries(tierPricing) as [string, TierPrice][]).map(([tier, price]) => {
+                                const count = userStats.byTier[tier] || 0;
+                                const revenue = count * price.monthly;
+                                return (
+                                    <div key={tier} className="p-5 bg-gradient-to-br from-stone-50 to-amber-50/30 rounded-xl border border-stone-100 hover:border-amber-200 transition-all group">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className={`text-xs font-bold px-3 py-1 rounded-full ${getTierBadge(tier)}`}>
+                                                {tier.toUpperCase()}
+                                            </span>
+                                            <span className="text-stone-400 text-sm">{count} utenti</span>
+                                        </div>
+                                        <p className="text-3xl font-bold text-stone-800 group-hover:text-amber-700 transition-colors">
+                                            €{revenue.toLocaleString()}
+                                        </p>
+                                        <p className="text-xs text-stone-400 mt-1">€{price.monthly}/mese × {count}</p>
                                     </div>
-                                    <p className="text-3xl font-bold text-stone-800 group-hover:text-amber-700 transition-colors">
-                                        €{revenue.toLocaleString()}
-                                    </p>
-                                    <p className="text-xs text-stone-400 mt-1">€{price}/mese × {count}</p>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-stone-400 text-sm">Dati prezzi non disponibili al momento.</div>
+                    )}
                 </motion.div>
 
-                {/* Pending Subscriptions Table */}
+                {/* Pending Subscriptions Table (invariato) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -510,7 +523,7 @@ export const AdminDashboard: React.FC = () => {
                     )}
                 </motion.div>
 
-                {/* Recent Users */}
+                {/* Recent Users (invariato) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -568,7 +581,7 @@ export const AdminDashboard: React.FC = () => {
                     )}
                 </motion.div>
 
-                {/* Founder Spots Progress */}
+                {/* Founder Spots Progress (invariato) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -597,7 +610,6 @@ export const AdminDashboard: React.FC = () => {
                     </p>
                 </motion.div>
 
-                {/* Footer */}
                 <div className="text-center pt-8 border-t border-amber-100">
                     <p className="text-stone-400 text-sm tracking-widest">
                         LUMINEL MANAGER · GOD MODE · PRESTIGE & EXCELLENCE

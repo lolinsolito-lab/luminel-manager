@@ -1,0 +1,169 @@
+?? .env
+?? .env.example
+?? .gitignore
+?? App.tsx
+?? components/
+  ?? AdminDashboard.tsx
+  ?? AIAssistant.tsx
+  ?? Analytics.tsx
+  ?? Calendar.tsx
+  ?? Clients.tsx
+  ?? Dashboard.tsx
+  ?? Finance.tsx
+  ?? FounderLanding.tsx
+  ?? FoundingMemberBadge.tsx
+  ?? HomeLanding.tsx
+  ?? LandingV2.tsx
+  ?? Layout.tsx
+  ?? LegalModals.tsx
+  ?? Library.tsx
+  ?? Login.tsx
+  ?? Logo.tsx
+  ?? NotificationDrawer.tsx
+  ?? PaymentSuccess.tsx
+  ?? Programs.tsx
+  ?? ResetPassword.tsx
+  ?? ScrollExpandMedia.tsx
+  ?? Settings.tsx
+  ?? SplashIntro.tsx
+  ?? Team.tsx
+  ?? UpgradeBanner.tsx
+?? config.ts
+?? constants.ts
+?? contexts/
+  ?? LanguageContext.tsx
+  ?? ProgramContext.tsx
+  ?? ResourceContext.tsx
+  ?? SubscriptionContext.tsx
+  ?? UIContext.tsx
+  ?? UserContext.tsx
+?? control/
+  ?? 00_INDICE.md
+  ?? 01_BRAND_IDENTITY.md
+  ?? 02_CUSTOMER_AVATAR.md
+  ?? 03_PRODUCT_OVERVIEW.md
+  ?? 04_COPYWRITING_GUIDE.md
+  ?? 05_COMPETITIVE_ANALYSIS.md
+  ?? 06_PRICING_STRATEGY.md
+  ?? 07_SECURITY_ANTIFRAUD.md
+  ?? 08_TECH_ARCHITECTURE.md
+  ?? 09_GROWTH_ROADMAP.md
+  ?? 10_CHANGELOG.md
+  ?? 11_ECOSYSTEM_MAP.md
+?? database/
+  ?? archivio_pre_28ago2026/
+    ?? migration_add_logo_url.sql
+    ?? migration_storage_buckets.sql
+    ?? migration_v1.1.sql
+    ?? migration_v1.2_fix_users.sql
+    ?? migration_v1.3_vault_categories.sql
+    ?? migration_v1.4_user_settings.sql
+    ?? migration_v2.0_subscriptions.sql
+    ?? migration_v2.1a_add_subscription_columns.sql
+    ?? migration_v2.1_admin_founder.sql
+    ?? migration_v2.2_founder_spots_update.sql
+    ?? migration_v2.3_pending_subscriptions.sql
+    ?? migration_v2.4_fix_user_registration.sql
+    ?? migration_v2.5_founder_25_spots.sql
+    ?? migration_v2.6_align_prices.sql
+    ?? README.md
+    ?? schema.sql
+?? fix_75.cjs
+?? fix_hero.cjs
+?? fix_jpg.cjs
+?? fix_layout.cjs
+?? fix_sticky.cjs
+?? get_tree.cjs
+?? get_tree.ps1
+?? index.html
+?? index.tsx
+?? metadata.json
+?? package-lock.json
+?? package.json
+?? pricing_fix.cjs
+?? public/
+  ?? .htaccess
+  ?? assets/
+    ?? images/
+      ?? 1media_1787930226434.jpg
+      ?? foto 7 lading.png
+      ?? media_1787930226434.jpg
+      ?? media_1787944837526.png
+      ?? media_1787944837542.jpg
+      ?? media_1787944837651.jpg
+      ?? media_1787944837657.jpg
+  ?? luminel_calendar_ipad.png
+  ?? luminel_coach_ambient.png
+  ?? luminel_crm_desktop.png
+  ?? luminel_hero_dashboard.png
+  ?? michael-jara.png
+?? README.md
+?? scratch_admin.cjs
+?? scratch_clients.cjs
+?? scripts/
+  ?? setupStripe.js
+?? services/
+  ?? categoryService.ts
+  ?? clientService.ts
+  ?? geminiService.ts
+  ?? notificationService.ts
+  ?? pdfService.ts
+  ?? pricingPlans.ts
+  ?? programService.ts
+  ?? resourceService.ts
+  ?? sessionService.ts
+  ?? settingsService.ts
+  ?? storageService.ts
+  ?? stripePrices.ts
+  ?? stripeService.ts
+  ?? supabaseClient.ts
+  ?? taskService.ts
+  ?? teamService.ts
+  ?? tierLimits.ts
+  ?? transactionService.ts
+  ?? waitlistService.ts
+?? stripe_ids.json
+?? stripe_prices.json
+?? supabase/
+  ?? .temp/
+    ?? cli-latest
+    ?? gotrue-version
+    ?? pooler-url
+    ?? postgres-version
+    ?? project-ref
+    ?? rest-version
+    ?? storage-migration
+    ?? storage-version
+  ?? functions/
+    ?? send-email/
+      ?? index.ts
+      ?? README.md
+    ?? send-resource/
+      ?? index.ts
+    ?? stripe-webhook/
+      ?? index.ts
+      ?? README.md
+?? tsconfig.json
+?? types.ts
+?? update.cjs
+?? update.js
+?? update2.cjs
+?? update_admin.js
+?? update_cta.cjs
+?? update_founder.cjs
+?? update_hero.cjs
+?? update_home.cjs
+?? update_images.cjs
+?? update_merged.cjs
+?? update_pricing.cjs
+?? utils/
+  ?? dailyQuotes.ts
+  ?? pdfGenerator.ts
+  ?? translations.ts
+  ?? validation.ts
+?? vercel.json
+?? vite-env.d.ts
+?? vite.config.ts
+?? _archive/
+  ?? HomeLanding.backup.tsx
+  ?? HomeLanding.piani_fixed.tsx

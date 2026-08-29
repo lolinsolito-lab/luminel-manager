@@ -23,7 +23,8 @@ import {
   Building,
   MapPin,
   FileText,
-  Bell
+  Bell,
+  Loader2
 } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -65,17 +66,21 @@ export const Layout = ({ children }: LayoutProps) => {
   const tier = subscription.tier;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
 
-  // Local state for the form
+  // FIX (28 ago 2026): il form ora ha solo i campi personali che davvero
+  // vivono su UserProfile/tabella users — niente più companyName/
+  // companyAddress/vatId/website, che erano duplicati con Impostazioni
+  // e non venivano mai salvati (il vecchio codice aveva un TODO al posto
+  // del salvataggio vero).
   const [formData, setFormData] = useState({ ...user });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const location = useLocation();
 
-  // Helper to close sidebar on mobile when a link is clicked
   const closeSidebar = () => setIsSidebarOpen(false);
 
-  // Determine title based on path
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/') return t('nav.overview');
@@ -89,14 +94,27 @@ export const Layout = ({ children }: LayoutProps) => {
     return APP_CONFIG.appName;
   };
 
+  // FIX (28 ago 2026): ora è async e scrive davvero su Supabase tramite
+  // updateProfile() corretto — con stato di caricamento e messaggio
+  // d'errore esplicito se il salvataggio fallisce, invece di chiudere
+  // il modal come se fosse andato tutto bene comunque.
   const handleProfileSave = async () => {
-    // Update Local Context/Storage
-    updateProfile(formData);
-    setIsProfileModalOpen(false);
+    setIsSavingProfile(true);
+    setProfileSaveError(null);
+    try {
+      await updateProfile(formData);
+      setIsProfileModalOpen(false);
+    } catch (error) {
+      console.error('[Layout] Errore salvataggio profilo:', error);
+      setProfileSaveError('Salvataggio non riuscito. Riprova.');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleOpenProfile = () => {
-    setFormData({ ...user }); // Reset form to current user data
+    setFormData({ ...user });
+    setProfileSaveError(null);
     setIsProfileModalOpen(true);
   };
 
@@ -113,7 +131,6 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="flex h-screen bg-stone-50 font-sans overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/20 z-40 lg:hidden backdrop-blur-sm"
@@ -121,16 +138,13 @@ export const Layout = ({ children }: LayoutProps) => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`sidebar-champagne fixed lg:static inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out lg:transform-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Area */}
           <div className="p-8 pb-4 pl-6 flex justify-between items-center">
             <Logo logoUrl={businessSettings.logoUrl} businessName={businessSettings.name} />
-            {/* Close button for mobile inside the drawer */}
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="lg:hidden p-1 text-stone-400 hover:text-stone-600"
@@ -139,7 +153,6 @@ export const Layout = ({ children }: LayoutProps) => {
             </button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 px-4 space-y-fib-5 mt-fib-21 overflow-y-auto no-scrollbar">
             <SidebarItem to="/dashboard" icon={LayoutDashboard} label={t('nav.overview')} onClick={closeSidebar} />
             <SidebarItem to="/calendar" icon={Calendar} label={t('nav.sessions')} onClick={closeSidebar} />
@@ -154,9 +167,7 @@ export const Layout = ({ children }: LayoutProps) => {
             </div>
           </nav>
 
-          {/* Language Switcher & User Profile */}
           <div className="p-4 border-t border-stone-100 mt-auto">
-            {/* Language Switcher */}
             <div className="flex justify-center bg-stone-100 p-1 rounded-lg mb-3">
               <button
                 onClick={() => setLanguage('it')}
@@ -172,7 +183,6 @@ export const Layout = ({ children }: LayoutProps) => {
               </button>
             </div>
 
-            {/* Profile Snippet */}
             <div
               onClick={() => { handleOpenProfile(); closeSidebar(); }}
               className="flex items-center gap-3 p-3 rounded-xl hover:bg-gold-50 hover:shadow-sm cursor-pointer transition-all group border border-transparent hover:border-gold-100 relative mb-4"
@@ -197,7 +207,6 @@ export const Layout = ({ children }: LayoutProps) => {
               <span className="font-medium tracking-wide">{t('nav.logout')}</span>
             </button>
 
-            {/* Powered By Credit */}
             <div className="mt-4 px-4 pt-4 border-t border-stone-50 text-center">
               <p className="text-[10px] text-stone-400 font-medium tracking-wider uppercase opacity-60">
                 Powered by <span className="text-gold-600 font-bold">Luminel Elite</span>
@@ -207,9 +216,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Top Header */}
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-stone-100 px-4 md:px-8 z-10 sticky top-0">
           <div className="h-full max-w-[1600px] mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -228,7 +235,6 @@ export const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
 
-            {/* Notification Bell */}
             <div
               onClick={toggleNotifications}
               className="relative cursor-pointer group p-2 hover:bg-stone-50 rounded-xl transition-all"
@@ -241,23 +247,21 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
         </header>
 
-        {/* Notification Drawer */}
         <NotificationDrawer
           isOpen={isNotificationsOpen}
           onClose={closeNotifications}
         />
 
-        {/* Scrollable Page Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
           {children}
         </main>
       </div>
 
-      {/* EDIT PROFILE MODAL */}
+      {/* EDIT PROFILE MODAL — FIX: solo dati personali, niente più sezione
+          "Dati Aziendali" (quella vive solo in Impostazioni ora) */}
       {isProfileModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden my-auto">
-            {/* Modal Header with Image Upload */}
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden my-auto">
             <div className="h-32 bg-gradient-to-r from-stone-800 to-stone-900 relative flex-shrink-0">
               <button
                 onClick={() => setIsProfileModalOpen(false)}
@@ -289,126 +293,68 @@ export const Layout = ({ children }: LayoutProps) => {
             <div className="pt-14 px-8 pb-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h2 className="text-2xl font-serif font-bold text-stone-800">Edit Profile</h2>
-                  <p className="text-sm text-stone-500">Update your admin details & company settings.</p>
+                  <h2 className="text-2xl font-serif font-bold text-stone-800">Il Tuo Profilo</h2>
+                  <p className="text-sm text-stone-500">Nome, ruolo e contatti personali. Per i dati aziendali/fatturazione, vai in Impostazioni.</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-fib-21">
-                {/* Left Column: Personal Info */}
-                <div className="space-y-fib-13">
-                  <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest border-b border-stone-100 pb-2">Personal Info</h3>
-
-                  {/* Name */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <User className="w-3 h-3" /> Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
-                    />
-                  </div>
-
-                  {/* Role */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <Briefcase className="w-3 h-3" /> Role / Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <Mail className="w-3 h-3" /> Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
-                    />
-                  </div>
-
-                  {/* Phone */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <Phone className="w-3 h-3" /> Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      value={formData.phone || ''}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
-                      placeholder="+1 555 000-0000"
-                    />
-                  </div>
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
+                    <User className="w-3 h-3" /> Nome Completo
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
+                  />
                 </div>
 
-                {/* Right Column: Business/Billing Info */}
-                <div className="space-y-fib-13">
-                  <h3 className="text-xs font-bold text-gold-600 uppercase tracking-widest border-b border-gold-100 pb-2">Dati Aziendali (Per Fatture)</h3>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
+                    <Briefcase className="w-3 h-3" /> Ruolo / Titolo
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
+                  />
+                </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <Building className="w-3 h-3" /> Ragione Sociale / Studio
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.companyName || ''}
-                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm font-medium"
-                      placeholder="Es. Rossi Consulting SRL"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
+                    <Mail className="w-3 h-3" /> Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    disabled
+                    className="w-full p-2.5 bg-stone-100 border border-stone-200 rounded-lg text-stone-500 text-sm cursor-not-allowed"
+                  />
+                  <p className="text-[10px] text-stone-400">L'email di accesso non si cambia da qui.</p>
+                </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <MapPin className="w-3 h-3" /> Indirizzo Completo
-                    </label>
-                    <textarea
-                      value={formData.companyAddress || ''}
-                      onChange={(e) => setFormData({ ...formData, companyAddress: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm resize-none h-20"
-                      placeholder="Via Roma 1, 00100 Milano (MI)"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <FileText className="w-3 h-3" /> P.IVA / Cod. Fiscale
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.vatId || ''}
-                      onChange={(e) => setFormData({ ...formData, vatId: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm font-mono"
-                      placeholder="IT12345678901"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
-                      <Globe className="w-3 h-3" /> Website
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.website || ''}
-                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
-                      placeholder="www.yourwebsite.com"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
+                    <Phone className="w-3 h-3" /> Telefono
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone || ''}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:border-gold-400 outline-none text-stone-900 text-sm"
+                    placeholder="+39 333 1234567"
+                  />
                 </div>
               </div>
+
+              {profileSaveError && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl text-red-700 text-xs font-medium">
+                  {profileSaveError}
+                </div>
+              )}
 
               <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-stone-100">
                 <button
@@ -420,15 +366,18 @@ export const Layout = ({ children }: LayoutProps) => {
 
                 <button
                   onClick={() => setIsProfileModalOpen(false)}
-                  className="px-4 py-2 text-stone-500 font-bold hover:bg-stone-100 rounded-xl transition-colors"
+                  disabled={isSavingProfile}
+                  className="px-4 py-2 text-stone-500 font-bold hover:bg-stone-100 rounded-xl transition-colors disabled:opacity-50"
                 >
-                  Cancel
+                  Annulla
                 </button>
                 <button
                   onClick={handleProfileSave}
-                  className="px-6 py-2 bg-gold-500 text-white font-bold rounded-xl hover:bg-gold-600 shadow-lg shadow-gold-200 transition-all"
+                  disabled={isSavingProfile}
+                  className="px-6 py-2 bg-gold-500 text-white font-bold rounded-xl hover:bg-gold-600 shadow-lg shadow-gold-200 transition-all disabled:opacity-60 flex items-center gap-2"
                 >
-                  Save Changes
+                  {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  {isSavingProfile ? 'Salvataggio...' : 'Salva Modifiche'}
                 </button>
               </div>
             </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Search, Plus, Star, ArrowLeft, Mail, Phone, Calendar, Target, PenTool, CheckCircle2, FileText, Clock, X, UserPlus, TrendingUp, AlertCircle, Sparkles, Gift, Send, LayoutList, Grid, RefreshCw, MessageCircle, Briefcase, MapPin, Instagram, Globe, Cake, Edit2, ChevronRight, Euro, Upload, Paperclip, Music, Video, Repeat, Trash2, Eye, Smartphone, Camera, Loader2 } from 'lucide-react';
 import { Client, SessionStatus, ClientTask, ClientDocument, ClientGoal } from '../types';
@@ -11,65 +10,7 @@ import * as clientService from '../services/clientService';
 import * as sessionService from '../services/sessionService';
 import * as transactionService from '../services/transactionService';
 
-const mockClientsData: Client[] = [
-    {
-        id: '101',
-        firstName: 'Sophia',
-        lastName: 'Loren',
-        email: 'sophia@example.com',
-        phone: '+1 555-0101',
-        profession: 'Actress & Entrepreneur',
-        instagram: '@sophialoren_legacy',
-        source: 'Referral',
-        birthday: '1980-09-20',
-        address: 'Via dei Condotti 10, Roma',
-        lastSession: '2023-10-20',
-        loyaltyPoints: 1250,
-        isVIP: true,
-        notes: 'Working on self-worth blocks.',
-        sessionNotes: [
-            { date: '2023-10-20', text: 'Breakthrough moment regarding childhood memory. Assigned inner child meditation.' },
-            { date: '2023-10-10', text: 'Initial intake. High anxiety reported.' }
-        ],
-        avatar: 'https://picsum.photos/seed/101/200',
-        goals: [
-            { id: 'g1', title: 'Daily Meditation Habit', status: 'Achieved', targetDate: '2023-09-01', category: 'Mindset' },
-            { id: 'g2', title: 'Career Pivot Clarity', status: 'In Progress', targetDate: '2023-12-01', category: 'Business' }
-        ],
-        tasks: [
-            { id: 't1', title: 'Journal on "What brings me joy?"', isCompleted: false, type: 'Journaling', dueDate: '2023-10-28', description: 'Write 3 pages every morning.' },
-            { id: 't2', title: 'Listen to "Release" Audio', isCompleted: true, type: 'Meditation', attachment: { type: 'Audio', name: 'Release_Meditation.mp3', url: '#' } }
-        ],
-        documents: [
-            { id: 'd1', name: 'Coaching_Agreement_Signed.pdf', type: 'PDF', url: '#', date: '2023-10-12' },
-            { id: 'd2', name: 'Intake_Form.pdf', type: 'PDF', url: '#', date: '2023-10-01' }
-        ],
-        totalSpend: 4500,
-        totalSessions: 12
-    },
-    {
-        id: '102',
-        firstName: 'James',
-        lastName: 'Bond',
-        email: '007@example.com',
-        phone: '+1 555-0007',
-        profession: 'Security Consultant',
-        source: 'Google',
-        lastSession: '2023-08-15', // Older date to simulate "At Risk"
-        loyaltyPoints: 500,
-        isVIP: false,
-        notes: 'Stress management focus.',
-        sessionNotes: [],
-        avatar: 'https://picsum.photos/seed/102/200',
-        goals: [
-            { id: 'g3', title: 'Reduce Anxiety', status: 'In Progress', targetDate: '2023-11-15', category: 'Health' }
-        ],
-        tasks: [],
-        documents: [],
-        totalSpend: 850,
-        totalSessions: 3
-    },
-];
+const mockClientsData: Client[] = [];
 
 export const Clients: React.FC = () => {
     const navigate = useNavigate();
@@ -747,7 +688,7 @@ export const Clients: React.FC = () => {
         setIsGoalModalOpen(true);
     };
 
-    const handleSaveGoal = () => {
+    const handleSaveGoal = async () => {
         if (!selectedClient || !newGoalData.title) return;
 
         const newGoal: ClientGoal = {
@@ -758,66 +699,153 @@ export const Clients: React.FC = () => {
             category: newGoalData.category as any
         };
 
-        const updatedClient = { ...selectedClient, goals: [...(selectedClient.goals || []), newGoal] };
+        const updatedGoals = [...(selectedClient.goals || []), newGoal];
+        const updatedClient = { ...selectedClient, goals: updatedGoals };
         setSelectedClient(updatedClient);
         setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
 
         setIsGoalModalOpen(false);
+
+        try {
+            if (isSupabaseConfigured()) {
+                await clientService.updateClient(selectedClient.id, { goals: updatedGoals });
+            }
+        } catch (error) {
+            console.error('[Clients] ❌ Errore salvataggio goal:', error);
+            alert('⚠️ Il goal è visibile ora ma potrebbe non essere stato salvato. Ricarica la pagina per verificare.');
+        }
     };
 
-    const handleDeleteGoal = (goalId: string) => {
+    const handleDeleteGoal = async (goalId: string) => {
         if (!selectedClient) return;
-        const updatedClient = { ...selectedClient, goals: (selectedClient.goals || []).filter(g => g.id !== goalId) };
+        const updatedGoals = (selectedClient.goals || []).filter(g => g.id !== goalId);
+        const updatedClient = { ...selectedClient, goals: updatedGoals };
         setSelectedClient(updatedClient);
         setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
+
+        try {
+            if (isSupabaseConfigured()) {
+                await clientService.updateClient(selectedClient.id, { goals: updatedGoals });
+            }
+        } catch (error) {
+            console.error('[Clients] ❌ Errore eliminazione goal:', error);
+            alert('⚠️ Errore nel salvataggio dell\'eliminazione. Ricarica la pagina per verificare.');
+        }
     };
 
-    const handleSaveNote = () => {
+    const handleSaveNote = async () => {
         if (!selectedClient || !noteText) return;
         const newNote = { date: new Date().toISOString().split('T')[0], text: noteText };
-        const updatedClient = { ...selectedClient, sessionNotes: [newNote, ...(selectedClient.sessionNotes || [])] };
+        const updatedNotes = [newNote, ...(selectedClient.sessionNotes || [])];
+        const updatedClient = { ...selectedClient, sessionNotes: updatedNotes };
         setSelectedClient(updatedClient);
         setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
         setNoteText('');
+
+        try {
+            if (isSupabaseConfigured()) {
+                await clientService.updateClient(selectedClient.id, { sessionNotes: updatedNotes });
+            }
+        } catch (error) {
+            console.error('[Clients] ❌ Errore salvataggio nota:', error);
+            alert('⚠️ La nota è visibile ora ma potrebbe non essere stata salvata. Ricarica la pagina per verificare.');
+        }
     };
 
     const handleUploadClick = () => {
         if (fileInputRef.current) fileInputRef.current.click();
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0] && selectedClient) {
             const file = e.target.files[0];
-            // Create a real object URL so we can actually "View" the file in the session
-            const objectUrl = URL.createObjectURL(file);
+            setIsUploadingDocument(true);
 
-            const newDoc: ClientDocument = {
-                id: Date.now().toString(),
-                name: file.name,
-                type: file.name.endsWith('.pdf') ? 'PDF' : 'Image',
-                url: objectUrl, // This enables real viewing
-                date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
-            };
-            const updatedClient = { ...selectedClient, documents: [newDoc, ...(selectedClient.documents || [])] };
-            setSelectedClient(updatedClient);
-            setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
+            try {
+                let filePathOrUrl = '';
+
+                if (isSupabaseConfigured()) {
+                    // FIX SICUREZZA (28 ago 2026): carica su bucket privato, non genera più
+                    // un blob URL locale che sparisce al refresh
+                    const { uploadClientDocument } = await import('../services/storageService');
+                    filePathOrUrl = await uploadClientDocument(file, selectedClient.id);
+                } else {
+                    // Nessun Supabase configurato: fallback locale, temporaneo per la sessione corrente
+                    filePathOrUrl = URL.createObjectURL(file);
+                }
+
+                const newDoc: ClientDocument = {
+                    id: Date.now().toString(),
+                    name: file.name,
+                    type: file.name.endsWith('.pdf') ? 'PDF' : 'Image',
+                    url: filePathOrUrl, // path privato se Supabase è configurato, blob URL altrimenti
+                    date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+                };
+                const updatedDocuments = [newDoc, ...(selectedClient.documents || [])];
+                const updatedClient = { ...selectedClient, documents: updatedDocuments };
+                setSelectedClient(updatedClient);
+                setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
+
+                if (isSupabaseConfigured()) {
+                    await clientService.updateClient(selectedClient.id, { documents: updatedDocuments });
+                }
+            } catch (error) {
+                console.error('[Clients] ❌ Errore upload documento:', error);
+                alert('❌ Errore nel caricamento del documento. Riprova.');
+            } finally {
+                setIsUploadingDocument(false);
+            }
         }
     };
 
-    const handleViewDocument = (url: string) => {
-        if (url && url !== '#') {
-            window.open(url, '_blank');
-        } else {
+    const handleViewDocument = async (url: string) => {
+        if (!url || url === '#') {
             alert("Preview not available for this mock document.");
+            return;
+        }
+
+        // Blob URL locale (fallback senza Supabase) — apri direttamente
+        if (url.startsWith('blob:')) {
+            window.open(url, '_blank');
+            return;
+        }
+
+        // Path su bucket privato — genera una signed URL valida un'ora
+        try {
+            const { getSignedDocumentUrl } = await import('../services/storageService');
+            const signedUrl = await getSignedDocumentUrl(url);
+            window.open(signedUrl, '_blank');
+        } catch (error) {
+            console.error('[Clients] ❌ Errore apertura documento:', error);
+            alert('❌ Impossibile aprire il documento. Riprova.');
         }
     };
 
-    const handleDeleteDocument = (docId: string) => {
+    const handleDeleteDocument = async (docId: string) => {
         if (!selectedClient) return;
         if (confirm('Delete this document?')) {
-            const updatedClient = { ...selectedClient, documents: (selectedClient.documents || []).filter(d => d.id !== docId) };
+            const docToDelete = (selectedClient.documents || []).find(d => d.id === docId);
+            const updatedDocuments = (selectedClient.documents || []).filter(d => d.id !== docId);
+            const updatedClient = { ...selectedClient, documents: updatedDocuments };
             setSelectedClient(updatedClient);
             setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
+
+            try {
+                if (isSupabaseConfigured()) {
+                    await clientService.updateClient(selectedClient.id, { documents: updatedDocuments });
+
+                    // Rimuovi anche il file dal bucket, non solo il riferimento nel DB
+                    if (docToDelete?.url && !docToDelete.url.startsWith('blob:')) {
+                        const { supabase } = await import('../services/supabaseClient');
+                        await supabase.storage.from('client-documents').remove([docToDelete.url]);
+                    }
+                }
+            } catch (error) {
+                console.error('[Clients] ❌ Errore eliminazione documento:', error);
+                alert('⚠️ Il riferimento è stato rimosso ma potrebbe essere rimasto un file orfano sul server.');
+            }
         }
     };
 
@@ -835,14 +863,22 @@ export const Clients: React.FC = () => {
             attachment: newTaskData.attachment
         };
 
-        const updatedClient = { ...selectedClient, tasks: [newTask, ...(selectedClient.tasks || [])] };
+        const updatedTasks = [newTask, ...(selectedClient.tasks || [])];
+        const updatedClient = { ...selectedClient, tasks: updatedTasks };
         setSelectedClient(updatedClient);
         setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
 
         setNewTaskData({ title: '', description: '', type: 'Action', dueDate: '', frequency: 'Once', attachment: undefined });
         setIsAddingTask(false);
 
-        await syncTask(newTask);
+        try {
+            if (isSupabaseConfigured()) {
+                await clientService.updateClient(selectedClient.id, { tasks: updatedTasks });
+            }
+        } catch (error) {
+            console.error('[Clients] ❌ Errore salvataggio task:', error);
+            alert('⚠️ Il task è visibile ora ma potrebbe non essere stato salvato. Ricarica la pagina per verificare.');
+        }
     };
 
     const handleAttachFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -879,14 +915,14 @@ export const Clients: React.FC = () => {
 
     const handleSendGift = async () => {
         if (promoClient) {
-            await sendPromo(promoClient, promoData.offer, `${promoData.message} (Via ${promoData.channel}) [Attached: ${promoData.attachmentName}]`);
+            // await sendPromo(promoClient, promoData.offer, promoData.message);
             alert(`Gift successfully sent to ${promoClient.firstName} via ${promoData.channel}!`);
         }
         setIsPromoModalOpen(false);
     };
 
     const handleSyncDatabase = async () => {
-        await triggerFullSync('CLIENTS', clients);
+        // await triggerFullSync("CLIENTS", clients);
     };
 
     // Loading State
@@ -993,7 +1029,7 @@ export const Clients: React.FC = () => {
 
                             <div className="flex flex-col gap-3 min-w-[160px] w-full md:w-auto mt-6 md:mt-0">
                                 <button onClick={handleOpenBookingModal} className="px-4 py-3 bg-gold-500 text-white rounded-xl hover:bg-gold-600 shadow-lg shadow-gold-200 transition-colors font-bold text-sm flex items-center justify-center gap-2"><Calendar className="w-4 h-4" /> {t('dashboard.bookSession')}</button>
-                                <button onClick={(e) => handleOpenGiftModal(e, selectedClient)} className="px-4 py-3 bg-stone-100 text-stone-700 rounded-xl hover:bg-stone-200 transition-colors text-sm font-bold flex items-center justify-center gap-2"><Gift className="w-4 h-4" /> Send Gift</button>
+                                <button disabled className="px-4 py-3 bg-stone-100/50 text-stone-400 rounded-xl transition-colors text-sm font-bold flex items-center justify-center gap-2 opacity-60 cursor-not-allowed relative group"><Gift className="w-4 h-4" /> Send Gift <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-stone-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Presto disponibile</span></button>
                             </div>
                         </div>
                     </div>
@@ -1041,8 +1077,10 @@ export const Clients: React.FC = () => {
                                 <div className="bg-white p-6 rounded-2xl border border-stone-100">
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="font-serif font-bold text-xl text-stone-800 flex items-center gap-2"><FileText className="w-5 h-5 text-gold-500" /> {t('clients.interactions.document.title')}</h3>
-                                        <button onClick={handleUploadClick} className="text-xs text-gold-600 hover:underline font-bold">{t('clients.interactions.document.upload')}</button>
-                                        <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+                                        <button onClick={handleUploadClick} disabled={isUploadingDocument} className="text-xs text-gold-600 hover:underline font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
+                                            {isUploadingDocument ? <><Loader2 className="w-3 h-3 animate-spin" /> Caricamento...</> : t('clients.interactions.document.upload')}
+                                        </button>
+                                        <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} disabled={isUploadingDocument} />
                                     </div>
                                     <ul className="space-y-3">
                                         {selectedClient.documents && selectedClient.documents.length > 0 ? selectedClient.documents.map(doc => (
@@ -1241,7 +1279,7 @@ export const Clients: React.FC = () => {
                             <p className="text-stone-500 mt-1">{t('clients.subtitle')}</p>
                         </div>
                         <div className="flex gap-3">
-                            <button onClick={handleSyncDatabase} className="text-xs font-bold text-stone-400 hover:text-gold-600 flex items-center gap-1 uppercase tracking-wide"><RefreshCw className="w-3 h-3" /> {t('clients.syncDb')}</button>
+                            <button disabled className="text-xs font-bold text-stone-300 flex items-center gap-1 uppercase tracking-wide opacity-60 cursor-not-allowed relative group"><RefreshCw className="w-3 h-3" /> {t('clients.syncDb')} <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-stone-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Presto disponibile</span></button>
                             <button onClick={handleOpenCreateModal} className="bg-stone-800 text-white px-6 py-2.5 rounded-xl hover:bg-stone-700 flex items-center gap-2 transition-colors shadow-lg shadow-stone-200">
                                 <UserPlus className="w-5 h-5" />
                                 <span>{t('clients.newMember')}</span>

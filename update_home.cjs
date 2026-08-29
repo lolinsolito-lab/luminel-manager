@@ -1,0 +1,29 @@
+const fs = require('fs');
+
+let content = fs.readFileSync('c:/luminel manager/components/HomeLanding.tsx', 'utf8');
+
+// 1. Add imports
+content = content.replace(
+  "import { PlanId } from '../services/stripePrices';",
+  "import { PlanId } from '../services/stripePrices';\nimport { STATIC_PRICING_PLANS, getMergedPricingPlans, TierPlan } from '../services/pricingPlans';"
+);
+
+// 2. Remove local PRICING_PLANS array
+const oldPricingMatch = content.match(/const PRICING_PLANS = \[.*?\];/s);
+if (oldPricingMatch) {
+  content = content.replace(oldPricingMatch[0], '');
+}
+
+// 3. Update useState type
+content = content.replace(
+  "const [plans, setPlans] = useState<typeof PRICING_PLANS | null>(null);",
+  "const [plans, setPlans] = useState<TierPlan[] | null>(null);"
+);
+
+// 4. Update the DB merge logic
+const dbMergeRegex = /const mapped = PRICING_PLANS\.map\(templatePlan => \{.*?\n\s+return null;[^\n]*\n\s+\}\)\.filter\(Boolean\);/s;
+const newDbMerge = `const mapped = getMergedPricingPlans(plansData);`;
+content = content.replace(dbMergeRegex, newDbMerge);
+
+fs.writeFileSync('c:/luminel manager/components/HomeLanding.tsx', content, 'utf8');
+console.log('HomeLanding.tsx updated');

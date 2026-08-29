@@ -13,6 +13,11 @@ const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY") || "";
 const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET") || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+// FIX (29 ago 2026): dominio dell'app letto da secret, non più hardcoded.
+// "app.luminelcoach.com" era solo un test, mai attivato — usava un dominio
+// morto proprio nel link dentro l'email di benvenuto dopo un pagamento vero.
+// Di default usa il dominio Vercel provvisorio, finché non ne attivi uno nuovo.
+const APP_URL = Deno.env.get("APP_URL") || "https://luminel-manager.vercel.app";
 
 // Initialize Stripe
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
@@ -24,7 +29,10 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Price ID to Tier mapping (update these with your actual price IDs)
-// Price ID to Tier mapping for Option A (Updated Dec 30 2024)
+// ⚠️ Questi sono Price ID di Stripe TEST MODE. Quando passi a LIVE, Stripe
+// genera ID diversi anche per "lo stesso" prodotto — vanno aggiornati qui,
+// altrimenti il webhook riceve il pagamento vero ma non lo riconosce e
+// non attiva nulla, senza nessun errore visibile al cliente.
 const PRICE_TO_TIER: Record<string, { tier: string; cycle: string }> = {
     // Starter
     "price_1Sk65GBXiYadZ8OVDiYnzozM": { tier: "starter", cycle: "monthly" },
@@ -41,13 +49,11 @@ const PRICE_TO_TIER: Record<string, { tier: string; cycle: string }> = {
 };
 
 serve(async (req: Request) => {
-    // Only allow POST requests
     if (req.method !== "POST") {
         return new Response("Method not allowed", { status: 405 });
     }
 
     try {
-        // Get the raw body and signature
         const body = await req.text();
         const signature = req.headers.get("stripe-signature");
 
@@ -56,7 +62,6 @@ serve(async (req: Request) => {
             return new Response("No signature", { status: 400 });
         }
 
-        // Verify the webhook signature (use async version for Deno runtime)
         let event: Stripe.Event;
         try {
             event = await stripe.webhooks.constructEventAsync(body, signature, STRIPE_WEBHOOK_SECRET);
@@ -67,7 +72,6 @@ serve(async (req: Request) => {
 
         console.log(`📩 Received Stripe event: ${event.type}`);
 
-        // Handle the event
         switch (event.type) {
             case "checkout.session.completed": {
                 const session = event.data.object as Stripe.Checkout.Session;
@@ -109,7 +113,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     console.log("🎉 Processing checkout.session.completed");
     console.log("Session ID:", session.id);
 
-    // Get customer email from multiple possible locations
     const customerEmail = session.customer_email
         || session.customer_details?.email
         || null;
@@ -122,14 +125,12 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         return;
     }
 
-    // Get the subscription details
     const subscriptionId = session.subscription as string;
     if (!subscriptionId) {
         console.log("No subscription ID found (one-time payment?)");
         return;
     }
 
-    // Fetch subscription to get the price ID
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     const priceId = subscription.items.data[0]?.price.id;
 
@@ -138,7 +139,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         return;
     }
 
-    // Map price ID to tier
     const tierInfo = PRICE_TO_TIER[priceId];
     if (!tierInfo) {
         console.error(`Unknown price ID: ${priceId}`);
@@ -147,7 +147,10 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
     console.log(`📦 Plan: ${tierInfo.tier} (${tierInfo.cycle})`);
 
-    // Get the next founding member number
+    // ⚠️ NOTA APERTA (non risolta in questo fix): qui non c'è nessun controllo
+    // sul tetto dei 25 posti Founder. Chiunque paghi tramite un Payment Link
+    // Stripe diventa is_founding_member=true senza verifica. Da decidere se e
+    // come limitarlo — segnalato, non ancora corretto.
     const { count: founderCount } = await supabase
         .from("users")
         .select("*", { count: "exact", head: true })
@@ -160,7 +163,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
     const founderNumber = (founderCount || 0) + (pendingCount || 0) + 1;
 
-    // Check if user exists in database
     const { data: existingUser, error: userError } = await supabase
         .from("users")
         .select("id, email, full_name")
@@ -168,7 +170,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         .single();
 
     if (existingUser && !userError) {
-        // USER EXISTS - Update their subscription
         console.log(`✅ User found: ${customerEmail}`);
 
         const { error } = await supabase
@@ -193,7 +194,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
         console.log(`   Tier: ${tierInfo.tier}, Founder #${founderNumber}`);
 
-        // Send welcome email
         await sendEmail(customerEmail, "founder_welcome", {
             name: existingUser.full_name || customerEmail.split("@")[0] || "Founder",
             tier: tierInfo.tier,
@@ -201,7 +201,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         });
 
     } else {
-        // USER DOES NOT EXIST - Store in pending_subscriptions for marketing flow
         console.log(`⏳ User not found, saving to pending_subscriptions: ${customerEmail}`);
 
         const { error: pendingError } = await supabase
@@ -225,8 +224,9 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
         console.log(`   Saved pending: ${tierInfo.tier}, Founder #${founderNumber}`);
 
-        // Send invite registration email
-        const registrationUrl = `https://app.luminelcoach.com/#/register?email=${encodeURIComponent(customerEmail)}`;
+        // FIX: usa APP_URL (secret, dominio Vercel di default) invece di
+        // "app.luminelcoach.com" hardcoded — dominio mai attivato, link morto
+        const registrationUrl = `${APP_URL}/#/register?email=${encodeURIComponent(customerEmail)}`;
 
         await sendEmail(customerEmail, "invite_registration", {
             tier: tierInfo.tier,
@@ -236,9 +236,6 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     }
 }
 
-/**
- * Helper function to send emails
- */
 async function sendEmail(to: string, type: string, data: Record<string, unknown>) {
     try {
         const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
@@ -260,9 +257,6 @@ async function sendEmail(to: string, type: string, data: Record<string, unknown>
     }
 }
 
-/**
- * Handle subscription updates (plan changes, renewal, etc.)
- */
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     console.log("🔄 Processing subscription update");
 
@@ -291,9 +285,6 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     }
 }
 
-/**
- * Handle subscription cancellation
- */
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
     console.log("❌ Processing subscription cancellation");
 

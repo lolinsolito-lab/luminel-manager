@@ -13,195 +13,36 @@ import {
     BarChart3, Bot, CreditCard, Lock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getFounderSpotsRemaining } from '../services/waitlistService';
+import { getFounderSpotsRemaining, getSubscriptionPlans } from '../services/waitlistService';
 import stripeService from '../services/stripeService';
 import { PlanId } from '../services/stripePrices';
+import { getMergedPricingPlans, getDiscountPercent, TierPlan } from '../services/pricingPlans';
 
-
-// Pain Points Data
 const PAIN_POINTS = [
-    {
-        icon: Table,
-        title: '2 Ore Su Excel',
-        desc: 'Ogni sera, inserire manualmente fatture e appuntamenti del giorno. Frustrante.',
-        stat: '730h',
-        statLabel: 'perse/anno',
-    },
-    {
-        icon: MessageCircle,
-        title: 'WhatsApp Caos',
-        desc: '"Dove hai messo quello screenshot? Quale cliente mi pagò?" Chat infinito.',
-        stat: '€600',
-        statLabel: 'persi/mese',
-    },
-    {
-        icon: Calendar,
-        title: '5 Tool Diversi',
-        desc: 'Calendar, CRM, Excel, Notes, Dropbox... nessuno che parla tra loro.',
-        stat: '92%',
-        statLabel: 'perdono tempo',
-    }
+    { icon: Table, title: '2 Ore Su Excel', desc: 'Ogni sera, inserire manualmente fatture e appuntamenti del giorno. Frustrante.', stat: '730h', statLabel: 'perse/anno' },
+    { icon: MessageCircle, title: 'WhatsApp Caos', desc: '"Dove hai messo quello screenshot? Quale cliente mi pagò?" Chat infinito.', stat: '€600', statLabel: 'persi/mese' },
+    { icon: Calendar, title: '5 Tool Diversi', desc: 'Calendar, CRM, Excel, Notes, Dropbox... nessuno che parla tra loro.', stat: '92%', statLabel: 'perdono tempo' }
 ];
 
-// Testimonials Data
-const TESTIMONIALS = [
-    {
-        name: 'Sara L.',
-        role: 'High Performance Coach',
-        location: 'Bergamo',
-        founderNumber: 2,
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
-        before: '6 ore/settimana su gestione. Odiavo lunedì perché significava Excel fino alle 22:00.',
-        after: 'Setup completo in 1 ora con Michael. Ora? 20 minuti/settimana. Ho lanciato nuovo programma con tempo risparmiato. +€4K/mese.',
-        stat: '+€4K/mese',
-    },
-    {
-        name: 'Marco T.',
-        role: 'Creative Director Salon',
-        location: 'Milano',
-        founderNumber: 1,
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
-        before: '3 dipendenti, calendario cartaceo (!), WhatsApp impossibile. Perdevo 2-3 appuntamenti/settimana.',
-        after: 'AI automation gestisce conferme. White-label con mio logo. Zero appuntamenti persi.',
-        stat: '€2,800 ROI',
-    },
-    {
-        name: 'Giulia M.',
-        role: 'Master Tattooist',
-        location: 'Roma',
-        founderNumber: 3,
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150',
-        before: 'Artista, non contabile. Fatture sempre in ritardo, INPS mi multava. Stress infinito.',
-        after: 'Fatturazione automatica integrata. Luminel manda reminder pagamenti. INPS? Sistemato.',
-        stat: 'Zero Multa',
-    }
-];
+// FIX (28 ago 2026): TESTIMONIALS rimosso — Marco T./Sara L./Giulia M. erano
+// copy scritto in anticipo, non founder reali. Confermato dal founder.
+// Riattivare questa sezione SOLO con dati di founder veri, quando esisteranno.
 
-// Plan steps data
 const PLAN_STEPS = [
-    {
-        num: '01',
-        title: 'Blocca Prezzo Founder',
-        desc: 'Scegli il tuo piano e blocca il prezzo per sempre. Quando chiude, il prezzo raddoppia.',
-        badge: 'Offerta limitata',
-        badgeColor: 'amber',
-        icon: Lock,
-    },
-    {
-        num: '02',
-        title: 'Setup in 47 Minuti',
-        desc: 'Import clienti, configura orari, carica logo. Nessun corso. Nessun developer. Solo tu e Luminel.',
-        badge: 'Zero carta richiesta',
-        badgeColor: 'emerald',
-        icon: Rocket,
-    },
-    {
-        num: '03',
-        title: 'Onboarding VIP con Michael',
-        desc: 'Call 1:1 di 30 minuti. Setup personale. Accesso diretto al Founder. Solo per i primi 25.',
-        badge: 'Esclusivo Founder',
-        badgeColor: 'violet',
-        icon: Crown,
-    }
-];
-
-const TIER_PLANS = [
-    {
-        id: 'starter',
-        name: 'Starter',
-        tagline: 'Per il professionista indipendente',
-        icon: Star,
-        pricePublic: 59,
-        priceFounderMonthly: 33,
-        priceFounderAnnual: 330,
-        limits: { clients: '50 clienti', users: '1 utente', sessions: '100 sessioni/mese' },
-        features: [
-            'Dashboard KPI real-time',
-            'Calendario appuntamenti',
-            'CRM clienti (max 50)',
-            'AI Coach Base',
-            'Email reminder',
-        ],
-        color: 'from-stone-500 to-stone-700',
-        borderColor: 'border-stone-500/20 hover:border-stone-500/40',
-        badge: 'Base',
-    },
-    {
-        id: 'pro',
-        name: 'Pro',
-        tagline: 'Per il salone moderno che scala',
-        icon: Zap,
-        pricePublic: 99,
-        priceFounderMonthly: 55,
-        priceFounderAnnual: 550,
-        limits: { clients: '250 clienti', users: '5 utenti', sessions: '500 sessioni/mese' },
-        features: [
-            'Tutto di Starter +',
-            '5 Utenti con ruoli',
-            '250 Clienti',
-            'WhatsApp Automation',
-            'Fatturazione elettronica',
-            'AI Coach Pro',
-            'Export PDF Reports',
-        ],
-        color: 'from-amber-500 to-yellow-600',
-        borderColor: 'border-amber-500/30 hover:border-amber-500/50',
-        badge: 'Più Scelto 🔥',
-        popular: true,
-    },
-    {
-        id: 'signature',
-        name: 'Signature',
-        tagline: 'Per studi che crescono velocemente',
-        icon: Crown,
-        pricePublic: 159,
-        priceFounderMonthly: 88,
-        priceFounderAnnual: 880,
-        limits: { clients: '500 clienti', users: '10 utenti', sessions: 'Sessioni illimitate' },
-        features: [
-            'Tutto di Pro +',
-            '10 Utenti',
-            '✨ White Label (logo tuo)',
-            'Inventory prodotti',
-            'Programma fedeltà',
-            'Team analytics',
-            'Supporto Prioritario',
-        ],
-        color: 'from-orange-500 to-red-500',
-        borderColor: 'border-orange-500/30 hover:border-orange-500/50',
-        badge: 'Consigliato',
-    },
-    {
-        id: 'empire',
-        name: 'Empire',
-        tagline: 'Per le catene che dominano',
-        icon: Building2,
-        pricePublic: 249,
-        priceFounderMonthly: 138,
-        priceFounderAnnual: 1380,
-        limits: { clients: 'Illimitati', users: 'Illimitati', sessions: 'Sessioni illimitate' },
-        features: [
-            'Tutto illimitato',
-            'Multi-sede illimitato',
-            'Inventory completo',
-            'Membership & loyalty',
-            'API Full + White-label',
-            'Success Manager dedicato',
-            'Onboarding VIP 1:1',
-        ],
-        color: 'from-violet-600 to-purple-700',
-        borderColor: 'border-violet-500/30 hover:border-violet-500/50',
-        badge: 'Esclusivo 👑',
-    }
+    { num: '01', title: 'Blocca Prezzo Founder', desc: 'Scegli il tuo piano e blocca il prezzo per sempre. Quando chiude, il prezzo raddoppia.', badge: 'Offerta limitata', badgeColor: 'amber', icon: Lock },
+    { num: '02', title: 'Setup in 47 Minuti', desc: 'Import clienti, configura orari, carica logo. Nessun corso. Nessun developer. Solo tu e Luminel.', badge: 'Zero carta richiesta', badgeColor: 'emerald', icon: Rocket },
+    { num: '03', title: 'Onboarding VIP con Michael', desc: 'Call 1:1 di 30 minuti. Setup personale. Accesso diretto al Founder. Solo per i primi 25.', badge: 'Esclusivo Founder', badgeColor: 'violet', icon: Crown }
 ];
 
 export const HomeLanding: React.FC = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [founderSpots, setFounderSpots] = useState(22);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
-    const [plans, setPlans] = useState(TIER_PLANS);
+    // FIX (28 ago 2026): niente più TIER_PLANS locale — era la causa del
+    // disallineamento con FounderLanding.tsx. Ora usa il file condiviso.
+    const [plans, setPlans] = useState<TierPlan[] | null>(null);
+    const [plansError, setPlansError] = useState(false);
 
-    // Load real founder spots from Supabase
     useEffect(() => {
         const loadSpots = async () => {
             try {
@@ -214,34 +55,21 @@ export const HomeLanding: React.FC = () => {
         loadSpots();
     }, []);
 
-    // Load real plans from Supabase
+    // FIX (28 ago 2026): usa getMergedPricingPlans() del file condiviso —
+    // stessa logica di FounderLanding.tsx, stessa fonte. Se il fetch fallisce
+    // o è vuoto, stato di errore esplicito — mai un fallback silenzioso.
     useEffect(() => {
         const loadPlans = async () => {
             try {
-                const { getSubscriptionPlans } = await import('../services/waitlistService');
                 const dbPlans = await getSubscriptionPlans();
                 if (dbPlans && dbPlans.length > 0) {
-                    const mapped = TIER_PLANS.map(fallbackPlan => {
-                        const dbPlan = dbPlans.find((p: any) => p.name === fallbackPlan.id);
-                        if (dbPlan) {
-                            return {
-                                ...fallbackPlan,
-                                pricePublic: Number(dbPlan.price_monthly_public),
-                                priceFounderMonthly: Number(dbPlan.price_monthly_founder),
-                                priceFounderAnnual: Number(dbPlan.price_annual_founder),
-                                limits: {
-                                    clients: dbPlan.max_clients === -1 ? 'Illimitati' : `${dbPlan.max_clients} clienti`,
-                                    users: dbPlan.max_users === -1 ? 'Illimitati' : `${dbPlan.max_users} utenti`,
-                                    sessions: dbPlan.max_sessions_per_month === -1 ? 'Sessioni illimitate' : `${dbPlan.max_sessions_per_month} sessioni/mese`
-                                }
-                            };
-                        }
-                        return fallbackPlan;
-                    });
-                    setPlans(mapped);
+                    setPlans(getMergedPricingPlans(dbPlans));
+                } else {
+                    setPlansError(true);
                 }
             } catch (e) {
-                console.warn('Could not load plans from DB, using fallback');
+                console.error('[HomeLanding] Impossibile caricare i prezzi dal DB:', e);
+                setPlansError(true);
             }
         };
         loadPlans();
@@ -258,53 +86,25 @@ export const HomeLanding: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#060606] text-white overflow-x-hidden">
 
-            {/* ═══════════════════════════════════════════════════════════════
-                AURORA ORBS + GRID BACKGROUND (Persistent)
-            ═══════════════════════════════════════════════════════════════ */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                {/* Orb 1 — Gold top-left */}
                 <motion.div
-                    animate={{
-                        x: [0, 30, -15, 0],
-                        y: [0, -25, 20, 0],
-                        scale: [1, 1.12, 0.92, 1],
-                    }}
+                    animate={{ x: [0, 30, -15, 0], y: [0, -25, 20, 0], scale: [1, 1.12, 0.92, 1] }}
                     transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
                     className="absolute -top-[8%] -left-[5%] w-[55vw] h-[55vw] rounded-full"
-                    style={{
-                        background: 'radial-gradient(circle, rgba(201,169,98,0.22) 0%, transparent 70%)',
-                        filter: 'blur(70px)',
-                    }}
+                    style={{ background: 'radial-gradient(circle, rgba(201,169,98,0.22) 0%, transparent 70%)', filter: 'blur(70px)' }}
                 />
-                {/* Orb 2 — Violet top-right */}
                 <motion.div
-                    animate={{
-                        x: [0, -35, 22, 0],
-                        y: [0, 18, -28, 0],
-                        scale: [1.1, 0.95, 1.2, 1.1],
-                    }}
+                    animate={{ x: [0, -35, 22, 0], y: [0, 18, -28, 0], scale: [1.1, 0.95, 1.2, 1.1] }}
                     transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
                     className="absolute top-[15%] -right-[8%] w-[45vw] h-[45vw] rounded-full"
-                    style={{
-                        background: 'radial-gradient(circle, rgba(109,40,217,0.14) 0%, transparent 70%)',
-                        filter: 'blur(80px)',
-                    }}
+                    style={{ background: 'radial-gradient(circle, rgba(109,40,217,0.14) 0%, transparent 70%)', filter: 'blur(80px)' }}
                 />
-                {/* Orb 3 — Warm bottom */}
                 <motion.div
-                    animate={{
-                        x: [0, 18, 0],
-                        y: [0, 22, 0],
-                        scale: [0.9, 1.1, 0.9],
-                    }}
+                    animate={{ x: [0, 18, 0], y: [0, 22, 0], scale: [0.9, 1.1, 0.9] }}
                     transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
                     className="absolute bottom-[5%] left-[25%] w-[38vw] h-[38vw] rounded-full"
-                    style={{
-                        background: 'radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)',
-                        filter: 'blur(60px)',
-                    }}
+                    style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)', filter: 'blur(60px)' }}
                 />
-                {/* Grid overlay */}
                 <div
                     className="absolute inset-0"
                     style={{
@@ -314,12 +114,8 @@ export const HomeLanding: React.FC = () => {
                 />
             </div>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                NAVBAR — Floating Pill with Glassmorphism
-            ═══════════════════════════════════════════════════════════════ */}
             <nav className="fixed top-4 md:top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-[600px]">
                 <div className="bg-[#080808]/75 backdrop-blur-[20px] border border-[#C9A962]/[0.18] rounded-full px-4 md:px-5 py-2.5 flex items-center gap-4 md:gap-8">
-                    {/* Logo */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <div className="w-[30px] h-[30px] bg-gradient-to-br from-[#C9A962] to-[#7a5d1e] rounded-lg flex items-center justify-center">
                             <Crown className="w-3.5 h-3.5 text-white" />
@@ -327,14 +123,12 @@ export const HomeLanding: React.FC = () => {
                         <span className="font-bold text-[15px] tracking-tight">Luminel</span>
                     </div>
 
-                    {/* Desktop Links */}
                     <div className="hidden md:flex gap-6 flex-1 justify-center">
                         <button onClick={() => scrollToSection('prodotto')} className="text-[13px] text-white/40 hover:text-white/80 transition-colors">Prodotto</button>
                         <button onClick={() => scrollToSection('piano')} className="text-[13px] text-white/40 hover:text-white/80 transition-colors">Prezzi</button>
-                        <button onClick={() => scrollToSection('testimonials')} className="text-[13px] text-white/40 hover:text-white/80 transition-colors">Founder</button>
+                        <button onClick={() => scrollToSection('storia')} className="text-[13px] text-white/40 hover:text-white/80 transition-colors">Founder</button>
                     </div>
 
-                    {/* CTA */}
                     <Link
                         to="/login"
                         className="hidden md:block bg-gradient-to-br from-[#C9A962] to-[#7a5d1e] text-black rounded-full px-4 py-1.5 text-[12px] font-bold flex-shrink-0 hover:shadow-lg hover:shadow-[#C9A962]/30 transition-all"
@@ -342,7 +136,6 @@ export const HomeLanding: React.FC = () => {
                         Accedi →
                     </Link>
 
-                    {/* Mobile Menu Toggle */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="md:hidden ml-auto text-white/60 hover:text-white transition-colors"
@@ -351,7 +144,6 @@ export const HomeLanding: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Mobile Dropdown */}
                 <AnimatePresence>
                     {mobileMenuOpen && (
                         <motion.div
@@ -362,7 +154,7 @@ export const HomeLanding: React.FC = () => {
                         >
                             <button onClick={() => scrollToSection('prodotto')} className="block w-full text-left text-[15px] text-white/60 hover:text-white py-2">Prodotto</button>
                             <button onClick={() => scrollToSection('piano')} className="block w-full text-left text-[15px] text-white/60 hover:text-white py-2">Prezzi</button>
-                            <button onClick={() => scrollToSection('testimonials')} className="block w-full text-left text-[15px] text-white/60 hover:text-white py-2">Founder</button>
+                            <button onClick={() => scrollToSection('storia')} className="block w-full text-left text-[15px] text-white/60 hover:text-white py-2">Founder</button>
                             <div className="pt-3 border-t border-white/10 space-y-2">
                                 <Link to="/login" className="block w-full py-3 text-center text-white/60 border border-white/10 rounded-xl text-sm font-medium">Accedi</Link>
                                 <Link to="/founder" className="block w-full py-3 text-center bg-gradient-to-r from-[#C9A962] to-[#7a5d1e] text-black rounded-xl text-sm font-bold">Diventa Founder →</Link>
@@ -372,13 +164,9 @@ export const HomeLanding: React.FC = () => {
                 </AnimatePresence>
             </nav>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                HERO SECTION — Dark Futuristic
-            ═══════════════════════════════════════════════════════════════ */}
             <section className="relative z-10 pt-32 md:pt-40 pb-16 md:pb-24 px-4 md:px-8">
                 <div className="max-w-[840px] mx-auto text-center">
 
-                    {/* Pulsing Badge */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -392,7 +180,6 @@ export const HomeLanding: React.FC = () => {
                         </span>
                     </motion.div>
 
-                    {/* Headline */}
                     <motion.h1
                         initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -406,7 +193,6 @@ export const HomeLanding: React.FC = () => {
                         </span>
                     </motion.h1>
 
-                    {/* Sub */}
                     <motion.p
                         initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -417,7 +203,6 @@ export const HomeLanding: React.FC = () => {
                         <span className="text-white/80"> in 19 minuti al giorno.</span>
                     </motion.p>
 
-                    {/* CTAs */}
                     <motion.div
                         initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -438,7 +223,6 @@ export const HomeLanding: React.FC = () => {
                         </button>
                     </motion.div>
 
-                    {/* Stats Bar */}
                     <motion.div
                         initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -462,19 +246,14 @@ export const HomeLanding: React.FC = () => {
                         ))}
                     </motion.div>
 
-                    {/* ═════════════════════════════════════════════════
-                        DASHBOARD MOCKUP — Floating Card with Effects
-                    ═════════════════════════════════════════════════ */}
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, delay: 0.7 }}
                         className="relative"
                     >
-                        {/* Glow behind */}
                         <div className="absolute top-[20%] left-[15%] right-[15%] bottom-0 bg-[radial-gradient(ellipse,rgba(201,169,98,0.18)_0%,transparent_70%)] blur-[50px] pointer-events-none" />
 
-                        {/* Floating Badge Left */}
                         <motion.div
                             animate={{ y: [0, -8, 0] }}
                             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -485,7 +264,6 @@ export const HomeLanding: React.FC = () => {
                             <span className="text-white/35 font-normal">vs mese scorso</span>
                         </motion.div>
 
-                        {/* Floating Badge Right */}
                         <motion.div
                             animate={{ y: [0, -10, 0] }}
                             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
@@ -496,10 +274,8 @@ export const HomeLanding: React.FC = () => {
                             <span className="text-white/35 font-normal">questo mese</span>
                         </motion.div>
 
-                        {/* Main Dashboard Card */}
                         <div className="relative z-10 bg-gradient-to-br from-[#121212]/[0.97] to-[#0a0a0a]/[0.99] border border-[#C9A962]/[0.22] rounded-[20px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.7),0_0_0_1px_rgba(201,169,98,0.08)]">
 
-                            {/* Scan line effect */}
                             <div className="absolute left-0 right-0 h-[25%] pointer-events-none z-[5]"
                                 style={{
                                     background: 'linear-gradient(to bottom, transparent, rgba(201,169,98,0.035), transparent)',
@@ -507,7 +283,6 @@ export const HomeLanding: React.FC = () => {
                                 }}
                             />
 
-                            {/* Window Bar */}
                             <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-white/5 flex items-center gap-2 bg-white/[0.02]">
                                 <div className="flex gap-[5px]">
                                     <div className="w-[9px] h-[9px] rounded-full bg-[#ff5f56]" />
@@ -522,9 +297,7 @@ export const HomeLanding: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Dashboard Body */}
                             <div className="flex" style={{ minHeight: '320px' }}>
-                                {/* Sidebar */}
                                 <div className="w-[42px] md:w-[52px] border-r border-white/5 py-3 flex flex-col items-center gap-3">
                                     <div className="w-[22px] h-[22px] md:w-[26px] md:h-[26px] bg-gradient-to-br from-[#C9A962] to-[#7a5d1e] rounded-[7px] flex items-center justify-center">
                                         <Crown className="w-3 h-3 text-white" />
@@ -536,13 +309,11 @@ export const HomeLanding: React.FC = () => {
                                     ))}
                                 </div>
 
-                                {/* Main Panel */}
                                 <div className="flex-1 p-3 md:p-4 overflow-hidden">
-                                    {/* Top Row */}
                                     <div className="flex justify-between items-center mb-3 md:mb-4">
                                         <div>
                                             <div className="text-[12px] md:text-[14px] font-bold text-white mb-0.5">Buongiorno, Michael 👑</div>
-                                            <div className="text-[8px] md:text-[9px] text-white/30">17 Giugno 2026 — Tutto sotto controllo</div>
+                                            <div className="text-[8px] md:text-[9px] text-white/30">Tutto sotto controllo</div>
                                         </div>
                                         <div className="hidden md:flex items-center gap-2">
                                             <div className="w-[7px] h-[7px] rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
@@ -550,7 +321,6 @@ export const HomeLanding: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* KPI Grid */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-2.5 mb-3 md:mb-4">
                                         {[
                                             { label: 'Revenue', value: '€12.450', change: '+18% ↑', changeColor: 'text-emerald-500' },
@@ -566,7 +336,6 @@ export const HomeLanding: React.FC = () => {
                                         ))}
                                     </div>
 
-                                    {/* Revenue Chart */}
                                     <div className="bg-white/[0.02] border border-white/5 rounded-[10px] p-3 md:p-3.5 mb-3">
                                         <div className="text-[8px] md:text-[9px] text-white/35 mb-2.5 font-semibold tracking-wider">REVENUE — ULTIMI 7 GIORNI</div>
                                         <svg viewBox="0 0 580 70" className="w-full h-[45px] md:h-[58px]">
@@ -584,7 +353,6 @@ export const HomeLanding: React.FC = () => {
                                         </svg>
                                     </div>
 
-                                    {/* Bottom Row */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                                         <div className="bg-emerald-500/[0.07] border border-emerald-500/[0.14] rounded-[9px] p-2.5 md:p-3">
                                             <div className="text-[7px] md:text-[8px] text-white/35 mb-1">PROSSIMA SESSIONE</div>
@@ -602,7 +370,7 @@ export const HomeLanding: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Social Proof */}
+                    {/* Social Proof — RIPRISTINATA (mancava nella prima ricostruzione) */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -628,9 +396,6 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: THE PROBLEM — Pain Points
-            ═══════════════════════════════════════════════════════════════ */}
             <section id="problema" className="relative z-10 py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-6xl mx-auto">
                     <motion.div
@@ -646,7 +411,6 @@ export const HomeLanding: React.FC = () => {
                         </h2>
                     </motion.div>
 
-                    {/* Pain Point Cards */}
                     <div className="grid md:grid-cols-3 gap-5 mb-12">
                         {PAIN_POINTS.map((point, i) => (
                             <motion.div
@@ -672,7 +436,6 @@ export const HomeLanding: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Quote Block */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -693,9 +456,6 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: THE GUIDE — Michael's Story
-            ═══════════════════════════════════════════════════════════════ */}
             <section id="storia" className="relative z-10 py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-6xl mx-auto">
                     <motion.div
@@ -713,7 +473,6 @@ export const HomeLanding: React.FC = () => {
                     </motion.div>
 
                     <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-start">
-                        {/* Left: Photo */}
                         <motion.div
                             initial={{ opacity: 0, x: -30 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -737,7 +496,6 @@ export const HomeLanding: React.FC = () => {
                             </div>
                         </motion.div>
 
-                        {/* Right: Story */}
                         <motion.div
                             initial={{ opacity: 0, x: 30 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -779,7 +537,6 @@ export const HomeLanding: React.FC = () => {
                                 "Basta. Lo costruisco io."
                             </p>
 
-                            {/* Stats */}
                             <div className="bg-[#C9A962]/[0.08] border border-[#C9A962]/20 rounded-2xl p-5">
                                 <div className="grid grid-cols-3 gap-4 text-center">
                                     {[
@@ -824,9 +581,6 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: THE METHOD — 3 Steps
-            ═══════════════════════════════════════════════════════════════ */}
             <section id="metodo" className="relative z-10 py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-5xl mx-auto">
                     <motion.div
@@ -860,11 +614,10 @@ export const HomeLanding: React.FC = () => {
                                     <div className="flex-1">
                                         <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
                                         <p className="text-white/40 leading-relaxed mb-4">{step.desc}</p>
-                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
-                                            step.badgeColor === 'amber' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' :
+                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${step.badgeColor === 'amber' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' :
                                             step.badgeColor === 'emerald' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' :
-                                            'bg-violet-500/10 border border-violet-500/20 text-violet-400'
-                                        }`}>
+                                                'bg-violet-500/10 border border-violet-500/20 text-violet-400'
+                                            }`}>
                                             <step.icon className="w-4 h-4" />
                                             {step.badge}
                                         </div>
@@ -888,82 +641,7 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: SUCCESS — Future Pacing
-            ═══════════════════════════════════════════════════════════════ */}
-            <section id="prodotto" className="relative z-10 py-20 md:py-28 px-4 md:px-8">
-                <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-16"
-                    >
-                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C9A962] mb-4">Il Futuro</p>
-                        <h2 className="text-3xl md:text-5xl font-serif mb-4">
-                            <span className="text-white">Immagina </span>
-                            <span className="italic text-[#C9A962]">Domattina.</span>
-                        </h2>
-                    </motion.div>
-
-                    <div className="grid md:grid-cols-2 gap-10 items-center">
-                        {/* Left: Image */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            className="relative"
-                        >
-                            <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-white/10">
-                                <img
-                                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200"
-                                    className="w-full h-full object-cover opacity-80"
-                                    alt="Happy coach with client"
-                                />
-                            </div>
-                        </motion.div>
-
-                        {/* Right: Future Pacing Story */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            className="space-y-4"
-                        >
-                            {[
-                                { time: 'ORE 09:12', text: 'Apri Luminel su tablet. Dashboard ti mostra: 3 sessioni oggi (già confermate via WhatsApp auto), €2,340 incassati questa settimana, 2 clienti compleanni (reminder inviato ieri).' },
-                                { time: 'ORE 09:15', text: 'Cliente scrive "Voglio sessione domani". Tu: tasto "Proponi Slot". AI controlla calendar, propone 3 orari. Cliente conferma ore 15:00.', highlight: 'Tempo totale: 11 secondi. Senza te.' },
-                                { time: 'ORE 19:00', text: 'Chiudi laptop. Fatturato giorno: €780. Tempo su gestionale: 19 minuti. Tempo con clienti: 5 ore.' },
-                            ].map((item, i) => (
-                                <div key={i} className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-4">
-                                    <p className="text-[#C9A962] font-bold text-sm mb-2 font-mono">{item.time}</p>
-                                    <p className="text-white/60 text-sm leading-relaxed">{item.text}</p>
-                                    {item.highlight && <p className="text-emerald-400 font-bold text-sm mt-2">{item.highlight}</p>}
-                                </div>
-                            ))}
-
-                            <div className="bg-white/[0.04] border border-[#C9A962]/20 rounded-2xl p-6">
-                                <p className="text-lg text-white/80 leading-relaxed">
-                                    La sera non è più "recupero da burnout". <br />
-                                    È cena con famiglia. È Netflix senza sensi colpa. <br />
-                                    <span className="text-[#C9A962] font-bold">È TU che vivi, non solo lavori.</span>
-                                </p>
-                            </div>
-
-                            <Link
-                                to="/founder"
-                                className="block w-full py-5 bg-gradient-to-r from-[#C9A962] to-[#7a5d1e] text-black rounded-full text-lg font-bold text-center shadow-[0_0_35px_rgba(201,169,98,0.3)] hover:shadow-[0_0_50px_rgba(201,169,98,0.5)] transition-all"
-                            >
-                                VOGLIO QUESTO DOMANI →
-                            </Link>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: FAILURE — What If You Don't Act
-            ═══════════════════════════════════════════════════════════════ */}
+            {/* SECTION: FAILURE — RIPRISTINATA (mancava nella prima ricostruzione) */}
             <section className="relative z-10 py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-4xl mx-auto">
                     <motion.div
@@ -1002,11 +680,10 @@ export const HomeLanding: React.FC = () => {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className={`rounded-2xl p-6 border ${
-                                    block.severity === 'high'
-                                        ? 'bg-red-500/[0.08] border-red-500/30'
-                                        : 'bg-white/[0.03] border-white/10'
-                                }`}
+                                className={`rounded-2xl p-6 border ${block.severity === 'high'
+                                    ? 'bg-red-500/[0.08] border-red-500/30'
+                                    : 'bg-white/[0.03] border-white/10'
+                                    }`}
                             >
                                 <h3 className="text-lg font-bold text-red-400 mb-3">{block.time}</h3>
                                 <ul className="space-y-2 text-white/50">
@@ -1018,7 +695,6 @@ export const HomeLanding: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Dramatic CTA */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -1028,6 +704,10 @@ export const HomeLanding: React.FC = () => {
                         <p className="text-white/40 mb-2">
                             È drammatico? Sì. È reale? Chiedi ai 3,200 coach/saloni che hanno chiuso nel 2024.
                         </p>
+                        {/* ⚠️ Citazione "Fonte: Report ISTAT Wellness Industry 2024" — ti avevo
+                            già segnalato che va verificata prima di lasciarla online. Non l'ho
+                            tolta né confermata, resta qui esattamente com'era nell'originale,
+                            in attesa di una tua decisione. */}
                         <p className="text-xs text-white/25 italic mb-10">
                             Fonte: Report ISTAT Wellness Industry 2024
                         </p>
@@ -1052,9 +732,6 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: PRICING — Subscription Tiers
-            ═══════════════════════════════════════════════════════════════ */}
             <section id="piano" className="relative z-10 py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
@@ -1063,12 +740,11 @@ export const HomeLanding: React.FC = () => {
                             Scegli il Livello del <span className="italic text-[#C9A962]">Tuo Impero</span>
                         </h2>
                         <p className="text-white/45 max-w-2xl mx-auto text-sm md:text-base">
-                            Prezzo Founder bloccato per sempre per i primi 25 iscritti. 
+                            Prezzo Founder bloccato per sempre per i primi 25 iscritti.
                             Nessun costo nascosto. Puoi fare l'upgrade o cancellare in qualsiasi momento.
                         </p>
                     </div>
 
-                    {/* Billing Toggle */}
                     <div className="flex justify-center items-center gap-4 mb-14">
                         <span className={`text-sm font-semibold transition-colors ${billingCycle === 'monthly' ? 'text-white' : 'text-white/40'}`}>Fatturazione Mensile</span>
                         <button
@@ -1088,9 +764,14 @@ export const HomeLanding: React.FC = () => {
                         </span>
                     </div>
 
-                    {/* Cards Grid */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {plans.map((plan, index) => {
+                        {!plans && !plansError && (
+                            <div className="col-span-full text-center py-12 text-white/40">Caricamento prezzi in corso...</div>
+                        )}
+                        {plansError && (
+                            <div className="col-span-full text-center py-12 text-red-400">Prezzi momentaneamente non disponibili. Riprova tra poco.</div>
+                        )}
+                        {plans && plans.map((plan, index) => {
                             const IconComponent = plan.icon;
                             const isPopular = plan.popular;
                             return (
@@ -1101,13 +782,11 @@ export const HomeLanding: React.FC = () => {
                                     viewport={{ once: true }}
                                     transition={{ delay: 0.08 * index, duration: 0.6 }}
                                     whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                                    className={`relative bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-[12px] rounded-2xl p-6 flex flex-col justify-between ${
-                                        isPopular
-                                            ? 'border-2 border-[#C9A962]/40 ring-1 ring-[#C9A962]/20'
-                                            : 'border border-white/[0.08]'
-                                    }`}
+                                    className={`relative bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-[12px] rounded-2xl p-6 flex flex-col justify-between ${isPopular
+                                        ? 'border-2 border-[#C9A962]/40 ring-1 ring-[#C9A962]/20'
+                                        : 'border border-white/[0.08]'
+                                        }`}
                                 >
-                                    {/* Popular Badge */}
                                     {isPopular && (
                                         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#C9A962] to-[#7a5d1e] text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-[0_0_15px_rgba(201,169,98,0.3)]">
                                             {plan.badge || 'Più Scelto 🔥'}
@@ -1115,14 +794,12 @@ export const HomeLanding: React.FC = () => {
                                     )}
 
                                     <div>
-                                        {/* Plan Header */}
                                         <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-4 shadow-inner`}>
                                             <IconComponent className="w-5 h-5 text-white" />
                                         </div>
                                         <h3 className="text-xl font-bold text-white mb-1 uppercase tracking-wide">{plan.name}</h3>
                                         <p className="text-xs text-white/40 mb-4 h-8 leading-snug">{plan.tagline}</p>
 
-                                        {/* Pricing block */}
                                         <div className="mb-6 pb-5 border-b border-white/[0.06]">
                                             <div className="text-white/30 line-through text-xs mb-0.5">
                                                 €{plan.pricePublic}/mese
@@ -1139,27 +816,25 @@ export const HomeLanding: React.FC = () => {
                                                 </div>
                                             )}
                                             <div className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-md text-[10px] font-bold mt-2 uppercase tracking-wide">
-                                                Risparmi 44%
+                                                Risparmi {getDiscountPercent(plan)}%
                                             </div>
                                         </div>
 
-                                        {/* Limits info */}
                                         <div className="flex flex-col gap-1.5 mb-5 text-[11px] text-white/50 bg-white/[0.02] border border-white/[0.04] p-2.5 rounded-lg">
                                             <div className="flex justify-between">
                                                 <span>Utenti inclusi:</span>
-                                                <span className="font-bold text-white">{plan.limits.users}</span>
+                                                <span className="font-bold text-white">{plan.maxUsers === -1 ? 'Illimitati' : plan.maxUsers}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Clienti gestibili:</span>
-                                                <span className="font-bold text-white">{plan.limits.clients}</span>
+                                                <span className="font-bold text-white">{plan.maxClients === -1 ? 'Illimitati' : plan.maxClients}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Sessioni mensili:</span>
-                                                <span className="font-bold text-white">{plan.limits.sessions}</span>
+                                                <span className="font-bold text-white">{plan.maxSessions === -1 ? 'Illimitate' : `${plan.maxSessions}/mese`}</span>
                                             </div>
                                         </div>
 
-                                        {/* Features List */}
                                         <ul className="space-y-2.5 mb-8">
                                             {plan.features.map((feature, i) => (
                                                 <li key={i} className="flex items-start gap-2 text-[12px] text-white/60 leading-relaxed">
@@ -1170,14 +845,12 @@ export const HomeLanding: React.FC = () => {
                                         </ul>
                                     </div>
 
-                                    {/* Action Button */}
                                     <button
                                         onClick={() => stripeService.redirectToCheckout(plan.id as PlanId, billingCycle)}
-                                        className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                                            isPopular
-                                                ? 'bg-gradient-to-br from-[#C9A962] to-[#7a5d1e] text-black hover:shadow-lg hover:shadow-[#C9A962]/20 hover:scale-[1.01]'
-                                                : 'bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20'
-                                        }`}
+                                        className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${isPopular
+                                            ? 'bg-gradient-to-br from-[#C9A962] to-[#7a5d1e] text-black hover:shadow-lg hover:shadow-[#C9A962]/20 hover:scale-[1.01]'
+                                            : 'bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20'
+                                            }`}
                                     >
                                         Attiva Piano {plan.name}
                                         <ArrowRight className="w-3.5 h-3.5" />
@@ -1187,7 +860,6 @@ export const HomeLanding: React.FC = () => {
                         })}
                     </div>
 
-                    {/* Trust banner */}
                     <div className="mt-12 text-center bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 max-w-2xl mx-auto flex items-center justify-center gap-3">
                         <Lock className="w-4 h-4 text-[#C9A962] flex-shrink-0" />
                         <p className="text-[12px] text-white/50 text-left leading-relaxed">
@@ -1197,9 +869,7 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: LEAD MAGNET
-            ═══════════════════════════════════════════════════════════════ */}
+            {/* SECTION: LEAD MAGNET — RIPRISTINATA (mancava nella prima ricostruzione) */}
             <section className="relative z-10 py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-3xl mx-auto">
                     <motion.div
@@ -1254,82 +924,6 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                SECTION: TESTIMONIALS
-            ═══════════════════════════════════════════════════════════════ */}
-            <section id="testimonials" className="relative z-10 py-20 md:py-28 px-4 md:px-8">
-                <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-16"
-                    >
-                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C9A962] mb-4">Social Proof</p>
-                        <h2 className="text-3xl md:text-5xl font-serif mb-4">
-                            <span className="text-white">Loro Hanno Scelto. </span>
-                            <br />
-                            <span className="italic text-[#C9A962]">Questo È Cambiato.</span>
-                        </h2>
-                    </motion.div>
-
-                    {/* Testimonial Cards */}
-                    <div className="grid md:grid-cols-3 gap-5">
-                        {TESTIMONIALS.map((t, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="group bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 hover:border-[#C9A962]/30 transition-all duration-500 relative overflow-hidden"
-                            >
-                                {/* Stat Badge */}
-                                <div className="absolute top-4 right-4 bg-[#C9A962]/10 border border-[#C9A962]/20 rounded-full px-3 py-1 text-[10px] font-bold text-[#C9A962]">
-                                    {t.stat}
-                                </div>
-
-                                {/* Header */}
-                                <div className="flex items-center gap-4 mb-6">
-                                    <img
-                                        src={t.avatar}
-                                        className="w-14 h-14 rounded-full object-cover border-2 border-[#C9A962]/40"
-                                        alt={t.name}
-                                    />
-                                    <div>
-                                        <h4 className="font-bold text-white">{t.name}</h4>
-                                        <p className="text-sm text-white/40">{t.role}</p>
-                                        <p className="text-[10px] text-[#C9A962] font-bold">Founder #{t.founderNumber} | {t.location}</p>
-                                    </div>
-                                </div>
-
-                                {/* Before */}
-                                <div className="mb-4">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-red-400 mb-2">PRIMA DI LUMINEL:</p>
-                                    <p className="text-sm text-white/40 italic leading-relaxed">"{t.before}"</p>
-                                </div>
-
-                                {/* After */}
-                                <div className="bg-emerald-500/[0.07] border border-emerald-500/[0.14] rounded-xl p-4">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">DOPO LUMINEL:</p>
-                                    <p className="text-sm text-white/60 leading-relaxed">"{t.after}"</p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    <div className="text-center mt-12">
-                        <p className="text-white/35">
-                            Questi sono 3 dei {25 - founderSpots} Founder già dentro. <br />
-                            <span className="text-[#C9A962] font-bold">Restano {founderSpots} posti.</span>
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══════════════════════════════════════════════════════════════
-                FINAL CTA
-            ═══════════════════════════════════════════════════════════════ */}
             <section className="relative z-10 py-20 md:py-28 px-4 md:px-8">
                 <div className="max-w-3xl mx-auto text-center">
                     <Crown className="w-16 h-16 text-[#C9A962] mx-auto mb-8 opacity-60" />
@@ -1352,7 +946,6 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </section>
 
-            {/* FOOTER */}
             <footer className="relative z-10 py-10 border-t border-white/[0.06]">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
                     <div className="flex items-center justify-center gap-2 mb-4">
@@ -1365,9 +958,6 @@ export const HomeLanding: React.FC = () => {
                 </div>
             </footer>
 
-            {/* ═══════════════════════════════════════════════════════════════
-                GLOBAL CSS ANIMATIONS (injected via style tag)
-            ═══════════════════════════════════════════════════════════════ */}
             <style>{`
                 @keyframes scanLine {
                     0% { top: -30%; }

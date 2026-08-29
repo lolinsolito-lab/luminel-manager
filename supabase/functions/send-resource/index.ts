@@ -1,21 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+// FIX (29 ago 2026): stesso secret FROM_EMAIL usato da send-email, invece di
+// "onboarding@resend.dev" scritto fisso nel codice. Quell'indirizzo è la
+// sandbox di Resend — funziona solo verso la tua email verificata, non verso
+// clienti veri, finché non hai un dominio verificato su Resend. Con questo
+// fix, basta cambiare il secret FROM_EMAIL su Supabase quando il dominio è
+// pronto, senza toccare codice, e le due funzioni restano coerenti tra loro.
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'Luminel Elite <onboarding@resend.dev>'
 
 const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 serve(async (req) => {
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
-    }
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
 
-    try {
-        const { to, resourceTitle, resourceUrl, message, businessName, senderName } = await req.json()
+  try {
+    const { to, resourceTitle, resourceUrl, message, businessName, senderName } = await req.json()
 
-        const htmlContent = `
+    const htmlContent = `
       <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 12px; color: #1c1917;">
         <div style="text-align: center; margin-bottom: 40px;">
           <h1 style="color: #ce9341; font-size: 24px; letter-spacing: 2px;">LUMINEL ELITE</h1>
@@ -46,30 +53,30 @@ serve(async (req) => {
       </div>
     `
 
-        const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
-            },
-            body: JSON.stringify({
-                from: 'Luminel Elite <onboarding@resend.dev>', // In production, this would be the custom domain
-                to: [to],
-                subject: `[LUMINEL] Nuova risorsa condivisa: ${resourceTitle}`,
-                html: htmlContent,
-            }),
-        })
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [to],
+        subject: `[LUMINEL] Nuova risorsa condivisa: ${resourceTitle}`,
+        html: htmlContent,
+      }),
+    })
 
-        const data = await res.json()
+    const data = await res.json()
 
-        return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200,
-        })
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
-        })
-    }
+    return new Response(JSON.stringify(data), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    })
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 400,
+    })
+  }
 })

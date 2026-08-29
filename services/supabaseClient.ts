@@ -4,49 +4,48 @@ import { createClient } from '@supabase/supabase-js';
 // LUMINA EMPIRE - Supabase Client Configuration
 // ==============================================
 
-// Environment variables (set in .env.local)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // ==============================================
-// Helper: Check if Supabase is properly configured
+// FIX SICUREZZA (29 ago 2026): rimosso ogni riferimento al progetto Supabase
+// vecchio ('xrdvmujlqibsucmkluru'). Il check ora è generico — funziona con
+// QUALSIASI progetto Supabase configurato in VITE_SUPABASE_URL, non solo
+// quello specifico su cui è stato scritto originariamente il codice.
 // ==============================================
-const SUPABASE_PROJECT_ID = 'xrdvmujlqibsucmkluru';
 export const isSupabaseConfigured = (): boolean => {
-    // Check if we're using a real Supabase URL (not placeholder)
-    const url = supabaseUrl || 'https://xrdvmujlqibsucmkluru.supabase.co';
-    return url.includes(SUPABASE_PROJECT_ID);
+    if (!supabaseUrl || !supabaseAnonKey) return false;
+    // Verifica solo che sia un URL Supabase con forma valida, non un progetto specifico
+    return supabaseUrl.startsWith('https://') && supabaseUrl.includes('.supabase.co');
 };
 
-// Validate configuration
-const isConfigured = !!(supabaseUrl && supabaseAnonKey);
-const hasHardcodedFallback = isSupabaseConfigured();
-
-if (!isConfigured && !hasHardcodedFallback) {
+if (!isSupabaseConfigured()) {
     console.warn(
-        '⚠️ Supabase not configured. Running in offline mode.\n' +
-        'To enable cloud features:\n' +
-        '1. Create a project at https://supabase.com\n' +
-        '2. Copy .env.example to .env.local\n' +
-        '3. Add your Supabase URL and Anon Key'
+        '⚠️ Supabase non configurato — modalità sviluppo locale, nessun dato persistente reale.\n' +
+        'Per abilitare le funzionalità cloud:\n' +
+        '1. Verifica che .env.local esista nella root del progetto\n' +
+        '2. Controlla che contenga VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY con valori reali\n' +
+        '3. Riavvia il server (Ctrl+C, poi npm run dev) — Vite non ricarica le env a caldo'
     );
 }
 
-// Create Supabase client with configuration
+// ==============================================
+// FIX SICUREZZA (29 ago 2026): NESSUN fallback hardcoded qui. Se le variabili
+// mancano, il client Supabase viene creato con stringhe vuote — fallirà in
+// modo chiaro e visibile alla prima chiamata, invece di connettersi
+// silenziosamente a un progetto vecchio con una chiave incorporata nel codice.
+// Meglio un errore evidente che una connessione sbagliata invisibile.
+// ==============================================
 export const supabase = createClient(
-    supabaseUrl || 'https://xrdvmujlqibsucmkluru.supabase.co',
-    supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyZHZtdWpscWlic3VjbWtsdXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTMyMDEsImV4cCI6MjA4MjMyOTIwMX0.KsDQ-jtq_ZoxwvprcgjOytk0G5PolF2G1RaCMaoFLDo',
+    supabaseUrl || '',
+    supabaseAnonKey || '',
     {
         auth: {
-            // Persist session in localStorage
             persistSession: true,
-            // Auto refresh token before expiry
             autoRefreshToken: true,
-            // Detect session from URL (for OAuth callbacks)
             detectSessionInUrl: true
         },
         realtime: {
-            // Enable realtime subscriptions
             params: {
                 eventsPerSecond: 10
             }
@@ -57,9 +56,6 @@ export const supabase = createClient(
 // Auth Helpers
 // ==============================================
 
-/**
- * Sign up a new user with email and password
- */
 export const signUp = async (email: string, password: string, metadata?: { full_name?: string }) => {
     const { data, error } = await supabase.auth.signUp({
         email,
@@ -73,9 +69,6 @@ export const signUp = async (email: string, password: string, metadata?: { full_
     return data;
 };
 
-/**
- * Sign in with email and password
- */
 export const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -86,9 +79,6 @@ export const signIn = async (email: string, password: string) => {
     return data;
 };
 
-/**
- * Sign in with Google OAuth
- */
 export const signInWithGoogle = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -101,37 +91,23 @@ export const signInWithGoogle = async () => {
     return data;
 };
 
-/**
- * Sign out current user
- */
 export const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
 };
 
-/**
- * Get current session
- */
 export const getSession = async () => {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) throw error;
     return session;
 };
 
-/**
- * Get current user
- */
 export const getCurrentUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
     return user;
 };
 
-/**
- * Reset password (send email)
- * With BrowserRouter, we can use clean URLs directly.
- * Supabase will append auth tokens to this URL and redirect the user.
- */
 export const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
@@ -139,9 +115,6 @@ export const resetPassword = async (email: string) => {
     if (error) throw error;
 };
 
-/**
- * Update password
- */
 export const updatePassword = async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({
         password: newPassword

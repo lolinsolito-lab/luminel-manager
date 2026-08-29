@@ -14,6 +14,7 @@ import {
 import { joinFounderWaitlist, getFounderSpotsRemaining } from '../services/waitlistService';
 import stripeService from '../services/stripeService';
 import { PlanId } from '../services/stripePrices';
+import { STATIC_PRICING_PLANS, getMergedPricingPlans, TierPlan } from '../services/pricingPlans';
 import { LegalModal } from './LegalModals';
 import { APP_CONFIG } from '../config';
 
@@ -23,98 +24,7 @@ declare global {
     }
 }
 
-// Pricing data v3.0 - Option A: Uniform 44% Founder Discount
-const PRICING_PLANS = [
-    {
-        id: 'starter',
-        name: 'STARTER',
-        icon: Star,
-        tagline: 'Per il professionista indipendente',
-        pricePublic: 59,
-        priceFounder: 33,
-        priceAnnual: 330,  // 10 months
-        discount: 44,
-        limits: { users: 1, clients: 50, sessions: 100, locations: 1 },
-        features: [
-            'Dashboard KPI real-time',
-            'Calendario appuntamenti',
-            'CRM clienti (max 50)',
-            'AI Coach Base',
-            'Email reminder',
-            'Mobile responsive',
-        ],
-        color: 'from-stone-400 to-stone-600',
-        borderColor: 'border-stone-300',
-    },
-    {
-        id: 'pro',
-        name: 'PRO',
-        icon: Zap,
-        tagline: 'Per il salone moderno che scala',
-        pricePublic: 99,
-        priceFounder: 55,
-        priceAnnual: 550,  // 10 months
-        discount: 44,
-        limits: { users: 5, clients: 250, sessions: 500, locations: 1 },
-        features: [
-            'Tutto di Starter +',
-            '5 Utenti con ruoli',
-            '250 clienti',
-            'WhatsApp Automation',
-            'Fatturazione elettronica',
-            'AI Coach Pro',
-            'Export PDF Reports',
-        ],
-        color: 'from-amber-500 to-yellow-600',
-        borderColor: 'border-amber-400',
-        popular: true,
-    },
-    {
-        id: 'signature',
-        name: 'SIGNATURE',
-        icon: Crown,
-        tagline: 'Per studi che crescono velocemente',
-        pricePublic: 159,
-        priceFounder: 88,
-        priceAnnual: 880,  // 10 months
-        discount: 44,
-        limits: { users: 10, clients: 500, sessions: -1, locations: 2 },
-        features: [
-            'Tutto di Pro +',
-            '10 Utenti',
-            '✨ White Label (logo tuo)',
-            'Inventory prodotti',
-            'Programma fedeltà',
-            'Team analytics',
-            'Priority support',
-        ],
-        color: 'from-orange-500 to-red-500',
-        borderColor: 'border-orange-400',
-        isNew: true,
-    },
-    {
-        id: 'empire',
-        name: 'EMPIRE',
-        icon: Building2,
-        tagline: 'Per le catene che dominano',
-        pricePublic: 249,
-        priceFounder: 138,
-        priceAnnual: 1380,  // 10 months
-        discount: 44,
-        limits: { users: -1, clients: -1, sessions: -1, locations: -1 },
-        features: [
-            'Tutto illimitato',
-            'Multi-sede illimitato',
-            'Inventory completo',
-            'Membership & loyalty',
-            'API Full + White-label',
-            'Success Manager dedicato',
-            'Onboarding VIP 1:1',
-        ],
-        color: 'from-violet-600 to-purple-700',
-        borderColor: 'border-violet-400',
-    },
-];
+
 
 const FOUNDER_BENEFITS = [
     { icon: Lock, title: 'Prezzo bloccato per sempre', desc: 'Sconto del 44% garantito vita natural durante, senza mai aumenti.', highlight: 'ESCLUSIVO' },
@@ -302,7 +212,11 @@ const FloatingContact: React.FC = () => {
 export const FounderLanding: React.FC = () => {
     const [founderSpots, setFounderSpots] = useState(25);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
-    const [plans, setPlans] = useState(PRICING_PLANS);
+    // FIX SICUREZZA (28 ago 2026): niente più prezzi finti come stato iniziale.
+    // Finché non arrivano i prezzi veri dal DB, plans resta null e la UI mostra
+    // un loading state — mai un numero che potrebbe essere sbagliato.
+    const [plans, setPlans] = useState<TierPlan[] | null>(null);
+    const [plansError, setPlansError] = useState(false);
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [businessType, setBusinessType] = useState('');
@@ -369,17 +283,21 @@ export const FounderLanding: React.FC = () => {
     }, []);
 
     // Load real plans from Supabase
+    // FIX SICUREZZA (28 ago 2026): se il fetch fallisce o torna vuoto, NON si
+    // torna più a PRICING_PLANS (prezzi potenzialmente disallineati dal DB).
+    // Si mostra invece uno stato d'errore esplicito — meglio un vuoto onesto
+    // che un prezzo sbagliato mostrato a un cliente pagante.
     useEffect(() => {
         const loadPlans = async () => {
             try {
                 const { getSubscriptionPlans } = await import('../services/waitlistService');
                 const dbPlans = await getSubscriptionPlans();
                 if (dbPlans && dbPlans.length > 0) {
-                    const mapped = PRICING_PLANS.map(fallbackPlan => {
-                        const dbPlan = dbPlans.find((p: any) => p.name === fallbackPlan.id);
+                    const mapped = PRICING_PLANS.map(templatePlan => {
+                        const dbPlan = dbPlans.find((p: any) => p.name === templatePlan.id);
                         if (dbPlan) {
                             return {
-                                ...fallbackPlan,
+                                ...templatePlan,
                                 pricePublic: Number(dbPlan.price_monthly_public),
                                 priceFounder: Number(dbPlan.price_monthly_founder),
                                 priceAnnual: Number(dbPlan.price_annual_founder),
@@ -391,12 +309,20 @@ export const FounderLanding: React.FC = () => {
                                 }
                             };
                         }
-                        return fallbackPlan;
-                    });
-                    setPlans(mapped);
+                        return null; // piano non trovato nel DB: meglio ometterlo che mostrare un prezzo finto
+                    }).filter((p): p is NonNullable<typeof p> => p !== null);
+
+                    if (mapped.length > 0) {
+                        setPlans(mapped);
+                    } else {
+                        setPlansError(true);
+                    }
+                } else {
+                    setPlansError(true);
                 }
             } catch (e) {
-                console.warn('Could not load plans from DB, using fallback');
+                console.error('[FounderLanding] Impossibile caricare i prezzi dal DB:', e);
+                setPlansError(true);
             }
         };
         loadPlans();
@@ -718,7 +644,13 @@ export const FounderLanding: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-stone-100">
-                                    {plans.map((plan) => (
+                                    {!plans && !plansError && (
+                                        <tr><td colSpan={5} className="text-center py-8 text-stone-400">Caricamento prezzi in corso...</td></tr>
+                                    )}
+                                    {plansError && (
+                                        <tr><td colSpan={5} className="text-center py-8 text-red-500">Prezzi momentaneamente non disponibili. Riprova tra poco.</td></tr>
+                                    )}
+                                    {plans && plans.map((plan) => (
                                         <tr key={plan.id} className={`${plan.popular ? 'bg-amber-50/50' : ''} hover:bg-stone-50 transition-colors`}>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
@@ -736,10 +668,10 @@ export const FounderLanding: React.FC = () => {
                                                 <span className="text-stone-400 line-through">€{plan.pricePublic}/m</span>
                                             </td>
                                             <td className="text-center px-4 py-4 bg-amber-50/50">
-                                                <span className="text-xl font-bold text-stone-800">€{plan.priceFounder}</span>
+                                                <span className="text-xl font-bold text-stone-800">€{plan.priceFounderMonthly}</span>
                                             </td>
                                             <td className="text-center px-4 py-4 bg-amber-50/50">
-                                                <span className="font-semibold text-stone-800">€{plan.priceAnnual}</span>
+                                                <span className="font-semibold text-stone-800">€{plan.priceFounderAnnual}</span>
                                             </td>
                                             <td className="text-center px-4 py-4">
                                                 <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-semibold text-sm">
@@ -811,7 +743,13 @@ export const FounderLanding: React.FC = () => {
                         </div>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {plans.map((plan, index) => (
+                        {!plans && !plansError && (
+                            <div className="col-span-full text-center py-12 text-stone-400">Caricamento prezzi in corso...</div>
+                        )}
+                        {plansError && (
+                            <div className="col-span-full text-center py-12 text-red-500">Prezzi momentaneamente non disponibili. Riprova tra poco o contattaci.</div>
+                        )}
+                        {plans && plans.map((plan, index) => (
                             <motion.div
                                 key={plan.id}
                                 initial={{ opacity: 0, y: 30 }}
@@ -848,13 +786,13 @@ export const FounderLanding: React.FC = () => {
                                     </div>
                                     <div className="flex items-baseline gap-1">
                                         <span className="text-3xl font-bold text-stone-800">
-                                            €{billingCycle === 'monthly' ? plan.priceFounder : Math.round(plan.priceAnnual / 12)}
+                                            €{billingCycle === 'monthly' ? plan.priceFounderMonthly : Math.round(plan.priceFounderAnnual / 12)}
                                         </span>
                                         <span className="text-stone-500">/mese</span>
                                     </div>
                                     {billingCycle === 'annual' && (
                                         <div className="text-xs text-stone-500 mt-1">
-                                            €{plan.priceAnnual}/anno
+                                            €{plan.priceFounderAnnual}/anno
                                         </div>
                                     )}
                                     <div className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs font-semibold mt-2">
@@ -1237,7 +1175,7 @@ export const FounderLanding: React.FC = () => {
             {/* Footer */}
             <footer className="py-12 px-4 border-t border-stone-200 bg-white">
                 <div className="max-w-6xl mx-auto text-center text-stone-500 text-sm">
-                    <p>© 2025 Luminel Manager. Gestionale Premium per Professionisti del Benessere.</p>
+                    <p>© 2026 Luminel Manager. Gestionale Premium per Professionisti del Benessere.</p>
                     <div className="flex justify-center gap-6 mt-4 text-[11px] font-bold uppercase tracking-widest text-stone-400">
                         <button onClick={() => setLegalModal({ isOpen: true, type: 'privacy' })} className="hover:text-stone-900 transition-colors">Privacy</button>
                         <button onClick={() => setLegalModal({ isOpen: true, type: 'terms' })} className="hover:text-stone-900 transition-colors">Termini</button>
