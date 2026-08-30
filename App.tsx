@@ -19,7 +19,7 @@ import { AIAssistant } from './components/AIAssistant';
 import { Login } from './components/Login';
 import { SplashIntro } from './components/SplashIntro';
 import { HomeLanding } from './components/HomeLanding';
-import { LandingV2 } from './components/LandingV2';
+import { LandingV3 } from './components/LandingV3';
 import { FounderLanding } from './components/FounderLanding';
 import PaymentSuccess from './components/PaymentSuccess';
 import { ResetPassword } from './components/ResetPassword';
@@ -127,7 +127,7 @@ const App: React.FC = () => {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomeLanding />} />
-          <Route path="/v2" element={<LandingV2 />} />
+          <Route path="/v3" element={<LandingV3 />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/founder" element={<FounderLanding />} />
                     <Route path="/success" element={<PaymentSuccess />} />

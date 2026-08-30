@@ -1,11 +1,24 @@
 const fs = require('fs');
-let content = fs.readFileSync('c:/luminel manager/components/LandingV2.tsx', 'utf8');
+let landing = fs.readFileSync('c:/luminel manager/components/LandingV3.tsx', 'utf8');
 
-// Replace the img tag in HolographicOrb to fix centering and effects
-content = content.replace(
-  "style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.12)', opacity: 0.88 }}",
-  "style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1)', opacity: 0.95, mixBlendMode: 'screen' }}"
+landing = landing.replace(
+  /import \{ AiCoachHeroSection \} from '\.\/ui\/ai-coach-hero';/,
+  "import { AiCoachHeroSection } from './ui/ai-coach-hero';\nimport { AnymaHeroSection } from './ui/anyma-hero';"
 );
 
-fs.writeFileSync('c:/luminel manager/components/LandingV2.tsx', content, 'utf8');
-console.log('Fixed Hero image styling.');
+const startStr = "<main style={{ position: 'relative', zIndex: 10 }}>";
+const endStr = "<ProblemSection />";
+const startIdx = landing.indexOf(startStr);
+const endIdx = landing.indexOf(endStr);
+
+if (startIdx !== -1 && endIdx !== -1) {
+    const before = landing.substring(0, startIdx + startStr.length);
+    const after = landing.substring(endIdx);
+    
+    const newHero = '\n\n        <AnymaHeroSection />\n\n        ';
+    
+    fs.writeFileSync('c:/luminel manager/components/LandingV3.tsx', before + newHero + after);
+    console.log('Replaced Hero with AnymaHeroSection');
+} else {
+    console.log('Could not find start/end bounds for Hero');
+}

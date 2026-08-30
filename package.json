@@ -10,15 +10,19 @@
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
+    "@splinetool/react-spline": "^4.1.0",
+    "@splinetool/runtime": "^1.12.98",
     "@supabase/supabase-js": "^2.89.0",
-    "framer-motion": "^12.23.26",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.43.0",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
-    "recharts": "^3.5.1"
+    "recharts": "^3.5.1",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
