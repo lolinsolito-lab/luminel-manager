@@ -67,28 +67,13 @@ const LUMINA_COLORS = {
 };
 
 
-// Mock Financial Data
-const initialTransactions: Transaction[] = [
-   // Income
-   { id: '1', description: 'Facial Treatment - Sophia Loren', amount: 250, type: 'Income', category: 'Service', date: getRelativeDate(0), status: 'Paid', paymentMethod: 'Credit Card' },
-   { id: '2', description: 'Monthly Coaching - James Bond', amount: 1200, type: 'Income', category: 'Coaching', date: getRelativeDate(-1), status: 'Paid', paymentMethod: 'Bank Transfer' },
-   { id: '3', description: 'Workshop Ticket - Group A', amount: 850, type: 'Income', category: 'Workshop', date: getRelativeDate(-2), status: 'Paid', paymentMethod: 'Credit Card' },
-
-   // Expenses
-   { id: '4', description: 'Essential Oils Restock', amount: 450, type: 'Expense', category: 'Inventory', date: getRelativeDate(-1), status: 'Paid', paymentMethod: 'Credit Card' },
-   { id: '5', description: 'Studio Rent (Monthly)', amount: 2000, type: 'Expense', category: 'Rent', date: getRelativeDate(-10), status: 'Paid', paymentMethod: 'Bank Transfer' },
-   { id: '6', description: 'Facebook Ads Campaign', amount: 300, type: 'Expense', category: 'Marketing', date: getRelativeDate(-5), status: 'Paid', paymentMethod: 'Credit Card' },
-
-   // Payroll (Matches initial team)
-   { id: '7', description: 'Salary - Assistant Anna', amount: 1500, type: 'Payroll', category: 'Salary', date: getRelativeDate(2), status: 'Pending', paymentMethod: 'Bank Transfer' },
-   { id: '8', description: 'Contractor - Yoga Teacher', amount: 400, type: 'Payroll', category: 'Contractor', date: getRelativeDate(-15), status: 'Paid', paymentMethod: 'Bank Transfer' },
-   { id: '9', description: 'Private Consultation', amount: 150, type: 'Income', category: 'Service', date: getRelativeDate(0), status: 'Pending', paymentMethod: 'Cash' },
-];
-
 export const Finance: React.FC = () => {
    const { user, businessSettings } = useUser();
    const { t, language } = useLanguage();
-   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+   // FIX (1 set 2026): rimossi i dati finti (Sophia Loren / James Bond) usati
+   // come fallback. Un account nuovo/vuoto deve mostrare uno stato vuoto reale,
+   // non transazioni inventate — coerente con la regola "niente fallback silenziosi".
+   const [transactions, setTransactions] = useState<Transaction[]>([]);
    const [timeRange, setTimeRange] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
 
    // Interactive Filters
@@ -148,9 +133,8 @@ export const Finance: React.FC = () => {
                }
             }
 
-            // If no data, keep mock data for demo
             if (!isSupabaseConfigured()) {
-               console.log('[Finance] 💡 Using mock data for demo');
+               console.log('[Finance] 💡 Supabase non configurato: nessuna transazione da mostrare');
             }
          } catch (error) {
             console.error('[Finance] ❌ Error loading transactions:', error);

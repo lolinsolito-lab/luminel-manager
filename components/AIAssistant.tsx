@@ -3,6 +3,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Send, X, Bot, Loader2, Zap } from 'lucide-react';
 import { generateBusinessInsight } from '../services/geminiService';
 import { ChatMessage } from '../types';
+import * as transactionService from '../services/transactionService';
+import * as sessionService from '../services/sessionService';
+import * as clientService from '../services/clientService';
 
 export const AIAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,20 +16,65 @@ export const AIAssistant: React.FC = () => {
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // MOCK DATA CONTEXT - In a real app, this would come from a Context Provider or Redux store
-  // This allows the AI to "know" what is happening in the dashboard.
-  const businessContext = {
-    revenueYTD: "€126.500",
-    revenueTarget: "€150.000",
-    monthlyRevenue: "€12.450",
-    monthlyTarget: "€15.000",
-    retentionRate: "78%",
-    avgSessionValue: "€185",
-    activeClients: 142,
-    newClientsThisMonth: 14,
-    topProgram: "Autumn Retreat",
-    sessionsDelivered: 420
-  };
+  // FIX (1 set 2026): rimosso il contesto finto (era hardcoded: 142 clienti,
+  // €126.500 fatturato eccetera, uguale per ogni utente). Ora carica i dati
+  // reali del coach loggato, con lo stesso pattern di Dashboard.tsx/Analytics.tsx.
+  const [businessContext, setBusinessContext] = useState({
+    monthlyRevenue: '€0',
+    totalRevenue: '€0',
+    netProfit: '€0',
+    pendingPayments: '€0',
+    activeClients: 0,
+    newClientsThisMonth: 0,
+    sessionsToday: 0,
+    sessionsCompletedThisMonth: 0,
+    avgSessionValue: '€0'
+  });
+  const [isContextLoading, setIsContextLoading] = useState(true);
+
+  useEffect(() => {
+    const loadRealBusinessContext = async () => {
+      setIsContextLoading(true);
+      try {
+        const [financeStats, sessionStats, clients] = await Promise.all([
+          transactionService.getFinanceStats(),
+          sessionService.getSessionStats(),
+          clientService.getClients()
+        ]);
+
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const newClientsThisMonth = clients.filter(c => {
+          const createdAt = (c as any).created_at || (c as any).createdAt;
+          return createdAt ? new Date(createdAt) >= monthStart : false;
+        }).length;
+
+        const avgSessionValue = sessionStats.completedThisMonth > 0
+          ? Math.round(financeStats.revenueThisMonth / sessionStats.completedThisMonth)
+          : 0;
+
+        setBusinessContext({
+          monthlyRevenue: `€${financeStats.revenueThisMonth.toLocaleString('it-IT')}`,
+          totalRevenue: `€${financeStats.totalRevenue.toLocaleString('it-IT')}`,
+          netProfit: `€${financeStats.netProfit.toLocaleString('it-IT')}`,
+          pendingPayments: `€${financeStats.pendingPayments.toLocaleString('it-IT')}`,
+          activeClients: clients.length,
+          newClientsThisMonth,
+          sessionsToday: sessionStats.totalToday,
+          sessionsCompletedThisMonth: sessionStats.completedThisMonth,
+          avgSessionValue: `€${avgSessionValue.toLocaleString('it-IT')}`
+        });
+      } catch (error) {
+        console.error('[AIAssistant] ❌ Errore caricamento contesto reale:', error);
+        // In caso di errore lascia i valori a zero invece di mostrare dati finti:
+        // meglio un'analisi onestamente vuota che una basata su numeri inventati.
+      } finally {
+        setIsContextLoading(false);
+      }
+    };
+
+    loadRealBusinessContext();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

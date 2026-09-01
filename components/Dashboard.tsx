@@ -42,6 +42,7 @@ import * as clientService from '../services/clientService';
 import * as sessionService from '../services/sessionService';
 import * as transactionService from '../services/transactionService';
 import * as taskService from '../services/taskService';
+import * as settingsService from '../services/settingsService';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { UpgradeBanner } from './UpgradeBanner';
 
@@ -97,6 +98,9 @@ export const Dashboard: React.FC = () => {
     pendingSessions: 0,
     newClientsThisMonth: 0
   });
+  // FIX (1 set 2026): target di fatturato non più hardcoded a €15.000 per
+  // tutti. null = il coach non l'ha ancora impostato nelle Settings.
+  const [monthlyRevenueTarget, setMonthlyRevenueTarget] = useState<number | null>(null);
   const [todaySessions, setTodaySessions] = useState<Session[]>([]);
   const [chartData, setChartData] = useState<{ name: string; revenue: number }[]>([]);
 
@@ -130,6 +134,14 @@ export const Dashboard: React.FC = () => {
           const clientAny = c as any;
           return new Date(clientAny.created_at || clientAny.createdAt || 0) >= monthStart;
         }).length;
+
+        // 1b. Load revenue target from Settings (null se il coach non l'ha ancora impostato)
+        try {
+          const settings = await settingsService.getSettings();
+          setMonthlyRevenueTarget(settings.monthlyRevenueTarget ?? null);
+        } catch (settingsError) {
+          console.error('[Dashboard] ❌ Errore caricamento target fatturato:', settingsError);
+        }
 
         // 2. Load Sessions
         const allSessions = await sessionService.getSessions();
@@ -463,16 +475,27 @@ export const Dashboard: React.FC = () => {
             <p className="text-2xl font-serif font-bold text-stone-900 mt-1 tabular-nums">€{kpis.monthlyRevenue.toLocaleString('it-IT')}</p>
             {/* Progress Bar */}
             <div className="mt-3">
-              <div className="flex justify-between text-[10px] text-stone-400 mb-1">
-                <span className="tabular-nums">Target: €15.000</span>
-                <span className="font-bold text-emerald-600 tabular-nums">{Math.min(100, Math.round((kpis.monthlyRevenue / 15000) * 100))}%</span>
-              </div>
-              <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-1000"
-                  style={{ width: `${Math.min(100, (kpis.monthlyRevenue / 15000) * 100)}%` }}
-                />
-              </div>
+              {monthlyRevenueTarget ? (
+                <>
+                  <div className="flex justify-between text-[10px] text-stone-400 mb-1">
+                    <span className="tabular-nums">Target: €{monthlyRevenueTarget.toLocaleString('it-IT')}</span>
+                    <span className="font-bold text-emerald-600 tabular-nums">{Math.min(100, Math.round((kpis.monthlyRevenue / monthlyRevenueTarget) * 100))}%</span>
+                  </div>
+                  <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-1000"
+                      style={{ width: `${Math.min(100, (kpis.monthlyRevenue / monthlyRevenueTarget) * 100)}%` }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate('/settings'); }}
+                  className="text-[10px] text-gold-600 hover:underline font-medium"
+                >
+                  + Imposta un obiettivo mensile
+                </button>
+              )}
             </div>
           </div>
         </motion.div>

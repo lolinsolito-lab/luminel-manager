@@ -24,6 +24,9 @@ export interface UserSettings {
     maxConcurrentAppointments: number;
     cabinNames: string[];
 
+    // Goals
+    monthlyRevenueTarget: number | null;
+
     // Schedule
     schedule: ScheduleDay[];
 
@@ -53,6 +56,7 @@ const DEFAULT_SETTINGS: UserSettings = {
     website: '',
     maxConcurrentAppointments: 1,
     cabinNames: ['Cabina Principale'],
+    monthlyRevenueTarget: null,
     schedule: [
         { day: 'Monday', active: true, start: '09:00', end: '17:00' },
         { day: 'Tuesday', active: true, start: '09:00', end: '17:00' },
@@ -82,6 +86,7 @@ const fromSupabase = (row: any): UserSettings => ({
     website: row.website || '',
     maxConcurrentAppointments: row.max_concurrent_appointments || 1,
     cabinNames: row.cabin_names || DEFAULT_SETTINGS.cabinNames,
+    monthlyRevenueTarget: row.monthly_revenue_target ?? null,
     schedule: row.schedule || DEFAULT_SETTINGS.schedule,
     makeWebhook: row.make_webhook || '',
     googleCalendarEnabled: row.google_calendar_enabled ?? true,
@@ -101,6 +106,7 @@ const toSupabase = (settings: Partial<UserSettings>) => ({
     website: settings.website,
     max_concurrent_appointments: settings.maxConcurrentAppointments,
     cabin_names: settings.cabinNames,
+    monthly_revenue_target: settings.monthlyRevenueTarget,
     schedule: settings.schedule,
     make_webhook: settings.makeWebhook,
     google_calendar_enabled: settings.googleCalendarEnabled,

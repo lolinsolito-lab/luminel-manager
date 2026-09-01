@@ -39,7 +39,8 @@ export const Settings: React.FC = () => {
       currency: APP_CONFIG.currency,
       timezone: APP_CONFIG.timezone,
       email: '',
-      website: ''
+      website: '',
+      monthlyRevenueTarget: null as number | null
    });
 
    const [schedule, setSchedule] = useState([
@@ -83,7 +84,8 @@ export const Settings: React.FC = () => {
                currency: settings.currency,
                timezone: settings.timezone,
                email: settings.email,
-               website: settings.website
+               website: settings.website,
+               monthlyRevenueTarget: settings.monthlyRevenueTarget ?? null
             });
             setSchedule(settings.schedule);
             setIntegrations({
@@ -119,6 +121,7 @@ export const Settings: React.FC = () => {
             timezone: general.timezone,
             email: general.email,
             website: general.website,
+            monthlyRevenueTarget: general.monthlyRevenueTarget,
             schedule: schedule,
             makeWebhook: integrations.makeWebhook,
             googleCalendarEnabled: integrations.googleCalendar,
@@ -351,6 +354,26 @@ export const Settings: React.FC = () => {
                               </div>
                            </div>
                         </div>
+
+                        <div className="pt-6 border-t border-stone-100">
+                           <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2">
+                              <CreditCard className="w-4 h-4 text-gold-500" /> Obiettivo di Fatturato
+                           </h3>
+                           <p className="text-sm text-stone-500 mb-4">
+                              Mostrato come barra di progresso nella tua Dashboard. Lascia vuoto per nasconderla.
+                           </p>
+                           <div className="max-w-xs space-y-2">
+                              <label className="text-xs font-bold uppercase text-stone-500">Target Mensile (€)</label>
+                              <input
+                                 type="number"
+                                 min="0"
+                                 value={general.monthlyRevenueTarget ?? ''}
+                                 onChange={e => setGeneral({ ...general, monthlyRevenueTarget: e.target.value === '' ? null : parseFloat(e.target.value) })}
+                                 placeholder="es. 3000"
+                                 className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:border-gold-400 text-stone-800"
+                              />
+                           </div>
+                        </div>
                      </div>
                   </div>
                )}
@@ -499,37 +522,36 @@ export const Settings: React.FC = () => {
                      </div>
 
                      {/* Other Connectors */}
+                     {/* FIX (1 set 2026): questi toggle salvavano solo un booleano nel DB,
+                         senza avviare un vero flusso OAuth — l'utente pensava di aver
+                         collegato Google Calendar/Stripe quando in realtà non succedeva
+                         nulla. Sostituiti con un badge onesto "Coming Soon", stesso
+                         pattern già usato per "Send Gift" e "Sync DB" in Clients.tsx. */}
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between">
+                        <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between opacity-75">
                            <div className="flex items-center gap-3">
                               <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Calendar className="w-5 h-5" /></div>
                               <div>
                                  <h3 className="font-bold text-stone-800">Google Calendar</h3>
-                                 <p className="text-xs text-stone-400">2-way Sync</p>
+                                 <p className="text-xs text-stone-400">Sincronizzazione a doppio senso</p>
                               </div>
                            </div>
-                           <button
-                              onClick={() => setIntegrations({ ...integrations, googleCalendar: !integrations.googleCalendar })}
-                              className={`w-10 h-5 rounded-full transition-colors relative ${integrations.googleCalendar ? 'bg-green-500' : 'bg-stone-300'}`}
-                           >
-                              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${integrations.googleCalendar ? 'translate-x-5' : 'translate-x-0'}`} />
-                           </button>
+                           <span className="text-[10px] font-bold uppercase tracking-wide text-stone-400 bg-stone-100 px-3 py-1.5 rounded-full">
+                              Presto disponibile
+                           </span>
                         </div>
 
-                        <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between">
+                        <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between opacity-75">
                            <div className="flex items-center gap-3">
                               <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><CreditCard className="w-5 h-5" /></div>
                               <div>
                                  <h3 className="font-bold text-stone-800">Stripe Payments</h3>
-                                 <p className="text-xs text-stone-400">Invoicing & Checkout</p>
+                                 <p className="text-xs text-stone-400">Fatturazione e checkout per i tuoi clienti</p>
                               </div>
                            </div>
-                           <button
-                              onClick={() => setIntegrations({ ...integrations, stripe: !integrations.stripe })}
-                              className={`w-10 h-5 rounded-full transition-colors relative ${integrations.stripe ? 'bg-green-500' : 'bg-stone-300'}`}
-                           >
-                              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${integrations.stripe ? 'translate-x-5' : 'translate-x-0'}`} />
-                           </button>
+                           <span className="text-[10px] font-bold uppercase tracking-wide text-stone-400 bg-stone-100 px-3 py-1.5 rounded-full">
+                              Presto disponibile
+                           </span>
                         </div>
                      </div>
                   </div>
