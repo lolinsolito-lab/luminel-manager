@@ -577,7 +577,7 @@ export const Finance: React.FC = () => {
 
             {/* Team Link Card */}
             <a
-               href="#/team"
+               href="/team"
                className="bg-gradient-to-br from-stone-50 to-stone-100 p-6 rounded-2xl border border-stone-200 hover:shadow-lg transition-all group flex items-center justify-between"
             >
                <div className="flex items-center gap-4">

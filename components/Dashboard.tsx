@@ -33,7 +33,6 @@ import {
 } from 'recharts';
 import { Session, SessionStatus } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { AIAssistant } from './AIAssistant';
 import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { usePrograms } from '../contexts/ProgramContext';
@@ -858,8 +857,7 @@ export const Dashboard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Floating AI Assistant */}
-      <AIAssistant />
+      {/* AIAssistant rimosso: gia' renderizzato globalmente in App.tsx */}
     </motion.div>
   );
 };
