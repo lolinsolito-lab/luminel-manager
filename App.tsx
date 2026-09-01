@@ -126,8 +126,9 @@ const App: React.FC = () => {
                   <AuthRedirectHandler />
                   <Routes>
                     {/* Public Routes */}
-                    <Route path="/" element={<HomeLanding />} />
-          <Route path="/v3" element={<LandingV3 />} />
+                    <Route path="/" element={<LandingV3 />} />
+                    <Route path="/v3" element={<Navigate to="/" replace />} />
+                    <Route path="/old-landing" element={<HomeLanding />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/founder" element={<FounderLanding />} />
                     <Route path="/success" element={<PaymentSuccess />} />
