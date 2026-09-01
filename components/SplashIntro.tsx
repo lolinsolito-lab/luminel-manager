@@ -1,27 +1,43 @@
-
 import React, { useEffect, useState } from 'react';
 import { Logo } from './Logo';
-import { getDailyQuote } from '../utils/dailyQuotes';
 
 interface SplashIntroProps {
   onFinish: () => void;
 }
 
+const loadingPhases = [
+  "Inizializzazione ecosistema in corso...",
+  "Sincronizzazione cluster dati (438 KPI attivi)",
+  "Calibrazione algoritmi manageriali...",
+  "Accesso garantito all'infrastruttura d'élite."
+];
+
 export const SplashIntro: React.FC<SplashIntroProps> = ({ onFinish }) => {
-  // Use the Daily Quote Engine
-  const [content] = useState(() => getDailyQuote());
-  
   const [isVisible, setIsVisible] = useState(true);
-  const [showText, setShowText] = useState(false);
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Reveal text shortly after background loads
-    const contentTimer = setTimeout(() => setShowText(true), 100);
+    // Gestione delle frasi (cambiano ogni 1 secondo circa)
+    const phaseInterval = setInterval(() => {
+      setPhaseIndex((prev) => {
+        if (prev < loadingPhases.length - 1) return prev + 1;
+        return prev;
+      });
+    }, 1100);
+
+    // Gestione progress bar (raggiunge 100 in 4.5s)
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        const next = prev + (100 / 45); // approx 4.5s for 100 ticks
+        return next > 100 ? 100 : next;
+      });
+    }, 100);
     
-    // Start fading out
+    // Inizia la chiusura (fade out)
     const fadeTimer = setTimeout(() => {
       setIsVisible(false);
-    }, 4500); 
+    }, 4800); 
     
     // Unmount/Finish
     const finishTimer = setTimeout(() => {
@@ -29,7 +45,8 @@ export const SplashIntro: React.FC<SplashIntroProps> = ({ onFinish }) => {
     }, 5500); 
 
     return () => {
-      clearTimeout(contentTimer);
+      clearInterval(phaseInterval);
+      clearInterval(progressInterval);
       clearTimeout(fadeTimer);
       clearTimeout(finishTimer);
     };
@@ -37,40 +54,55 @@ export const SplashIntro: React.FC<SplashIntroProps> = ({ onFinish }) => {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden transition-opacity duration-1000 ease-in-out bg-stone-900 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden transition-opacity duration-700 ease-in-out bg-[#0a0a0a] ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
     >
-      {/* Background Image tied to the specific quote */}
+      {/* Background Video/Image (Abstract AI Network) */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center opacity-30"
         style={{ 
-          backgroundImage: `url(${content.image})`,
+          backgroundImage: `url('/assets/images/anyma_ai_entity.jpg')`,
           animation: 'subtle-zoom 20s linear infinite'
         }}
       />
       
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-stone-900/30 via-stone-900/50 to-stone-900/80 backdrop-blur-[2px]"></div>
+      {/* Overlay scuro profondo */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/50 via-[#0a0a0a]/80 to-[#0a0a0a] backdrop-blur-md"></div>
 
-      <div 
-        className={`relative z-10 flex flex-col items-center max-w-3xl px-8 text-center transition-all duration-1000 transform ${showText ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
-      >
-        <div className="mb-12 scale-125 drop-shadow-2xl">
+      {/* Contenuto Centrale */}
+      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-2xl px-8 text-center">
+        
+        {/* Logo Pulsante */}
+        <div className="mb-16 scale-110 drop-shadow-2xl animate-pulse">
           <Logo variant="light" layout="vertical" />
         </div>
 
-        <div className="relative">
-          <h2 className="text-2xl md:text-4xl font-serif text-white leading-relaxed tracking-wide drop-shadow-lg">
-            {content.text}
-          </h2>
+        {/* Metriche & Testo */}
+        <div className="h-16 flex items-center justify-center">
+          <p className="text-xl md:text-2xl font-mono text-[var(--color-text-primary)] font-light tracking-widest uppercase animate-in fade-in zoom-in duration-500" key={phaseIndex}>
+            {loadingPhases[phaseIndex]}
+          </p>
         </div>
 
-        <div className="mt-10 flex items-center gap-4 animate-in fade-in duration-1000 delay-500 fill-mode-forwards opacity-0" style={{ animationDelay: '500ms' }}>
-          <div className="h-[1px] w-12 bg-white/40"></div>
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold-200 text-shadow-sm">
-            {content.author}
-          </p>
-          <div className="h-[1px] w-12 bg-white/40"></div>
+        {/* Barra di Progresso Tech */}
+        <div className="mt-8 w-full max-w-md bg-stone-900 h-[2px] rounded-full overflow-hidden relative border border-stone-800/50">
+          <div 
+            className="absolute top-0 left-0 h-full bg-[var(--color-border)] shadow-[0_0_15px_var(--color-border)] transition-all duration-100 ease-linear"
+            style={{ width: `${progress}%` }}
+          ></div>
         </div>
+
+        {/* Info Extra Footer */}
+        <div className="mt-12 flex items-center gap-8 text-xs font-mono text-stone-500 uppercase tracking-widest">
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Node: Secure
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-border)] animate-pulse" style={{ animationDelay: '0.5s' }}></span>
+            AI: Active
+          </span>
+        </div>
+
       </div>
       
       <style>{`

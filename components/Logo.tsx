@@ -31,19 +31,7 @@ export const Logo: React.FC<LogoProps> = ({
         {logoUrl ? (
           <img src={logoUrl} alt="Business Logo" className="w-full h-full object-cover" />
         ) : (
-          <>
-            {/* Energetic Circle */}
-            <div className={`absolute inset-0 rounded-full border ${borderColor} opacity-30`}></div>
-
-            {/* The Spark */}
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-6 h-6 text-gold-500 relative z-10 drop-shadow-sm"
-            >
-              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
-            </svg>
-          </>
+          <img src="/assets/images/anyma_logo_v1.jpg" alt="Luminel Logo" className="w-full h-full object-cover" />
         )}
       </div>
 
