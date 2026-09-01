@@ -360,30 +360,37 @@ export const Analytics: React.FC = () => {
                   </div>
                </div>
                <div className="h-80 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                     <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                        <defs>
-                           <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor={LUMINA_COLORS.income} stopOpacity={0.4} />
-                              <stop offset="95%" stopColor={LUMINA_COLORS.income} stopOpacity={0} />
-                           </linearGradient>
-                           <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor={LUMINA_COLORS.expense} stopOpacity={0.4} />
-                              <stop offset="95%" stopColor={LUMINA_COLORS.expense} stopOpacity={0} />
-                           </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#a8a29e', fontSize: 12, fontWeight: 500 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#a8a29e', fontSize: 12, fontWeight: 500 }} tickFormatter={(val) => `€${val / 1000}k`} />
-                        <Tooltip
-                           contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                           formatter={(value: number) => [`€${value.toLocaleString()}`, '']}
-                           itemStyle={{ fontWeight: 600, color: '#44403c' }}
-                        />
-                        <Area type="monotone" dataKey="revenue" stroke={LUMINA_COLORS.income} strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Fatturato" />
-                        <Area type="monotone" dataKey="expenses" stroke={LUMINA_COLORS.expense} strokeWidth={2} fillOpacity={1} fill="url(#colorExp)" name="Spese" />
-                     </AreaChart>
-                  </ResponsiveContainer>
+                  {revenueData.length > 0 ? (
+                     <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                           <defs>
+                              <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                 <stop offset="5%" stopColor={LUMINA_COLORS.income} stopOpacity={0.4} />
+                                 <stop offset="95%" stopColor={LUMINA_COLORS.income} stopOpacity={0} />
+                              </linearGradient>
+                              <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
+                                 <stop offset="5%" stopColor={LUMINA_COLORS.expense} stopOpacity={0.4} />
+                                 <stop offset="95%" stopColor={LUMINA_COLORS.expense} stopOpacity={0} />
+                              </linearGradient>
+                           </defs>
+                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
+                           <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#a8a29e', fontSize: 12, fontWeight: 500 }} dy={10} />
+                           <YAxis axisLine={false} tickLine={false} tick={{ fill: '#a8a29e', fontSize: 12, fontWeight: 500 }} tickFormatter={(val) => `€${val / 1000}k`} />
+                           <Tooltip
+                              contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                              formatter={(value: number) => [`€${value.toLocaleString()}`, '']}
+                              itemStyle={{ fontWeight: 600, color: '#44403c' }}
+                           />
+                           <Area type="monotone" dataKey="revenue" stroke={LUMINA_COLORS.income} strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Fatturato" />
+                           <Area type="monotone" dataKey="expenses" stroke={LUMINA_COLORS.expense} strokeWidth={2} fillOpacity={1} fill="url(#colorExp)" name="Spese" />
+                        </AreaChart>
+                     </ResponsiveContainer>
+                  ) : (
+                     <div className="h-full w-full flex flex-col items-center justify-center text-stone-400 border-2 border-dashed border-stone-100 rounded-xl">
+                        <p className="text-sm font-medium">Nessun dato finanziario ancora</p>
+                        <p className="text-xs mt-1">Il grafico si popolerà con le prime transazioni</p>
+                     </div>
+                  )}
                </div>
             </div>
 
