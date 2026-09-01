@@ -930,7 +930,7 @@ export const Clients: React.FC = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen">
                 <Loader2 className="w-12 h-12 text-gold-500 animate-spin mb-4" />
-                <p className="text-stone-600 font-medium">Loading clients from Google Sheets...</p>
+                <p className="text-stone-600 font-medium">Caricamento clienti...</p>
             </div>
         );
     }

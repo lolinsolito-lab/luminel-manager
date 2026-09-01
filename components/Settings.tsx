@@ -29,7 +29,12 @@ export const Settings: React.FC = () => {
    const [isSaved, setIsSaved] = useState(false);
    const [isLoading, setIsLoading] = useState(true);
    const [isSaving, setIsSaving] = useState(false);
-   const [isCloudConnected, setIsCloudConnected] = useState(false);
+   // FIX (1 set 2026): isCloudConnected era uno stato che restava bloccato a
+   // 'false' se QUALSIASI riga dentro loadSettings() falliva dopo il fetch,
+   // anche per motivi non legati a Supabase — mostrando "Non Configurato"
+   // anche a connessione perfettamente funzionante. Rimosso lo stato: il
+   // badge ora chiama isSupabaseConfigured() direttamente nel JSX, una
+   // funzione pura sugli env vars che non può mai restare disallineata.
 
    // --- STATE ---
    const [general, setGeneral] = useState({
@@ -99,7 +104,6 @@ export const Settings: React.FC = () => {
                cabinNames: settings.cabinNames
             });
             setLogoUrl(settings.logoUrl || '');
-            setIsCloudConnected(isSupabaseConfigured());
             console.log('[Settings] ✅ Settings loaded');
          } catch (error) {
             console.error('[Settings] ❌ Failed to load settings:', error);
@@ -491,7 +495,7 @@ export const Settings: React.FC = () => {
                                  </div>
                                  <h2 className="font-serif font-bold text-xl text-stone-800">Supabase Cloud</h2>
                               </div>
-                              {isCloudConnected ? (
+                              {isSupabaseConfigured() ? (
                                  <span className="text-xs font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1">
                                     <CheckCircle2 className="w-3 h-3" /> Connesso
                                  </span>

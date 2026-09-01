@@ -1,0 +1,71 @@
+From 4205455031c2d30ee26801bc4c7731d40f88423d Mon Sep 17 00:00:00 2001
+From: "Claude (audit fix)" <claude@anthropic.local>
+Date: Tue, 1 Sep 2026 17:32:45 +0000
+Subject: [PATCH] fix: badge Supabase Cloud disallineato + testo 'Google
+ Sheets' fuorviante
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Settings.tsx: il badge 'Connesso/Non Configurato' dipendeva da uno stato
+  che restava bloccato a false se qualsiasi riga di loadSettings falliva,
+  anche per motivi non legati alla connessione. Ora chiama isSupabaseConfigured()
+  direttamente, funzione pura che non può restare disallineata dalla realtà.
+- Clients.tsx: rimosso testo 'Loading clients from Google Sheets...' rimasto
+  dalla vecchia integrazione — i dati arrivano da Supabase da tempo, il testo
+  era solo fuorviante per l'utente.
+---
+ components/Clients.tsx  |  2 +-
+ components/Settings.tsx | 10 +++++++---
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/components/Clients.tsx b/components/Clients.tsx
+index d83a2e6..6fcae5b 100644
+--- a/components/Clients.tsx
++++ b/components/Clients.tsx
+@@ -930,7 +930,7 @@ export const Clients: React.FC = () => {
+         return (
+             <div className="flex flex-col items-center justify-center min-h-screen">
+                 <Loader2 className="w-12 h-12 text-gold-500 animate-spin mb-4" />
+-                <p className="text-stone-600 font-medium">Loading clients from Google Sheets...</p>
++                <p className="text-stone-600 font-medium">Caricamento clienti...</p>
+             </div>
+         );
+     }
+diff --git a/components/Settings.tsx b/components/Settings.tsx
+index f3dc2aa..76936f2 100644
+--- a/components/Settings.tsx
++++ b/components/Settings.tsx
+@@ -29,7 +29,12 @@ export const Settings: React.FC = () => {
+    const [isSaved, setIsSaved] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+-   const [isCloudConnected, setIsCloudConnected] = useState(false);
++   // FIX (1 set 2026): isCloudConnected era uno stato che restava bloccato a
++   // 'false' se QUALSIASI riga dentro loadSettings() falliva dopo il fetch,
++   // anche per motivi non legati a Supabase — mostrando "Non Configurato"
++   // anche a connessione perfettamente funzionante. Rimosso lo stato: il
++   // badge ora chiama isSupabaseConfigured() direttamente nel JSX, una
++   // funzione pura sugli env vars che non può mai restare disallineata.
+ 
+    // --- STATE ---
+    const [general, setGeneral] = useState({
+@@ -99,7 +104,6 @@ export const Settings: React.FC = () => {
+                cabinNames: settings.cabinNames
+             });
+             setLogoUrl(settings.logoUrl || '');
+-            setIsCloudConnected(isSupabaseConfigured());
+             console.log('[Settings] ✅ Settings loaded');
+          } catch (error) {
+             console.error('[Settings] ❌ Failed to load settings:', error);
+@@ -491,7 +495,7 @@ export const Settings: React.FC = () => {
+                                  </div>
+                                  <h2 className="font-serif font-bold text-xl text-stone-800">Supabase Cloud</h2>
+                               </div>
+-                              {isCloudConnected ? (
++                              {isSupabaseConfigured() ? (
+                                  <span className="text-xs font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center gap-1">
+                                     <CheckCircle2 className="w-3 h-3" /> Connesso
+                                  </span>
+-- 
+2.43.0
