@@ -1024,7 +1024,7 @@ const PlanSection: React.FC = () => (
           </p>
 
           <div className="flex flex-wrap gap-4">
-            <Link to="/auth/register" className="inline-flex items-center gap-2 rounded-full bg-white text-black px-8 py-3.5 text-sm font-bold transition-transform hover:scale-105">
+            <Link to="/login" className="inline-flex items-center gap-2 rounded-full bg-white text-black px-8 py-3.5 text-sm font-bold transition-transform hover:scale-105">
               Blocca il Posto <ArrowRight size={16} />
             </Link>
             <a href="#" className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 text-white px-8 py-3.5 text-sm font-semibold transition-colors hover:bg-white/10">
@@ -1235,7 +1235,7 @@ const FutureSection: React.FC = () => {
       <InteractiveSelector />
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
-        <Link to="/auth/register" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '1.25rem 3.5rem', borderRadius: '9999px', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, color: '#050504', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', boxShadow: `0 0 50px rgba(200,185,150,0.25)`, transition: 'all 0.4s', border: 'none' }}
+        <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '1.25rem 3.5rem', borderRadius: '9999px', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, color: '#050504', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', boxShadow: `0 0 50px rgba(200,185,150,0.25)`, transition: 'all 0.4s', border: 'none' }}
               onMouseOver={e => e.currentTarget.style.boxShadow = `0 0 70px rgba(200,185,150,0.4)`}
               onMouseOut={e => e.currentTarget.style.boxShadow = `0 0 50px rgba(200,185,150,0.25)`}>
           Lo Voglio <ArrowRight size={16} />
@@ -1305,7 +1305,7 @@ export const LandingV3: React.FC = () => {
               {label}
             </a>
           ))}
-          <Link to="/auth/login" style={{ color: 'rgba(240,232,210,0.5)', textDecoration: 'none', transition: 'color 0.3s' }} onMouseOver={e => (e.currentTarget.style.color = C.gold)} onMouseOut={e => (e.currentTarget.style.color = 'rgba(240,232,210,0.5)')}>Login</Link>
+          <Link to="/login" style={{ color: 'rgba(240,232,210,0.5)', textDecoration: 'none', transition: 'color 0.3s' }} onMouseOver={e => (e.currentTarget.style.color = C.gold)} onMouseOut={e => (e.currentTarget.style.color = 'rgba(240,232,210,0.5)')}>Login</Link>
           <a href="#pricing" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#050504', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, borderRadius: '9999px', padding: '0.5rem 1.4rem', textDecoration: 'none', fontWeight: 700, boxShadow: '0 0 20px rgba(200,185,150,0.2)' }}>
             Diventa Founder ({spotsText})
           </a>
@@ -1333,7 +1333,7 @@ export const LandingV3: React.FC = () => {
             {label}
           </a>
         ))}
-        <Link to="/auth/login" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '1rem' }}>Login</Link>
+        <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '1rem' }}>Login</Link>
         <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} style={{ marginTop: '2rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: '#050504', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, borderRadius: '9999px', padding: '1rem 2rem', textDecoration: 'none', fontWeight: 700 }}>
           Diventa Founder ({spotsText})
         </a>
@@ -1359,10 +1359,10 @@ export const LandingV3: React.FC = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 1 }} style={{ marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', zIndex: 60 }}>
-            <Link to="/auth/register" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 3rem', borderRadius: '9999px', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, color: '#050504', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', boxShadow: `0 0 40px rgba(240,232,210,0.2)`, border: 'none', transition: 'transform 0.2s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
+            <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 3rem', borderRadius: '9999px', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, color: '#050504', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', boxShadow: `0 0 40px rgba(240,232,210,0.2)`, border: 'none', transition: 'transform 0.2s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
               Diventa Founding Member <ArrowRight size={16} />
             </Link>
-            <Link to="/auth/login" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#44403c', textDecoration: 'none' }}>Ho già un account →</Link>
+            <Link to="/login" style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#44403c', textDecoration: 'none' }}>Ho già un account →</Link>
           </motion.div>
         </motion.section>
 
@@ -1489,7 +1489,7 @@ export const LandingV3: React.FC = () => {
               </p>
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <Link to="/auth/register" style={{ padding: '0.9rem 2rem', borderRadius: 9999, background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, color: '#050504', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', textDecoration: 'none' }}>
+                <Link to="/login" style={{ padding: '0.9rem 2rem', borderRadius: 9999, background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, color: '#050504', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', textDecoration: 'none' }}>
                   Voglio la mia libertà →
                 </Link>
                 <a href="#soluzioni" style={{ padding: '0.9rem 2rem', borderRadius: 9999, border: `1px solid rgba(240,232,210,0.15)`, color: '#a8a29e', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', textDecoration: 'none' }}>
