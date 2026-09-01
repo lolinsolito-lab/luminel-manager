@@ -266,8 +266,8 @@ export const AdminDashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-orange-50 p-6 lg:p-10">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-orange-50 p-4 md:p-6 lg:p-10">
+            <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -409,7 +409,7 @@ export const AdminDashboard: React.FC = () => {
                         Revenue per Piano
                     </h2>
                     {tierPricing ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             {(Object.entries(tierPricing) as [string, TierPrice][]).map(([tier, price]) => {
                                 const count = userStats.byTier[tier] || 0;
                                 const revenue = count * price.monthly;

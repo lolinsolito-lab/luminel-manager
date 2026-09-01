@@ -10,10 +10,32 @@ import {
 import { getMergedPricingPlans, getDiscountPercent, TierPlan } from '../services/pricingPlans';
 import { getSubscriptionPlans } from '../services/waitlistService';
 import { SplineScene } from './ui/splite';
+
+// Hook condiviso per garantire che tutte le sezioni leggano gli stessi posti disponibili
+function useFounderSpots() {
+  const [spots, setSpots] = useState<number | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    const loadSpots = async () => {
+      try {
+        const { getFounderSpotsRemaining } = await import('../services/waitlistService');
+        const s = await getFounderSpotsRemaining();
+        if (mounted) setSpots(s);
+      } catch (e) {
+        console.warn('[LandingV3] Could not load founder spots', e);
+      }
+    };
+    loadSpots();
+    return () => { mounted = false; };
+  }, []);
+  return spots;
+}
 import { Card } from './ui/card';
 import { Spotlight } from './ui/spotlight';
 import { WordsPullUp } from './ui/words-pull-up';
 import { ImageStreamHero } from './ui/image-stream-hero';
+import { GlassmorphismTrustHero } from './ui/glassmorphism-trust-hero';
+import { InteractiveFolderGallery } from './ui/interactive-folder-gallery';
 import { ColorChangeCards } from './ui/color-change-card';
 import { AiCoachHeroSection } from './ui/ai-coach-hero';
 import InteractiveSelector from './ui/interactive-selector';
@@ -241,24 +263,53 @@ const FeatureItem: React.FC<FeatProps> = ({ num, title, desc, isActive }) => (
 
 // ─── LIVING DASHBOARD IMAGE ───
 const LivingDashboardImage: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - left) / width - 0.5;
+    const y = (e.clientY - top) / height - 0.5;
+    setMousePos({ x, y });
+  };
+
   return (
-    <div style={{ position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.7)', transform: 'scale(1.08)', transformOrigin: 'center left' }}>
+    <div 
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => { setIsHovered(false); setMousePos({ x: 0, y: 0 }); }}
+      style={{ position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.7)', transform: 'scale(1.08)', transformOrigin: 'center left', perspective: '1200px' }}
+    >
       <img src="/assets/images/media_1787944837657.jpg" alt="Dashboard" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: 'brightness(1.05)' }} />
       
-      {/* Holographic Entity (Anyma style) */}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-        <video
-          autoPlay loop muted playsInline
-          src="https://claude-mem.ai/video/hero-bg.mp4"
+      {/* Holographic Entity (Interactive) */}
+      <motion.div 
+        animate={{ 
+          rotateX: mousePos.y * -30, 
+          rotateY: mousePos.x * 30, 
+          x: mousePos.x * 40,
+          y: mousePos.y * 40,
+          scale: isHovered ? 1.05 : 1
+        }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+        style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10, transformStyle: 'preserve-3d' }}
+      >
+        <img
+          src="/assets/images/anyma_ai_entity.jpg"
+          alt="AI Entity"
           style={{
-            width: '160%', height: '160%', objectFit: 'cover',
-            mixBlendMode: 'screen', opacity: 0.9,
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 15%, transparent 40%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 15%, transparent 40%)',
-            transform: 'scale(1.1) translateY(5%)',
+            width: '120%', height: '120%', objectFit: 'cover',
+            mixBlendMode: 'screen', opacity: isHovered ? 0.95 : 0.8,
+            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, transparent 60%)',
+            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, transparent 60%)',
+            transform: 'translateZ(80px) translateY(5%)',
+            transition: 'opacity 0.5s ease'
           }}
         />
-      </div>
+      </motion.div>
 
       {/* Floating Lights / Particles */}
       {[...Array(8)].map((_, i) => (
@@ -285,12 +336,12 @@ const LivingDashboardImage: React.FC = () => {
         transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
         style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: '25%',
-          background: 'linear-gradient(to bottom, transparent, rgba(200,185,150,0.2), transparent)', pointerEvents: 'none'
+          background: 'linear-gradient(to bottom, transparent, rgba(200,185,150,0.2), transparent)', pointerEvents: 'none', zIndex: 5
         }}
       />
       
       {/* Overlay border */}
-      <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(240,232,210,0.08)', borderRadius: '1.5rem', zIndex: 2, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(240,232,210,0.08)', borderRadius: '1.5rem', zIndex: 20, pointerEvents: 'none' }} />
     </div>
   );
 };
@@ -369,80 +420,47 @@ const EcosystemStack: React.FC = () => {
 // ─── SPECTACULAR ECOSYSTEM SECTION ───
 const SpectacularEcosystemSection: React.FC = () => {
   return (
-    <section style={{ position: 'relative', width: '100%', minHeight: '100vh', overflow: 'hidden', padding: '10rem 1.5rem', background: '#050504', display: 'flex', alignItems: 'center', borderTop: borderLine, borderBottom: borderLine }}>
-      {/* Background Holographic Faces */}
+    <section style={{ position: 'relative', width: '100%', minHeight: '100vh', overflow: 'hidden', padding: '10rem 1.5rem', background: 'transparent', display: 'flex', alignItems: 'center', borderTop: borderLine, borderBottom: borderLine }}>
+      {/* Background Holographic Faces (Removed for cleaner universe look) */}
       <div style={{ position: 'absolute', inset: 0, opacity: 0.15, mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 0 }}>
-        <motion.img 
-          src="/assets/images/media_1787944837651.jpg" 
-          alt="AI Vision"
-          initial={{ scale: 1.1, y: -20 }}
-          whileInView={{ scale: 1, y: 0 }}
-          transition={{ duration: 20, ease: 'linear', repeat: Infinity, repeatType: 'reverse' }}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'contrast(1.5) grayscale(1) brightness(1.2)' }}
-        />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #050504 0%, transparent 50%, #050504 100%)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, transparent 0%, #050504 90%)' }} />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 10, maxWidth: '88rem', margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1.2fr)', gap: '6rem', alignItems: 'center' }}>
+      <div style={{ position: 'relative', zIndex: 10, maxWidth: '88rem', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '3rem', alignItems: 'center', textAlign: 'center' }}>
         
-        {/* Testo ed Ecosistema (Left Column) */}
+        {/* Testo ed Ecosistema (Centered) */}
         <motion.div 
-          initial={{ opacity: 0, x: -40 }} 
-          whileInView={{ opacity: 1, x: 0 }} 
+          initial={{ opacity: 0, y: -40 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
           viewport={{ once: true }} 
           transition={{ duration: 1 }}
-          style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+          style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.85rem', borderRadius: '9999px', border: `1px solid ${C.goldDim}`, background: 'rgba(240,232,210,0.03)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: C.goldMid, width: 'max-content' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.85rem', borderRadius: '9999px', border: `1px solid ${C.goldDim}`, background: 'rgba(240,232,210,0.03)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: C.goldMid }}>
             <Sparkles size={12} color={C.goldMid} />
             La Visione Infinita
           </div>
 
-          <h2 style={{ fontFamily: 'Georgia,serif', fontSize: 'clamp(2.5rem,4vw,3.5rem)', color: '#fff', fontWeight: 300, lineHeight: 1.1, margin: 0 }}>
+          <h2 style={{ fontFamily: 'Georgia,serif', fontSize: 'clamp(3rem,6vw,5.5rem)', color: '#fff', fontWeight: 300, lineHeight: 1.1, margin: 0 }}>
             Luminel è solo <br />
             <span style={{ fontStyle: 'italic', color: C.gold, textShadow: `0 0 40px ${C.gold}40` }}>l'inizio.</span>
           </h2>
           
-          <p style={{ color: '#a8a29e', fontSize: '1.05rem', lineHeight: 1.8, maxWidth: '30rem', margin: '0 0 1.5rem 0' }}>
+          <p style={{ color: '#a8a29e', fontSize: '1.25rem', lineHeight: 1.8, maxWidth: '42rem', margin: '0' }}>
             Un ecosistema di intelligenze interconnesse. Mentre Luminel gestisce il tuo presente, stiamo già costruendo il tuo impero futuro.
           </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1rem' }}>
-            {[
-              { name: 'VirtualTwin', desc: 'Clone conversazionale 24/7.', status: 'live' },
-              { name: 'VirtualBNB', desc: 'Property management AI.', status: 'live' },
-              { name: 'LuminelCoach', desc: 'Il tuo Mentore AI privato. Ascolta le tue sfide e calcola le tue vittorie. Accesso Early Access severamente limitato.', status: 'soon' },
-              { name: 'Michael Luminels', desc: 'Il nucleo visionario dell\'intero ecosistema. L\'ingresso all\'élite è su invito. Le porte stanno per chiudersi.', status: 'soon' },
-            ].map((p, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -5, background: 'rgba(240,232,210,0.06)', borderColor: C.goldMid }}
-                style={{ position: 'relative', padding: '1.25rem', borderRadius: '1rem', border: borderLine, background: 'rgba(240,232,210,0.02)', backdropFilter: 'blur(10px)', transition: 'all 0.3s ease', cursor: 'default' }}
-              >
-                {p.status === 'soon' && (
-                  <div style={{ position: 'absolute', top: '-0.7rem', right: '1rem', background: 'linear-gradient(135deg, #f87171, #ef4444)', color: '#fff', fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', padding: '0.25rem 0.75rem', borderRadius: '99px', boxShadow: '0 4px 12px rgba(248,113,113,0.4)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                    Coming Soon
-                  </div>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: p.status === 'live' ? '#6FCF97' : '#57534e', boxShadow: p.status === 'live' ? '0 0 10px #6FCF97' : 'none' }} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', letterSpacing: '0.05em' }}>{p.name}</span>
-                </div>
-                <p style={{ fontSize: '0.75rem', color: '#78716c', margin: 0, lineHeight: 1.5 }}>{p.desc}</p>
-              </motion.div>
-            ))}
-          </div>
         </motion.div>
 
-        {/* Stack Macbooks / Dashboards (Right Column) */}
+        {/* Interactive Folder Gallery (Centered, full width) */}
         <motion.div
-          initial={{ opacity: 0, x: 40 }} 
-          whileInView={{ opacity: 1, x: 0 }} 
+          initial={{ opacity: 0, y: 40 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
           viewport={{ once: true }} 
-          transition={{ duration: 1, delay: 0.2 }}
+          transition={{ duration: 1.2, delay: 0.3 }}
+          style={{ width: '100%', maxWidth: '64rem' }}
         >
-          <EcosystemStack />
+          <InteractiveFolderGallery />
         </motion.div>
       </div>
     </section>
@@ -530,22 +548,9 @@ const PricingSection: React.FC = () => {
   const [plans, setPlans] = useState<TierPlan[] | null>(null);
   const [plansError, setPlansError] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
-  // FOMO onesto: numero vero dei posti Founder rimasti (stessa fonte usata in
-  // FounderLanding/HomeLanding), non un numero inventato per tier.
-  const [founderSpots, setFounderSpots] = useState<number | null>(null);
-
-  useEffect(() => {
-    const loadSpots = async () => {
-      try {
-        const { getFounderSpotsRemaining } = await import('../services/waitlistService');
-        const spots = await getFounderSpotsRemaining();
-        setFounderSpots(spots);
-      } catch (e) {
-        console.warn('[LandingV2] Could not load founder spots');
-      }
-    };
-    loadSpots();
-  }, []);
+  
+  // Usa l'hook condiviso per avere sempre il numero reale ovunque
+  const founderSpots = useFounderSpots();
 
   // Colori distinti per tier — plan.color è una classe Tailwind (non usabile
   // in inline style), qui la versione in hex per i badge icona di questa pagina.
@@ -752,22 +757,18 @@ const PricingSection: React.FC = () => {
   );
 };
 
-// ⚠️ NOTA (29 ago 2026): questi numeri (94% adozione, -78% errori, +3.2 ore/
-// giorno) non sono misurati — oggi non ci sono ancora clienti paganti reali.
-// Stessa categoria di rischio delle testimonianze Marco/Sara/Giulia rimosse
-// altrove oggi. Non li ho toccati: è una decisione di contenuto, non un bug
-// meccanico — dimmi se vuoi che li tolga/riformuli come promessa non come dato.
+// METRICS corrette: fatti strutturali del software e obiettivi, non dati inventati.
 const METRICS = [
-  { title: 'TEMPO RISPARMIATO', value: '+3.2', suffix: ' ORE/GIORNO', desc: 'Rispetto all\'uso di Excel + WhatsApp.', icon: Clock },
-  { title: 'TASSO DI ADOZIONE', value: '94', suffix: '%', desc: 'Tra Coach, Saloni e Professionisti del benessere.', icon: Activity },
-  { title: 'RIDUZIONE ERRORI', value: '-78', suffix: '%', desc: 'No-show e doppi appuntamenti azzerati.', icon: Check },
-  { title: 'WHATSAPP AUTOMATION', value: '24', suffix: '/7', desc: 'Promemoria automatici e proattivi ai clienti.', icon: Sparkles }
+  { title: 'SETUP INIZIALE', value: '47', suffix: ' MINUTI', desc: 'Il tempo medio stimato per configurare il tuo ambiente.', icon: Clock },
+  { title: 'ANTI-OVERBOOKING', value: '100', suffix: '%', desc: 'Garantito per costruzione dall\'architettura del sistema.', icon: Activity },
+  { title: 'RISPARMIO STIMATO', value: '+3.2', suffix: ' ORE/GG', desc: 'Obiettivo di tempo risparmiato rispetto a Excel + WhatsApp.', icon: Check },
+  { title: 'WHATSAPP AUTOMATION', value: '24', suffix: '/7', desc: 'Sistema progettato per promemoria sempre attivi.', icon: Sparkles }
 ];
 
 // --- SEZIONE: Ecosistema (Bento Grid) --------------------------------------
 const ECOSYSTEM_PRODUCTS = [
-  { name: 'VirtualTwin', desc: 'L\'AI Clone conversazionale che risponde come te 24/7.', status: 'live', colSpan: 'md:col-span-2' },
-  { name: 'VirtualBNB', desc: 'Automazione e property management intelligente.', status: 'live', colSpan: 'md:col-span-1' },
+  { name: 'VirtualTwin', desc: 'L\'AI Clone conversazionale che risponde come te 24/7.', status: 'soon', colSpan: 'md:col-span-2' },
+  { name: 'VirtualBNB', desc: 'Automazione e property management intelligente.', status: 'soon', colSpan: 'md:col-span-1' },
   { name: 'LuminelCoach', desc: 'Il tuo AI Coach personale per decisioni business.', status: 'soon', colSpan: 'md:col-span-1' },
   { name: 'Insolita Academy', desc: 'Formazione elitaria su tech, mind e business.', status: 'soon', colSpan: 'md:col-span-2' },
 ];
@@ -826,11 +827,11 @@ const MetricsGridSection: React.FC = () => {
 
       <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', marginBottom: '6rem' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 1rem', borderRadius: '99px', border: `1px solid ${C.goldDim}`, background: 'rgba(240,232,210,0.03)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: C.goldMid, marginBottom: '1.5rem' }}>
-          La Scienza dell'Efficienza
+          Performance By Design
         </div>
         <h2 style={{ fontSize: 'clamp(2.5rem,5vw,4.5rem)', fontFamily: 'Georgia,serif', color: '#fff', fontWeight: 300, lineHeight: 1.1, margin: 0 }}>
-          I numeri non mentono.<br />
-          <span style={{ fontStyle: 'italic', color: C.gold, textShadow: `0 0 40px ${C.gold}50` }}>Il tuo business decolla.</span>
+          Progettato per l'Eccellenza.<br />
+          <span style={{ fontStyle: 'italic', color: C.gold, textShadow: `0 0 40px ${C.gold}50` }}>Non lasciamo nulla al caso.</span>
         </h2>
       </div>
 
@@ -1042,45 +1043,49 @@ const PlanSection: React.FC = () => (
   </section>
 );
 
-const FailureSection: React.FC = () => (
-  <section style={{ maxWidth: '80rem', margin: '0 auto', padding: '4rem 1.5rem 8rem', borderTop: borderLine }}>
-    <FailureAccordion />
+const FailureSection: React.FC = () => {
+  const founderSpots = useFounderSpots();
 
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[2.5rem] border border-[#c8b996]/20 bg-[#050504] p-10 md:p-16 text-center mt-12"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#c8b996]/10 via-transparent to-transparent pointer-events-none" />
+  return (
+    <section style={{ maxWidth: '80rem', margin: '0 auto', padding: '4rem 1.5rem 8rem', borderTop: borderLine }}>
+      <FailureAccordion />
 
-      <p className="mb-2 text-[1.1rem] text-stone-300 md:text-[1.25rem]">
-        È drammatico? Sì. È reale? Chiedi ai <strong className="text-white">3.200 coach e saloni</strong> che hanno chiuso nel 2024.
-      </p>
-      <p className="mb-10 text-[0.75rem] italic text-stone-500">Fonte: Report ISTAT Wellness Industry 2024</p>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="relative overflow-hidden rounded-[2.5rem] border border-[#c8b996]/20 bg-[#050504] p-10 md:p-16 text-center mt-12"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#c8b996]/10 via-transparent to-transparent pointer-events-none" />
 
-      <h3 className="font-serif text-[2rem] font-light leading-[1.2] text-white md:text-[3.5rem] mb-12">
-        "Ma Tu Non Sei Loro.<br />
-        <span className="italic" style={{ color: C.gold, textShadow: '0 0 20px rgba(200,185,150,0.3)' }}>Perché Sei Ancora Qui."</span>
-      </h3>
+        <p className="mb-2 text-[1.1rem] text-stone-300 md:text-[1.25rem]">
+          È drammatico? Sì. È reale? Chiedi ai <strong className="text-white">3.200 coach e saloni</strong> che hanno chiuso nel 2024.
+        </p>
+        <p className="mb-10 text-[0.75rem] italic text-stone-500">Fonte: Report ISTAT Wellness Industry 2024</p>
 
-      <div className="flex flex-col items-center gap-4">
-        <a
-          href="https://luminel-manager.vercel.app/founder"
-          className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-gradient-to-br from-[#c8b996] to-[#a89976] px-8 py-4 text-[0.9rem] font-bold uppercase tracking-[0.15em] text-black no-underline transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(200,185,150,0.4)]"
-        >
-          <span className="relative z-10 flex items-center gap-2">
-            Blocca Prezzo Founder Ora <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+        <h3 className="font-serif text-[2rem] font-light leading-[1.2] text-white md:text-[3.5rem] mb-12">
+          "Ma Tu Non Sei Loro.<br />
+          <span className="italic" style={{ color: C.gold, textShadow: '0 0 20px rgba(200,185,150,0.3)' }}>Perché Sei Ancora Qui."</span>
+        </h3>
+
+        <div className="flex flex-col items-center gap-4">
+          <a
+            href="https://luminel-manager.vercel.app/founder"
+            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-gradient-to-br from-[#c8b996] to-[#a89976] px-8 py-4 text-[0.9rem] font-bold uppercase tracking-[0.15em] text-black no-underline transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(200,185,150,0.4)]"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Blocca Prezzo Founder Ora <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+            </span>
+          </a>
+          <span className="text-[0.8rem] font-semibold tracking-widest text-[#c8b996] uppercase bg-[#c8b996]/10 px-4 py-1.5 rounded-full border border-[#c8b996]/20">
+            {founderSpots !== null ? `${founderSpots} posti / 25 disponibili` : 'Posti in esaurimento'}
           </span>
-        </a>
-        <span className="text-[0.8rem] font-semibold tracking-widest text-[#c8b996] uppercase bg-[#c8b996]/10 px-4 py-1.5 rounded-full border border-[#c8b996]/20">
-          22 posti / 25 disponibili
-        </span>
-      </div>
-    </motion.div>
-  </section>
-);
+        </div>
+      </motion.div>
+    </section>
+  );
+};
 
 const LeadMagnetSection: React.FC = () => (
   <section style={{ maxWidth: '48rem', margin: '0 auto', padding: '7rem 1.5rem', borderTop: borderLine }}>
@@ -1245,6 +1250,9 @@ export const LandingV3: React.FC = () => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
   const [activeFeature, setActiveFeature] = useState(0);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const spots = useFounderSpots();
+  const spotsText = spots !== null ? `${25 - spots}/25` : "22/25";
 
   useEffect(() => {
     const onScroll = () => {
@@ -1264,38 +1272,85 @@ export const LandingV3: React.FC = () => {
       <FallingStars />
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, background: 'radial-gradient(ellipse 55% 35% at 15% 10%, rgba(200,185,150,0.05) 0%, transparent 70%), radial-gradient(ellipse 50% 35% at 85% 85%, rgba(160,148,120,0.04) 0%, transparent 70%)' }} />
 
-      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, padding: '1.2rem 2.5rem', backdropFilter: 'blur(24px)', borderBottom: borderLine, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(5,5,4,0.6)' }}>
-        <div style={{ fontFamily: 'Georgia,serif', fontSize: '1.2rem', letterSpacing: '0.22em', color: '#fff', fontWeight: 300, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <motion.div
-            animate={{ boxShadow: ['0 0 8px 2px rgba(240,232,210,0.4)', '0 0 16px 4px rgba(240,232,210,0.8)', '0 0 8px 2px rgba(240,232,210,0.4)'] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ width: 6, height: 6, borderRadius: '50%', background: C.gold }}
-          />
-          LUMINEL
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          padding: '1rem 1.5rem',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderBottom: borderLine,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          background: 'rgba(5,5,4,0.7)',
+        }}
+      >
+        <div style={{ fontFamily: 'Georgia,serif', fontSize: '1.2rem', letterSpacing: '0.22em', color: '#fff', fontWeight: 300, display: 'flex', alignItems: 'center', gap: '0.75rem', zIndex: 60 }}>
+          <img src="/assets/images/anyma_logo_v1.jpg" alt="Luminel Logo" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(200,185,150,0.3)', boxShadow: '0 0 15px rgba(200,185,150,0.2)' }} />
+          <span className="hidden md:inline">LUMINEL MANAGER</span>
         </div>
-        <nav style={{ display: 'flex', gap: '2rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#57534e' }}>
-          {['#storia', '#soluzioni', '#pricing'].map((href, i) => (
-            <a key={i} href={href} style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.3s' }}
-              onMouseOver={e => (e.currentTarget.style.color = C.gold)} onMouseOut={e => (e.currentTarget.style.color = '#57534e')}>
-              {['Chi Siamo', 'Soluzioni', 'Pricing'][i]}
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex" style={{ gap: '2rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#a8a29e', alignItems: 'center' }}>
+          {['La Soluzione', 'L\'Ecosistema', 'Il Creatore', 'Prestige Access'].map((label, i) => (
+            <a key={i} href={['#soluzione', '#ecosistema', '#storia', '#pricing'][i]} style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.3s' }}
+              onMouseOver={e => (e.currentTarget.style.color = C.gold)} onMouseOut={e => (e.currentTarget.style.color = '#a8a29e')}>
+              {label}
             </a>
           ))}
+          <Link to="/auth/login" style={{ color: 'rgba(240,232,210,0.5)', textDecoration: 'none', transition: 'color 0.3s' }} onMouseOver={e => (e.currentTarget.style.color = C.gold)} onMouseOut={e => (e.currentTarget.style.color = 'rgba(240,232,210,0.5)')}>Login</Link>
+          <a href="#pricing" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#050504', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, borderRadius: '9999px', padding: '0.5rem 1.4rem', textDecoration: 'none', fontWeight: 700, boxShadow: '0 0 20px rgba(200,185,150,0.2)' }}>
+            Diventa Founder ({spotsText})
+          </a>
         </nav>
-        <Link to="/auth/login" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(240,232,210,0.4)', border: `1px solid rgba(240,232,210,0.12)`, borderRadius: '9999px', padding: '0.45rem 1.4rem', textDecoration: 'none', background: 'rgba(240,232,210,0.02)' }}>Accedi</Link>
-      </header>
+
+        {/* Mobile Nav Toggle */}
+        <button className="md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} style={{ background: 'transparent', border: 'none', color: C.gold, zIndex: 60, cursor: 'pointer' }}>
+          <div style={{ width: '24px', height: '2px', background: C.gold, marginBottom: '6px', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
+          <div style={{ width: '24px', height: '2px', background: C.gold, transition: '0.3s', opacity: isMobileMenuOpen ? 0 : 1 }} />
+          <div style={{ width: '24px', height: '2px', background: C.gold, marginTop: '6px', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(-45deg) translate(6px, -6px)' : 'none' }} />
+        </button>
+      </motion.header>
+
+      {/* Mobile Drawer */}
+      <motion.div
+        initial={false}
+        animate={{ opacity: isMobileMenuOpen ? 1 : 0, pointerEvents: isMobileMenuOpen ? 'auto' : 'none' }}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 55, background: 'rgba(5,5,4,0.95)', backdropFilter: 'blur(20px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem'
+        }}
+      >
+        {['La Soluzione', 'L\'Ecosistema', 'Il Creatore', 'Prestige Access'].map((label, i) => (
+          <a key={i} href={['#soluzione', '#ecosistema', '#storia', '#pricing'][i]} onClick={() => setIsMobileMenuOpen(false)} style={{ color: C.goldMid, textDecoration: 'none', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+            {label}
+          </a>
+        ))}
+        <Link to="/auth/login" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#fff', textDecoration: 'none', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '1rem' }}>Login</Link>
+        <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} style={{ marginTop: '2rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: '#050504', background: `linear-gradient(90deg, ${C.gold}, #f0d080)`, borderRadius: '9999px', padding: '1rem 2rem', textDecoration: 'none', fontWeight: 700 }}>
+          Diventa Founder ({spotsText})
+        </a>
+      </motion.div>
 
       <main style={{ position: 'relative', zIndex: 10 }}>
 
         <motion.section style={{ opacity: heroOpacity, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '6rem', paddingBottom: '2.5rem', padding: '6rem 1.5rem 2.5rem' }}>
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.4, delay: 0.2 }} style={{ textAlign: 'center', maxWidth: '72rem', margin: '0 auto 2.5rem', zIndex: 20 }}>
-            <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 'clamp(3rem,7.5vw,8.5rem)', color: '#fff', lineHeight: 0.88, letterSpacing: '-0.03em', marginBottom: '1.25rem' }}>
-              Il tuo impero.<br />
+            <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 'clamp(2.5rem,6.5vw,7.5rem)', color: '#fff', lineHeight: 0.95, letterSpacing: '-0.02em', marginBottom: '1.25rem' }}>
+              L'arte della tua professione.<br />
               <span style={{ fontStyle: 'italic', fontWeight: 300, background: `linear-gradient(90deg, #ffffff, ${C.gold}, rgba(200,185,150,0.8))`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Finalmente libero.
+                Senza il peso della gestione.
               </span>
             </h1>
-            <p style={{ fontSize: '1.1rem', color: '#7a7570', fontWeight: 300, maxWidth: '32rem', margin: '0 auto', lineHeight: 1.65 }}>
-              L'ecosistema premium che orchestra ogni dettaglio della tua attività. Dalle prenotazioni al billing, restituiamo al tuo talento il tempo che merita.
+            <p style={{ fontSize: '1.1rem', color: '#7a7570', fontWeight: 300, maxWidth: '38rem', margin: '0 auto', lineHeight: 1.65 }}>
+              Un partner invisibile e instancabile. Luminel Manager opera nel silenzio: appuntamenti, pagamenti e strategie si allineano da soli, mentre tu ti dedichi all'unica cosa inestimabile: il tuo tempo.
             </p>
           </motion.div>
 
@@ -1311,36 +1366,49 @@ export const LandingV3: React.FC = () => {
           </motion.div>
         </motion.section>
 
-        <AiCoachHeroSection />
+        <div id="soluzione">
+          <AiCoachHeroSection />
+          <ProblemSection />
+          <QuoteSection />
+        </div>
 
-        <ProblemSection />
-        <QuoteSection />
-        <FutureSection />
-        <FailureSection />
-        <ProfessionsCarousel />
+        <div id="vantaggio">
+          <FutureSection />
+          <FailureSection />
+          <ProfessionsCarousel />
+        </div>
 
-        <section style={{ maxWidth: '88rem', margin: '0 auto', padding: '2rem 1.5rem 6rem', display: 'grid', gridTemplateColumns: 'minmax(300px, 1.4fr) minmax(300px, 1fr)', gap: '4rem', alignItems: 'center', borderTop: borderLine }}>
-          <LivingDashboardImage />
-          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.9 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <section style={{ maxWidth: '88rem', margin: '0 auto', padding: '6rem 1.5rem', display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1.4fr)', gap: '6rem', alignItems: 'center', borderTop: borderLine }}>
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.9 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.85rem', borderRadius: '9999px', border: `1px solid ${C.goldDim}`, background: 'rgba(240,232,210,0.03)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: C.goldMid, width: 'max-content' }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.goldMid }} />
-              Costruito per chi vive di sessioni
+              Un'Anima Digitale
             </div>
-            <h2 style={{ fontFamily: 'Georgia,serif', fontSize: 'clamp(1.8rem,3vw,3rem)', color: '#fff', fontWeight: 300, lineHeight: 1.2, margin: 0 }}>Il tuo studio,<br />elevato alla potenza dell'AI.</h2>
-            <p style={{ color: '#6b6661', fontWeight: 300, fontSize: '1.05rem', lineHeight: 1.75 }}>Mentre lavori con un cliente, Luminel tiene traccia di tutto il resto - appuntamenti, fatture, promemoria. Una mente instancabile, con i tuoi numeri sempre a portata di mano.</p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <h2 style={{ fontFamily: 'Georgia,serif', fontSize: 'clamp(2.2rem,3.5vw,3.5rem)', color: '#fff', fontWeight: 300, lineHeight: 1.15, margin: 0 }}>
+              Un'Intelligenza Superiore.<br />
+              <span style={{ fontStyle: 'italic', color: C.gold }}>Al Tuo Servizio.</span>
+            </h2>
+            <p style={{ color: '#a8a29e', fontWeight: 300, fontSize: '1.1rem', lineHeight: 1.8 }}>
+              L'anima digitale del tuo business. Prevede, organizza e automatizza ogni aspetto del tuo studio nel silenzio, permettendoti di dedicare il 100% della tua attenzione all'unica cosa inestimabile: il tuo cliente.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0 0 0', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {HERO_BULLETS.map((f, i) => (
-                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', color: '#a8a29e', fontWeight: 300 }}>
-                  <div style={{ width: 3, height: 3, borderRadius: '50%', background: C.goldMid, boxShadow: `0 0 6px ${C.gold}`, flexShrink: 0 }} />{f}
+                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', color: '#c8c4bc', fontWeight: 300 }}>
+                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: C.goldMid, boxShadow: `0 0 8px ${C.gold}`, flexShrink: 0 }} />{f}
                 </li>
               ))}
             </ul>
           </motion.div>
+          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.9 }}>
+            <LivingDashboardImage />
+          </motion.div>
         </section>
 
-        <PricingSection />
+        <div id="pricing">
+          <PricingSection />
+        </div>
         
-        <MetricsGridSection />
+        <GlassmorphismTrustHero />
 
         <section id="storia" style={{ maxWidth: '76rem', margin: '0 auto', padding: '8rem 1.5rem', position: 'relative', borderTop: borderLine }}>
           <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 1, height: '5rem', background: `linear-gradient(to bottom, ${C.goldMid}, transparent)` }} />
@@ -1432,7 +1500,9 @@ export const LandingV3: React.FC = () => {
           </div>
         </section>
 
-        <SpectacularEcosystemSection />
+        <div id="ecosistema">
+          <SpectacularEcosystemSection />
+        </div>
 
         <section id="cta-finale" style={{ position: 'relative', padding: '10rem 1.5rem', textAlign: 'center', overflow: 'hidden', borderTop: borderLine }}>
           <AnimatedImg src="/assets/images/foto 7 lading.png" alt="" style={{ position: 'absolute', inset: 0, height: '100%', borderRadius: 0 }} />

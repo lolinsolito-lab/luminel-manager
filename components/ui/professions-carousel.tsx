@@ -52,8 +52,8 @@ export const ProfessionsCarousel: React.FC = () => {
 
       <div className="max-w-[70rem] mx-auto px-6 text-center mb-14 relative z-10">
         <h2 className="font-sans font-medium text-[2.8rem] md:text-[4.2rem] leading-[1.05] tracking-tight text-white mb-6">
-          Costruito per chi vive di <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-stone-400">sessioni</span>.<br />
-          Non di scontrini
+          Progettato per chi guida le <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-stone-400">persone</span>.<br />
+          Non per chi batte scontrini
         </h2>
         
         <p className="text-stone-400 text-lg md:text-xl font-light max-w-2xl mx-auto leading-relaxed mb-8">

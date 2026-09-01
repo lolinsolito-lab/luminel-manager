@@ -354,7 +354,7 @@ export const Dashboard: React.FC = () => {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="space-y-fib-34 w-full max-w-[1600px] pb-fib-55"
+      className="space-y-6 md:space-y-fib-34 w-full max-w-[1600px] pb-20 md:pb-fib-55"
     >
 
       {/* Upgrade Banner for Free Users */}
@@ -365,14 +365,14 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* Elite Hero Header */}
-      <motion.div variants={itemVariants} className="bg-gradient-to-br from-white via-white to-gold-50/30 p-8 rounded-[2rem] border border-stone-100 shadow-sm relative overflow-hidden glass-card">
+      <motion.div variants={itemVariants} className="bg-gradient-to-br from-white via-white to-gold-50/30 p-5 md:p-8 rounded-[2rem] border border-stone-100 shadow-sm relative overflow-hidden glass-card">
         {/* Decorative background */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-gold-100/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+        <div className="absolute top-0 right-0 w-40 h-40 md:w-80 md:h-80 bg-gradient-to-br from-gold-100/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
 
         <div className="relative z-10">
           {/* Greeting Header */}
           <div className="mb-2">
-            <h1 className="text-3xl text-display text-stone-900 flex items-center gap-fib-8">
+            <h1 className="text-2xl md:text-3xl text-display text-stone-900 flex items-center gap-2 md:gap-fib-8 flex-wrap">
               {greeting.emoji} {greeting.text}, {user.name?.split(' ')[0] || 'Coach'}
             </h1>
           </div>
@@ -438,17 +438,17 @@ export const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* KPI Grid - Elite Design with Progress Bars */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-fib-21">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-fib-21">
         {/* Revenue Card with Progress Bar */}
         <motion.div
           variants={itemVariants}
           whileHover={{ y: -8, scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 300 }}
           onClick={() => navigate('/finance')}
-          className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
+          className="bg-white p-5 md:p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
         >
           <div className="absolute top-0 right-0 p-3 opacity-10 text-emerald-600">
-            <Euro className="w-14 h-14" />
+            <Euro className="w-10 h-10 md:w-14 md:h-14" />
           </div>
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="p-2.5 rounded-xl shadow-sm bg-gradient-to-br from-emerald-500 to-emerald-600">
@@ -483,10 +483,10 @@ export const Dashboard: React.FC = () => {
           whileHover={{ y: -8, scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 300 }}
           onClick={() => navigate('/calendar')}
-          className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
+          className="bg-white p-5 md:p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
         >
           <div className="absolute top-0 right-0 p-3 opacity-10 text-gold-600">
-            <CalendarCheck className="w-14 h-14" />
+            <CalendarCheck className="w-10 h-10 md:w-14 md:h-14" />
           </div>
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="p-2.5 rounded-xl shadow-sm bg-gradient-to-br from-gold-500 to-gold-600">
@@ -520,10 +520,10 @@ export const Dashboard: React.FC = () => {
           whileHover={{ y: -8, scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 300 }}
           onClick={() => navigate('/clients')}
-          className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
+          className="bg-white p-5 md:p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
         >
           <div className="absolute top-0 right-0 p-3 opacity-10 text-stone-600">
-            <HeartHandshake className="w-14 h-14" />
+            <HeartHandshake className="w-10 h-10 md:w-14 md:h-14" />
           </div>
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="p-2.5 rounded-xl shadow-sm bg-gradient-to-br from-stone-600 to-stone-700">
@@ -548,10 +548,10 @@ export const Dashboard: React.FC = () => {
           whileHover={{ y: -8, scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 300 }}
           onClick={() => navigate('/analytics')}
-          className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
+          className="bg-white p-5 md:p-6 rounded-[2rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer group relative overflow-hidden glass-card"
         >
           <div className="absolute top-0 right-0 p-3 opacity-10 text-emerald-600">
-            <BrainCircuit className="w-14 h-14" />
+            <BrainCircuit className="w-10 h-10 md:w-14 md:h-14" />
           </div>
           <div className="flex justify-between items-start mb-3 relative z-10">
             <div className="p-2.5 rounded-xl shadow-sm bg-gradient-to-br from-emerald-500 to-emerald-600">
@@ -570,12 +570,12 @@ export const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* Main Content Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-fib-34 h-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-fib-34 h-auto">
 
         {/* Left Column (Stats & Tasks) */}
-        <div className="lg:col-span-2 space-y-fib-34">
+        <div className="lg:col-span-2 space-y-6 md:space-y-fib-34">
           {/* Revenue Chart */}
-          <motion.div variants={itemVariants} className="bg-white p-fib-21 rounded-[2rem] border border-stone-100 shadow-sm glass-card">
+          <motion.div variants={itemVariants} className="bg-white p-5 md:p-fib-21 rounded-[2rem] border border-stone-100 shadow-sm glass-card">
             <div className="flex justify-between items-center mb-fib-21">
               <div>
                 <h3 className="text-lg font-serif font-bold text-stone-900">{t('dashboard.energyExchange')}</h3>

@@ -226,9 +226,9 @@ export const Layout = ({ children }: LayoutProps) => {
               >
                 <Menu className="w-6 h-6" />
               </button>
-              <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-4 overflow-hidden">
-                <h2 className="text-xl lg:text-2xl text-display text-stone-800 truncate max-w-[200px] lg:max-w-none">{getPageTitle()}</h2>
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 overflow-hidden">
+                <h2 className="text-lg md:text-xl lg:text-2xl text-display text-stone-800 truncate max-w-[120px] sm:max-w-[200px] lg:max-w-none">{getPageTitle()}</h2>
+                <div className="flex items-center gap-1 md:gap-2">
                   {isFoundingMember && <FoundingMemberBadge size="sm" since={subscription.foundingMemberSince} />}
                   {tier !== 'free' && <SubscriptionTierBadge tier={tier as any} size="sm" />}
                 </div>
