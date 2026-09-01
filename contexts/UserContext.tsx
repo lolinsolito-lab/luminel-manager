@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { APP_CONFIG } from '../config';
 import { supabase, isSupabaseConfigured, signIn, signUp, signOut, getSession } from '../services/supabaseClient';
 import type { User, Session } from '@supabase/supabase-js';
@@ -59,6 +59,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [businessSettings, setBusinessSettings] = useState({ name: 'Luminel Elite', logoUrl: '' });
+  const currentUserIdRef = useRef(null);
 
   const isSupabaseMode = isSupabaseConfigured();
 
@@ -124,6 +125,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (currentSession) {
             setSession(currentSession);
             setSupabaseUser(currentSession.user);
+            currentUserIdRef.current = currentSession.user.id;
             setIsAuthenticated(true);
 
             const metadata = currentSession.user.user_metadata;
@@ -150,7 +152,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             console.log('[Auth] State changed:', event);
 
             const isSameUserAlreadyLoaded =
-              newSession?.user?.id && newSession.user.id === supabaseUser?.id;
+              newSession?.user?.id && newSession.user.id === currentUserIdRef.current;
 
             setSession(newSession);
             setSupabaseUser(newSession?.user || null);
@@ -160,6 +162,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               console.log('[Auth] Stesso utente gia caricato - salto il refresh completo del profilo');
               return;
             }
+
+            currentUserIdRef.current = newSession?.user?.id || null;
 
             if (newSession?.user) {
               const metadata = newSession.user.user_metadata;
