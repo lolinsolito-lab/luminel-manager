@@ -7,7 +7,7 @@ export const APP_CONFIG = {
   tagline: "Gestionale Premium per Professionisti",
 
   // SEO / Browser Title
-  documentTitle: "Luminel | Gestionale Premium",
+  documentTitle: "Luminel Manager | Il Gestionale Premium con AI per Professionisti",
 
   // Default Settings
   currency: "EUR (€)",
