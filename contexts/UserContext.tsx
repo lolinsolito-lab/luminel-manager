@@ -148,9 +148,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, newSession) => {
             console.log('[Auth] State changed:', event);
+
+            const isSameUserAlreadyLoaded =
+              newSession?.user?.id && newSession.user.id === supabaseUser?.id;
+
             setSession(newSession);
             setSupabaseUser(newSession?.user || null);
             setIsAuthenticated(!!newSession);
+
+            if (isSameUserAlreadyLoaded) {
+              console.log('[Auth] Stesso utente gia caricato - salto il refresh completo del profilo');
+              return;
+            }
 
             if (newSession?.user) {
               const metadata = newSession.user.user_metadata;
