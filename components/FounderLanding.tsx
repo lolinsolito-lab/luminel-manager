@@ -80,7 +80,7 @@ const FAQ_ITEMS = [
     },
     {
         question: "Posso provare prima di acquistare?",
-        answer: "Tutti i piani includono 14 giorni di prova gratuita. Nessuna carta di credito richiesta per iniziare."
+        answer: "Non offriamo un trial gratuito, ma una garanzia più forte: se entro 30 giorni non sei soddisfatto, ti rimborsiamo per intero, nessuna domanda."
     },
 ];
 

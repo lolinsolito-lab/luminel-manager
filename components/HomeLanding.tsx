@@ -934,7 +934,7 @@ export const HomeLanding: React.FC = () => {
                     </h2>
                     <p className="text-white/35 mb-10 max-w-xl mx-auto leading-relaxed">
                         {founderSpots} posti Founder rimasti. Prezzo bloccato a vita.
-                        Onboarding personale con me. 14 giorni trial senza carta.
+                        Onboarding personale con me. Soddisfatto o rimborsato entro 30 giorni.
                     </p>
                     <Link
                         to="/founder"

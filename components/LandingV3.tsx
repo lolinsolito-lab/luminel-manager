@@ -1515,7 +1515,7 @@ export const LandingV3: React.FC = () => {
             </motion.h2>
             <motion.p initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.15 }}
               style={{ color: '#a8a29e', fontSize: '1rem', lineHeight: 1.7, maxWidth: '32rem', margin: '0 auto 2.5rem' }}>
-              25 posti Founder rimasti. Prezzo bloccato a vita. Onboarding personale con me. 14 giorni trial senza carta.
+              25 posti Founder rimasti. Prezzo bloccato a vita. Onboarding personale con me. Soddisfatto o rimborsato entro 30 giorni.
             </motion.p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center', width: '100%' }}>
