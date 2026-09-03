@@ -5,7 +5,6 @@
  */
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import {
     Crown, Sparkles, Check, Zap, Users, Building2,
     Star, Shield, Clock, Gift, ChevronRight, ArrowRight,
@@ -417,7 +416,7 @@ export const FounderLanding: React.FC = () => {
                                 {/* Public Pricing Card */}
                                 <div className="bg-white rounded-2xl p-6 shadow-xl border border-stone-100 w-full">
                                     <p className="text-sm text-stone-500 text-center mb-4">
-                                        I 25 posti Founder sono stati assegnati. Puoi comunque iniziare con il nostro <strong className="text-stone-800">Pricing Pubblico</strong>:
+                                        I 25 posti Founder sono stati assegnati. Iscriviti alla lista d'attesa per il <strong className="text-stone-800">Pricing Pubblico</strong> — ti contattiamo personalmente appena apriamo nuovi accessi:
                                     </p>
 
                                     <div className="grid grid-cols-2 gap-4 mb-4">
@@ -431,18 +430,12 @@ export const FounderLanding: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center mb-4">
-                                        <p className="text-sm text-emerald-700 font-semibold">
-                                            🎁 EARLY BIRD: <span className="font-black">20% OFF</span> per i primi 100 iscritti pubblici!
-                                        </p>
-                                    </div>
-
-                                    <Link
-                                        to="/login"
+                                    <a
+                                        href="#waitlist-form"
                                         className="block w-full py-4 bg-stone-900 text-white rounded-xl text-center font-bold hover:bg-stone-800 transition-colors"
                                     >
-                                        Inizia con il Pricing Pubblico →
-                                    </Link>
+                                        Iscriviti alla Lista d'Attesa →
+                                    </a>
                                 </div>
                             </motion.div>
                         )}
@@ -1008,7 +1001,7 @@ export const FounderLanding: React.FC = () => {
             </section>
 
             {/* Waitlist Form - POWER VERSION */}
-            <section className="py-24 px-4 bg-stone-900 relative overflow-hidden">
+            <section id="waitlist-form" className="py-24 px-4 bg-stone-900 relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
                 <div className="max-w-4xl mx-auto relative z-10">
                     <motion.div
