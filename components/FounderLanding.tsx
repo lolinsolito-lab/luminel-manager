@@ -292,7 +292,7 @@ export const FounderLanding: React.FC = () => {
                 const { getSubscriptionPlans } = await import('../services/waitlistService');
                 const dbPlans = await getSubscriptionPlans();
                 if (dbPlans && dbPlans.length > 0) {
-                    const mapped = PRICING_PLANS.map(templatePlan => {
+                    const mapped = STATIC_PRICING_PLANS.map(templatePlan => {
                         const dbPlan = dbPlans.find((p: any) => p.name === templatePlan.id);
                         if (dbPlan) {
                             return {
