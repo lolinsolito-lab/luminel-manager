@@ -196,7 +196,7 @@ export const AdminDashboard: React.FC = () => {
                     type: 'invite_registration',
                     data: {
                         tier: tier,
-                        registrationUrl: `https://luminel-manager.vercel.app/#/register?email=${encodeURIComponent(email)}`
+                        registrationUrl: `https://luminel-manager.vercel.app/login?email=${encodeURIComponent(email)}`
                     }
                 })
             });

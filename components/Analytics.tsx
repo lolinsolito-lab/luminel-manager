@@ -566,7 +566,7 @@ export const Analytics: React.FC = () => {
                   {/* Dynamic CTA based on tier */}
                   {subscription.tier !== 'empire' ? (
                      <button
-                        onClick={() => window.open('/#/settings', '_self')}
+                        onClick={() => window.open('/settings', '_self')}
                         className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg shadow-amber-900/30 active:scale-95 flex items-center gap-2"
                      >
                         {subscription.tier === 'signature' ? 'Scopri Empire' :

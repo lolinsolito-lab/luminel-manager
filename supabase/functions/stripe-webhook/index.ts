@@ -226,7 +226,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
         // FIX: usa APP_URL (secret, dominio Vercel di default) invece di
         // "app.luminelcoach.com" hardcoded — dominio mai attivato, link morto
-        const registrationUrl = `${APP_URL}/#/register?email=${encodeURIComponent(customerEmail)}`;
+        const registrationUrl = `${APP_URL}/login?email=${encodeURIComponent(customerEmail)}`;
 
         await sendEmail(customerEmail, "invite_registration", {
             tier: tierInfo.tier,

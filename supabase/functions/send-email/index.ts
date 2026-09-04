@@ -8,6 +8,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 // Environment variables
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Luminel <noreply@luminelcoach.com>";
+const APP_URL = Deno.env.get("APP_URL") || "https://luminel-manager.vercel.app";
 
 // Email types
 type EmailType = "founder_welcome" | "payment_receipt" | "subscription_canceled" | "invite_registration";
@@ -96,7 +97,7 @@ const EMAIL_TEMPLATES: Record<EmailType, { subject: string; html: (data: EmailRe
       
       <!-- CTA Button -->
       <div style="text-align: center; margin: 40px 0;">
-        <a href="https://app.luminelcoach.com" style="display: inline-block; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%); color: #0c0a09; text-decoration: none; padding: 18px 50px; border-radius: 14px; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3), 0 0 0 1px rgba(255,255,255,0.1) inset; transition: all 0.3s;">
+        <a href="${APP_URL}/dashboard" style="display: inline-block; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%); color: #0c0a09; text-decoration: none; padding: 18px 50px; border-radius: 14px; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3), 0 0 0 1px rgba(255,255,255,0.1) inset; transition: all 0.3s;">
           Accedi alla Dashboard →
         </a>
       </div>
@@ -282,7 +283,7 @@ const EMAIL_TEMPLATES: Record<EmailType, { subject: string; html: (data: EmailRe
       
       <!-- CTA Button -->
       <div style="text-align: center; margin: 40px 0;">
-        <a href="${data?.registrationUrl || "https://app.luminelcoach.com/#/register"}" style="display: inline-block; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%); color: #0c0a09; text-decoration: none; padding: 20px 60px; border-radius: 14px; font-weight: 600; font-size: 17px; letter-spacing: 0.5px; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset;">
+        <a href="${data?.registrationUrl || APP_URL + "/login"}" style="display: inline-block; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%); color: #0c0a09; text-decoration: none; padding: 20px 60px; border-radius: 14px; font-weight: 600; font-size: 17px; letter-spacing: 0.5px; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset;">
           Completa la Registrazione →
         </a>
       </div>

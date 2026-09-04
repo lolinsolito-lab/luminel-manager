@@ -7,7 +7,7 @@ interface SplashIntroProps {
 
 const loadingPhases = [
   "Inizializzazione ecosistema in corso...",
-  "Sincronizzazione cluster dati (438 KPI attivi)",
+  "Sincronizzazione dati in corso...",
   "Calibrazione algoritmi manageriali...",
   "Accesso garantito all'infrastruttura d'élite."
 ];

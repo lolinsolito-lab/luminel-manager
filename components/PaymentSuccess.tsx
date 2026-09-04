@@ -147,10 +147,10 @@ const PaymentSuccess: React.FC = () => {
                         className="mt-8"
                     >
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/login')}
                             className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-2"
                         >
-                            Accedi alla Dashboard
+                            Completa la Registrazione
                             <ArrowRight className="w-5 h-5" />
                         </button>
                         <p className="text-stone-500 text-sm mt-4">
