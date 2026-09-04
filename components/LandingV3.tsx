@@ -735,7 +735,7 @@ const PricingSection: React.FC = () => {
                   )}
 
                   <Link
-                    to={`/auth/register?plan=${plan.id}`}
+                    to="/founder"
                     style={{
                       marginTop: 'auto', textAlign: 'center', padding: '0.85rem', borderRadius: '0.75rem',
                       fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
