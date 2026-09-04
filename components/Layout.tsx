@@ -24,7 +24,8 @@ import {
   MapPin,
   FileText,
   Bell,
-  Loader2
+  Loader2,
+  ShieldCheck
 } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -164,6 +165,9 @@ export const Layout = ({ children }: LayoutProps) => {
             <SidebarItem to="/analytics" icon={BarChart3} label={t('nav.analytics')} onClick={closeSidebar} />
             <div className="pt-4 mt-4 border-t border-stone-100">
               <SidebarItem to="/settings" icon={Settings} label={t('nav.settings')} onClick={closeSidebar} />
+              {user?.isAdmin && (
+                <SidebarItem to="/admin" icon={ShieldCheck} label="Admin" onClick={closeSidebar} />
+              )}
             </div>
           </nav>
 

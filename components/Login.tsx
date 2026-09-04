@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { Logo } from './Logo';
 import { Mail, Lock, User, Instagram, MessageCircle, ArrowLeft } from 'lucide-react';
@@ -67,6 +67,7 @@ type ViewState = 'login' | 'register' | 'forgot-password';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, register } = useUser();
   const [viewState, setViewState] = useState<ViewState>('login');
 
@@ -76,6 +77,15 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const emailParam = params.get('email');
+    if (emailParam) {
+      setEmail(emailParam);
+      setViewState('register');
+    }
+  }, [location.search]);
 
   // Hover Effect State for left container
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });

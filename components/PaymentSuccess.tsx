@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Crown, Sparkles, ArrowRight, Gift, Star } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '../services/supabaseClient';
 
 /**
  * PAYMENT SUCCESS PAGE
@@ -44,8 +45,26 @@ const PaymentSuccess: React.FC = () => {
     const customerName = searchParams.get('name') || searchParams.get('customer_name');
     const customerEmail = searchParams.get('email');
 
+  const [resolvedEmail, setResolvedEmail] = useState<string | null>(null);
+
     // Create personalized greeting
-    const greeting = customerName
+    useEffect(() => {
+    if (!sessionId) return;
+    let isMounted = true;
+    const lookupEmail = async (retry = false) => {
+      const { data } = await supabase.rpc('get_pending_email_by_session', { p_session_id: sessionId });
+      if (!isMounted) return;
+      if (data) {
+        setResolvedEmail(data);
+      } else if (!retry) {
+        setTimeout(() => lookupEmail(true), 1800);
+      }
+    };
+    lookupEmail();
+    return () => { isMounted = false; };
+  }, [sessionId]);
+
+  const greeting = customerName
         ? `Benvenuto, ${customerName}!`
         : 'Benvenuto nella Famiglia!';
 
@@ -147,7 +166,7 @@ const PaymentSuccess: React.FC = () => {
                         className="mt-8"
                     >
                         <button
-                            onClick={() => navigate('/login')}
+                            onClick={() => navigate(resolvedEmail ? '/login?email=' + encodeURIComponent(resolvedEmail) : '/login')}
                             className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-2"
                         >
                             Completa la Registrazione
