@@ -52,6 +52,19 @@ const defaultUser: UserProfile = {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+const clearLuminaCache = () => {
+  const keys = [
+    'lumina_clients_cache',
+    'lumina_settings_cache',
+    'lumina_transactions_cache',
+    'lumina_sessions_cache',
+    'lumina_subscription',
+    'lumina_auth',
+    'lumina_user',
+  ];
+  keys.forEach(key => localStorage.removeItem(key));
+};
+
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile>(defaultUser);
   const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
@@ -175,6 +188,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               return;
             }
 
+            clearLuminaCache();
             currentUserIdRef.current = newSession?.user?.id || null;
 
             if (newSession?.user) {
@@ -306,7 +320,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setSession(null);
     setSupabaseUser(null);
     setUser(defaultUser);
-    localStorage.removeItem('lumina_auth');
+    clearLuminaCache();
   };
 
   // ==============================================
