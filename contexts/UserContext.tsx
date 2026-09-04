@@ -131,6 +131,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const metadata = currentSession.user.user_metadata;
             const isAdmin = await fetchIsAdmin(currentSession.user.id);
             const dbProfile = await fetchUserProfile(currentSession.user.id);
+
+            if (currentSession.user.email) {
+              try {
+                await supabase.rpc('claim_pending_subscription', {
+                  user_email: currentSession.user.email,
+                  user_id: currentSession.user.id,
+                });
+              } catch (claimError) {
+                console.error('[Auth] Errore nel collegare un abbonamento in sospeso:', claimError);
+              }
+            }
+
             setUser({
               ...defaultUser,
               id: currentSession.user.id,
@@ -169,6 +181,21 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               const metadata = newSession.user.user_metadata;
               const isAdmin = await fetchIsAdmin(newSession.user.id);
               const dbProfile = await fetchUserProfile(newSession.user.id);
+
+              if (newSession.user.email) {
+                try {
+                  const { data: claimed } = await supabase.rpc('claim_pending_subscription', {
+                    user_email: newSession.user.email,
+                    user_id: newSession.user.id,
+                  });
+                  if (claimed) {
+                    console.log('[Auth] Abbonamento Founder in sospeso collegato a questo account');
+                  }
+                } catch (claimError) {
+                  console.error('[Auth] Errore nel collegare un abbonamento in sospeso:', claimError);
+                }
+              }
+
               setUser({
                 ...defaultUser,
                 id: newSession.user.id,
