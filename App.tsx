@@ -20,7 +20,6 @@ import { Login } from './components/Login';
 import { SplashIntro } from './components/SplashIntro';
 import { HomeLanding } from './components/HomeLanding';
 import { LandingV3 } from './components/LandingV3';
-import { FounderLanding } from './components/FounderLanding';
 import PaymentSuccess from './components/PaymentSuccess';
 import { ResetPassword } from './components/ResetPassword';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -130,7 +129,8 @@ const App: React.FC = () => {
                     <Route path="/v3" element={<Navigate to="/" replace />} />
                     <Route path="/old-landing" element={<HomeLanding />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/founder" element={<FounderLanding />} />
+                    {/* Fase Founder rimossa (17 set 2026): /founder ora reindirizza alla home */}
+                    <Route path="/founder" element={<Navigate to="/" replace />} />
                     <Route path="/success" element={<PaymentSuccess />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
 
